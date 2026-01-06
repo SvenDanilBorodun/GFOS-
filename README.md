@@ -1,4 +1,4 @@
-# GFOS Digital Idea Board
+# GFOS Digital Idea B
 
 Innovation management platform for GFOS Innovation Award 2026.
 

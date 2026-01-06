@@ -99,4 +99,14 @@ public class UserService {
                 .getSingleResult();
         return count > 0;
     }
+
+    public List<UserDTO> getLeaderboard(int limit) {
+        List<User> users = em.createQuery(
+                "SELECT u FROM User u WHERE u.isActive = true ORDER BY u.xpPoints DESC, u.level DESC", User.class)
+                .setMaxResults(limit)
+                .getResultList();
+        return users.stream()
+                .map(UserDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
 }

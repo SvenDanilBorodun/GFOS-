@@ -75,9 +75,35 @@ public class DashboardResource {
         // Most popular category
         List<Object[]> categoryResults = em.createQuery(
                 "SELECT i.category, COUNT(i) as cnt FROM Idea i GROUP BY i.category ORDER BY cnt DESC", Object[].class)
-                .setMaxResults(1)
                 .getResultList();
         stats.put("popularCategory", categoryResults.isEmpty() ? "N/A" : categoryResults.get(0)[0]);
+
+        // Category breakdown for charts
+        List<Map<String, Object>> categoryBreakdown = categoryResults.stream()
+                .map(row -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("category", row[0]);
+                    item.put("count", row[1]);
+                    return item;
+                })
+                .collect(Collectors.toList());
+        stats.put("categoryBreakdown", categoryBreakdown);
+
+        // Weekly activity (ideas created per day this week)
+        List<Object[]> weeklyActivity = em.createQuery(
+                "SELECT FUNCTION('DATE', i.createdAt), COUNT(i) FROM Idea i " +
+                "WHERE i.createdAt >= :weekStart GROUP BY FUNCTION('DATE', i.createdAt) ORDER BY FUNCTION('DATE', i.createdAt)", Object[].class)
+                .setParameter("weekStart", java.time.LocalDate.now().with(java.time.DayOfWeek.SUNDAY).atStartOfDay())
+                .getResultList();
+        List<Map<String, Object>> activityData = weeklyActivity.stream()
+                .map(row -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("date", row[0].toString());
+                    item.put("ideas", row[1]);
+                    return item;
+                })
+                .collect(Collectors.toList());
+        stats.put("weeklyActivity", activityData);
 
         return Response.ok(stats).build();
     }

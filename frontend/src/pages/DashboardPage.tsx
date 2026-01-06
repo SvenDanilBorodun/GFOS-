@@ -10,9 +10,35 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import { TrophyIcon, FireIcon } from '@heroicons/react/24/solid';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
 import { dashboardService } from '../services/dashboardService';
 import { DashboardStats, TopIdea, Idea, Survey } from '../types';
 import { format } from 'date-fns';
+
+// Chart colors
+const STATUS_COLORS = {
+  Concept: '#9CA3AF',
+  'In Progress': '#F59E0B',
+  Completed: '#10B981',
+};
+
+const CATEGORY_COLORS = [
+  '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#06B6D4', '#EF4444', '#6366F1'
+];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -176,75 +202,124 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="space-y-6">
-          {/* Ideas by status */}
-          <div className="card p-5">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Ideas by Status
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Concept</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {stats?.conceptIdeas || 0}
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-bar-fill bg-gray-400"
-                    style={{
-                      width: `${((stats?.conceptIdeas || 0) / (stats?.totalIdeas || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">In Progress</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {stats?.inProgressIdeas || 0}
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-bar-fill bg-warning-500"
-                    style={{
-                      width: `${((stats?.inProgressIdeas || 0) / (stats?.totalIdeas || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Completed</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {stats?.completedIdeas || 0}
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-bar-fill bg-success-500"
-                    style={{
-                      width: `${((stats?.completedIdeas || 0) / (stats?.totalIdeas || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
+        {/* Status Pie Chart */}
+        <div className="card p-5">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Ideas by Status
+          </h2>
+          {stats && (stats.conceptIdeas > 0 || stats.inProgressIdeas > 0 || stats.completedIdeas > 0) ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Concept', value: stats.conceptIdeas || 0 },
+                    { name: 'In Progress', value: stats.inProgressIdeas || 0 },
+                    { name: 'Completed', value: stats.completedIdeas || 0 },
+                  ].filter(d => d.value > 0)}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
+                >
+                  {[
+                    { name: 'Concept', value: stats.conceptIdeas || 0 },
+                    { name: 'In Progress', value: stats.inProgressIdeas || 0 },
+                    { name: 'Completed', value: stats.completedIdeas || 0 },
+                  ].filter(d => d.value > 0).map((entry) => (
+                    <Cell key={`cell-${entry.name}`} fill={STATUS_COLORS[entry.name as keyof typeof STATUS_COLORS]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`${value} ideas`, '']} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[250px] text-gray-500 dark:text-gray-400">
+              No data available
             </div>
-          </div>
+          )}
+        </div>
+      </div>
 
-          {/* Popular category */}
-          <div className="card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <ChartBarIcon className="w-5 h-5 text-primary-600" />
-              <h2 className="font-semibold text-gray-900 dark:text-white">Most Popular Category</h2>
-            </div>
-            <p className="text-2xl font-bold text-primary-600">
-              {stats?.popularCategory || 'N/A'}
-            </p>
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Category Bar Chart */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <ChartBarIcon className="w-5 h-5 text-primary-600" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Ideas by Category
+            </h2>
           </div>
+          {stats?.categoryBreakdown && stats.categoryBreakdown.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={stats.categoryBreakdown}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis dataKey="category" type="category" width={70} tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(value) => [`${value} ideas`, 'Count']} />
+                <Bar dataKey="count" name="Ideas" radius={[0, 4, 4, 0]}>
+                  {stats.categoryBreakdown.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
+              No category data available
+            </div>
+          )}
+        </div>
+
+        {/* Weekly Activity Line Chart */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <ArrowTrendingUpIcon className="w-5 h-5 text-success-600" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Weekly Activity
+            </h2>
+          </div>
+          {stats?.weeklyActivity && stats.weeklyActivity.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={stats.weeklyActivity.map(d => ({
+                  ...d,
+                  date: format(new Date(d.date), 'EEE')
+                }))}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis dataKey="date" />
+                <YAxis allowDecimals={false} />
+                <Tooltip formatter={(value) => [`${value} ideas`, 'New Ideas']} />
+                <Line
+                  type="monotone"
+                  dataKey="ideas"
+                  name="New Ideas"
+                  stroke="#3B82F6"
+                  strokeWidth={3}
+                  dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
+              <div className="text-center">
+                <ArrowTrendingUpIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No activity this week yet</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

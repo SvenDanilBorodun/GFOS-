@@ -73,6 +73,12 @@ export default function IdeaDetailPage() {
   const handleLike = async () => {
     if (!idea) return;
 
+    // Prevent users from liking their own ideas
+    if (isAuthor) {
+      toast.error('You cannot like your own idea');
+      return;
+    }
+
     try {
       if (idea.isLikedByCurrentUser) {
         await ideaService.unlikeIdea(idea.id);
@@ -347,21 +353,31 @@ export default function IdeaDetailPage() {
         {/* Actions */}
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleLike}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                idea.isLikedByCurrentUser
-                  ? 'bg-red-50 dark:bg-red-900/20 text-red-600'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600'
-              }`}
-            >
-              {idea.isLikedByCurrentUser ? (
-                <HeartSolidIcon className="w-5 h-5" />
-              ) : (
+            {isAuthor ? (
+              <span
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                title="You cannot like your own idea"
+              >
                 <HeartIcon className="w-5 h-5" />
-              )}
-              {idea.likeCount} {idea.likeCount === 1 ? 'Like' : 'Likes'}
-            </button>
+                {idea.likeCount} {idea.likeCount === 1 ? 'Like' : 'Likes'}
+              </span>
+            ) : (
+              <button
+                onClick={handleLike}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  idea.isLikedByCurrentUser
+                    ? 'bg-red-50 dark:bg-red-900/20 text-red-600'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600'
+                }`}
+              >
+                {idea.isLikedByCurrentUser ? (
+                  <HeartSolidIcon className="w-5 h-5" />
+                ) : (
+                  <HeartIcon className="w-5 h-5" />
+                )}
+                {idea.likeCount} {idea.likeCount === 1 ? 'Like' : 'Likes'}
+              </button>
+            )}
 
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
               <ChatBubbleLeftIcon className="w-5 h-5" />

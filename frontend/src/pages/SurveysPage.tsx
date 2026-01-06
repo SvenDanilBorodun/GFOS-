@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PlusIcon, XMarkIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XMarkIcon, ChartBarIcon, InformationCircleIcon, EyeSlashIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { surveyService } from '../services/surveyService';
 import { Survey } from '../types';
@@ -123,6 +123,7 @@ export default function SurveysPage() {
               survey={survey}
               onVote={handleVote}
               onDelete={handleDelete}
+              onShowDetails={() => setSelectedSurvey(survey)}
               canDelete={user?.id === survey.creator.id || user?.role === 'ADMIN'}
             />
           ))}
@@ -136,6 +137,14 @@ export default function SurveysPage() {
           onSubmit={handleCreateSurvey}
         />
       )}
+
+      {/* Survey Details Modal */}
+      {selectedSurvey && (
+        <SurveyDetailsModal
+          survey={selectedSurvey}
+          onClose={() => setSelectedSurvey(null)}
+        />
+      )}
     </div>
   );
 }
@@ -144,10 +153,11 @@ interface SurveyCardProps {
   survey: Survey;
   onVote: (surveyId: number, optionIds: number[]) => void;
   onDelete: (surveyId: number) => void;
+  onShowDetails: () => void;
   canDelete: boolean;
 }
 
-function SurveyCard({ survey, onVote, onDelete, canDelete }: SurveyCardProps) {
+function SurveyCard({ survey, onVote, onDelete, onShowDetails, canDelete }: SurveyCardProps) {
   const [selectedOptions, setSelectedOptions] = useState<number[]>(
     survey.userVotedOptionIds || []
   );
@@ -192,14 +202,24 @@ function SurveyCard({ survey, onVote, onDelete, canDelete }: SurveyCardProps) {
               {format(new Date(survey.createdAt), 'MMM d')}
             </p>
           </div>
-          {canDelete && (
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => onDelete(survey.id)}
-              className="btn-icon text-gray-400 hover:text-error-500"
+              onClick={onShowDetails}
+              className="btn-icon text-gray-400 hover:text-primary-500"
+              title="View details"
             >
-              <XMarkIcon className="w-5 h-5" />
+              <InformationCircleIcon className="w-5 h-5" />
             </button>
-          )}
+            {canDelete && (
+              <button
+                onClick={() => onDelete(survey.id)}
+                className="btn-icon text-gray-400 hover:text-error-500"
+                title="Delete survey"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -402,6 +422,156 @@ function CreateSurveyModal({ onClose, onSubmit }: CreateSurveyModalProps) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+interface SurveyDetailsModalProps {
+  survey: Survey;
+  onClose: () => void;
+}
+
+function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
+  const getPercentage = (voteCount: number) => {
+    if (survey.totalVotes === 0) return 0;
+    return Math.round((voteCount / survey.totalVotes) * 100);
+  };
+
+  const getWinningOption = () => {
+    if (survey.options.length === 0 || survey.totalVotes === 0) return null;
+    return survey.options.reduce((max, option) =>
+      option.voteCount > max.voteCount ? option : max
+    );
+  };
+
+  const winningOption = getWinningOption();
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content p-6 max-w-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Survey Details
+          </h2>
+          <button onClick={onClose} className="btn-icon">
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Question */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              {survey.question}
+            </h3>
+            {survey.description && (
+              <p className="text-gray-600 dark:text-gray-400">
+                {survey.description}
+              </p>
+            )}
+          </div>
+
+          {/* Survey Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Created by</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {survey.creator.firstName} {survey.creator.lastName}
+              </p>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Votes</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {survey.totalVotes}
+              </p>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Created</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {format(new Date(survey.createdAt), 'MMM d, yyyy')}
+              </p>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {survey.isActive ? 'Active' : 'Closed'}
+              </p>
+            </div>
+          </div>
+
+          {/* Survey Settings */}
+          <div className="flex flex-wrap gap-2">
+            {survey.isAnonymous && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                <EyeSlashIcon className="w-4 h-4" />
+                Anonymous Voting
+              </span>
+            )}
+            {survey.allowMultipleVotes && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                <CheckIcon className="w-4 h-4" />
+                Multiple Choices Allowed
+              </span>
+            )}
+            {survey.expiresAt && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                Expires: {format(new Date(survey.expiresAt), 'MMM d, yyyy')}
+              </span>
+            )}
+          </div>
+
+          {/* Results Breakdown */}
+          <div>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+              Results Breakdown
+            </h4>
+            <div className="space-y-3">
+              {survey.options.map((option) => {
+                const percentage = getPercentage(option.voteCount);
+                const isWinner = winningOption && option.id === winningOption.id && survey.totalVotes > 0;
+
+                return (
+                  <div key={option.id} className="relative">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-sm ${isWinner ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                        {option.optionText}
+                        {isWinner && ' (Leading)'}
+                      </span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {option.voteCount} votes ({percentage}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          isWinner ? 'bg-primary-500' : 'bg-gray-400 dark:bg-gray-500'
+                        }`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Your Vote Status */}
+          {survey.hasVoted && (
+            <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+              <p className="text-sm text-primary-700 dark:text-primary-300 flex items-center gap-2">
+                <CheckCircleIcon className="w-5 h-5" />
+                You have voted in this survey
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <button onClick={onClose} className="btn-primary">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

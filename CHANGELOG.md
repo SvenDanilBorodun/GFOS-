@@ -6,7 +6,7 @@ This document lists all changes made to the GFOS Digital Idea Board project duri
 
 ---
 
-## 1. TypeScript Error Fixes
+## 1. TypeScript Err
 
 ### 1.1 AdminPage.tsx (Line 11)
 **File:** `frontend/src/pages/AdminPage.tsx`

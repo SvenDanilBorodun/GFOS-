@@ -220,7 +220,8 @@ public class User {
     }
 
     private void updateLevel() {
-        int[] thresholds = {0, 100, 300, 600, 1000, 1500};
+        // Synced with GamificationService.LEVEL_THRESHOLDS
+        int[] thresholds = {0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000};
         for (int i = thresholds.length - 1; i >= 0; i--) {
             if (xpPoints >= thresholds[i]) {
                 this.level = i + 1;

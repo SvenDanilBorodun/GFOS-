@@ -23,6 +23,11 @@ export interface UserBadge {
   earnedAt: string;
 }
 
+export interface BadgeWithStatus extends Badge {
+  earned: boolean;
+  earnedAt?: string;
+}
+
 // Idea types
 export type IdeaStatus = 'CONCEPT' | 'IN_PROGRESS' | 'COMPLETED';
 
@@ -145,6 +150,7 @@ export interface SurveyCreateRequest {
 export interface Badge {
   id: number;
   name: string;
+  displayName?: string;
   description: string;
   icon: string;
   criteria?: string;
@@ -188,6 +194,16 @@ export interface AuditLog {
 }
 
 // Dashboard types
+export interface CategoryBreakdown {
+  category: string;
+  count: number;
+}
+
+export interface WeeklyActivity {
+  date: string;
+  ideas: number;
+}
+
 export interface DashboardStats {
   totalIdeas: number;
   totalUsers: number;
@@ -199,6 +215,8 @@ export interface DashboardStats {
   totalLikes: number;
   totalComments: number;
   activeSurveys: number;
+  categoryBreakdown: CategoryBreakdown[];
+  weeklyActivity: WeeklyActivity[];
 }
 
 export interface TopIdea {

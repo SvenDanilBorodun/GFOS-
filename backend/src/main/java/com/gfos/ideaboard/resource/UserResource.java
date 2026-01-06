@@ -1,9 +1,12 @@
 package com.gfos.ideaboard.resource;
 
+import com.gfos.ideaboard.dto.BadgeDTO;
+import com.gfos.ideaboard.dto.UserBadgeDTO;
 import com.gfos.ideaboard.dto.UserDTO;
 import com.gfos.ideaboard.entity.UserRole;
 import com.gfos.ideaboard.exception.ApiException;
 import com.gfos.ideaboard.security.Secured;
+import com.gfos.ideaboard.service.GamificationService;
 import com.gfos.ideaboard.service.LikeService;
 import com.gfos.ideaboard.service.UserService;
 import jakarta.inject.Inject;
@@ -25,6 +28,9 @@ public class UserResource {
 
     @Inject
     private LikeService likeService;
+
+    @Inject
+    private GamificationService gamificationService;
 
     @GET
     @Path("/me")
@@ -127,5 +133,55 @@ public class UserResource {
 
         userService.setUserActive(id, isActive);
         return Response.ok(Map.of("message", "Status updated")).build();
+    }
+
+    @GET
+    @Path("/{id}/badges")
+    @Secured
+    public Response getUserBadges(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
+        Long currentUserId = (Long) requestContext.getProperty("userId");
+        String role = (String) requestContext.getProperty("role");
+
+        // Users can view their own badges, admins can view anyone's
+        if (!currentUserId.equals(id) && !"ADMIN".equals(role)) {
+            throw ApiException.forbidden("You can only view your own badges");
+        }
+
+        List<UserBadgeDTO> badges = gamificationService.getUserBadges(id).stream()
+                .map(UserBadgeDTO::fromEntity)
+                .collect(java.util.stream.Collectors.toList());
+        return Response.ok(badges).build();
+    }
+
+    @GET
+    @Path("/me/badges")
+    @Secured
+    public Response getCurrentUserBadges(@Context ContainerRequestContext requestContext) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        List<UserBadgeDTO> badges = gamificationService.getUserBadges(userId).stream()
+                .map(UserBadgeDTO::fromEntity)
+                .collect(java.util.stream.Collectors.toList());
+        return Response.ok(badges).build();
+    }
+
+    @GET
+    @Path("/leaderboard")
+    @Secured
+    public Response getLeaderboard(@QueryParam("limit") @DefaultValue("10") int limit) {
+        if (limit < 1 || limit > 100) {
+            limit = 10;
+        }
+        List<UserDTO> leaderboard = userService.getLeaderboard(limit);
+        return Response.ok(leaderboard).build();
+    }
+
+    @GET
+    @Path("/badges")
+    @Secured
+    public Response getAllBadges() {
+        List<BadgeDTO> badges = gamificationService.getAllBadges().stream()
+                .map(BadgeDTO::fromEntity)
+                .collect(java.util.stream.Collectors.toList());
+        return Response.ok(badges).build();
     }
 }

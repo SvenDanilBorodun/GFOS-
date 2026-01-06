@@ -24,6 +24,10 @@ public class Badge {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
+    @Size(max = 100)
+    @Column(name = "display_name", length = 100)
+    private String displayName;
+
     @NotBlank
     @Size(max = 500)
     @Column(nullable = false, length = 500)
@@ -67,6 +71,14 @@ public class Badge {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName != null ? displayName : name;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getDescription() {

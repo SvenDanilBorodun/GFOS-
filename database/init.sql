@@ -208,6 +208,7 @@ CREATE INDEX idx_survey_votes_user ON survey_votes(user_id);
 CREATE TABLE badges (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
+    display_name VARCHAR(100),
     description VARCHAR(500) NOT NULL,
     icon VARCHAR(100) NOT NULL,
     criteria VARCHAR(500),
@@ -380,18 +381,18 @@ CREATE TRIGGER trigger_update_vote_count
 -- SEED DATA
 -- =====================================================
 
--- Insert default badges
-INSERT INTO badges (name, description, icon, criteria, xp_reward) VALUES
-    ('First Idea', 'Submitted your first innovation idea', 'lightbulb', 'Submit first idea', 25),
-    ('Idea Machine', 'Submitted 10 innovation ideas', 'rocket', 'Submit 10 ideas', 100),
-    ('Popular', 'Received 10 likes on a single idea', 'star', 'Get 10 likes on one idea', 50),
-    ('Trendsetter', 'Received 50 likes total', 'trending_up', 'Get 50 total likes', 150),
-    ('Commentator', 'Left 50 comments on ideas', 'chat', 'Post 50 comments', 75),
-    ('Supporter', 'Used all likes 4 weeks in a row', 'favorite', 'Use all likes 4 consecutive weeks', 100),
-    ('Contributor of the Month', 'Most ideas submitted in a month', 'emoji_events', 'Top contributor monthly', 200),
-    ('Team Player', 'Commented on 20 different ideas', 'groups', 'Comment on 20 unique ideas', 50),
-    ('Innovator', 'Had an idea reach Completed status', 'check_circle', 'Idea reaches Completed', 150),
-    ('Early Bird', 'One of the first 100 users', 'schedule', 'Register in first 100 users', 50);
+-- Insert default badges (name matches GamificationService badge criteria)
+INSERT INTO badges (name, display_name, description, icon, criteria, xp_reward) VALUES
+    ('first_idea', 'First Idea', 'Submitted your first innovation idea', 'lightbulb', 'Submit first idea', 25),
+    ('idea_machine', 'Idea Machine', 'Submitted 10 innovation ideas', 'rocket', 'Submit 10 ideas', 100),
+    ('popular', 'Popular', 'Received 10 likes on a single idea', 'star', 'Get 10 likes on one idea', 50),
+    ('trendsetter', 'Trendsetter', 'Received 50 likes total', 'trending_up', 'Get 50 total likes', 150),
+    ('commentator', 'Commentator', 'Left 50 comments on ideas', 'chat', 'Post 50 comments', 75),
+    ('supporter', 'Supporter', 'Used all likes 4 weeks in a row', 'favorite', 'Use all likes 4 consecutive weeks', 100),
+    ('contributor_month', 'Contributor of the Month', 'Most ideas submitted in a month', 'emoji_events', 'Top contributor monthly', 200),
+    ('team_player', 'Team Player', 'Commented on 20 different ideas', 'groups', 'Comment on 20 unique ideas', 50),
+    ('innovator', 'Innovator', 'Had an idea reach Completed status', 'check_circle', 'Idea reaches Completed', 150),
+    ('early_bird', 'Early Bird', 'One of the first 100 users', 'schedule', 'Register in first 100 users', 50);
 
 -- Insert admin user (password: admin123)
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, xp_points, level) VALUES

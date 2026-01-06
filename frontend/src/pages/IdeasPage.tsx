@@ -94,7 +94,13 @@ export default function IdeasPage() {
     });
   };
 
-  const handleLike = async (ideaId: number, isLiked: boolean) => {
+  const handleLike = async (ideaId: number, isLiked: boolean, authorId: number) => {
+    // Prevent users from liking their own ideas
+    if (user && user.id === authorId) {
+      toast.error('You cannot like your own idea');
+      return;
+    }
+
     if (!isLiked && likeStatus && likeStatus.remainingLikes <= 0) {
       toast.error('No likes remaining this week!');
       return;
@@ -338,24 +344,31 @@ export default function IdeasPage() {
 
               {/* Actions footer */}
               <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleLike(idea.id, idea.isLikedByCurrentUser || false);
-                  }}
-                  className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                    idea.isLikedByCurrentUser
-                      ? 'text-red-500'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-red-500'
-                  }`}
-                >
-                  {idea.isLikedByCurrentUser ? (
-                    <HeartSolidIcon className="w-5 h-5" />
-                  ) : (
+                {user?.id === idea.author.id ? (
+                  <span className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 cursor-not-allowed" title="You cannot like your own idea">
                     <HeartIcon className="w-5 h-5" />
-                  )}
-                  {idea.likeCount}
-                </button>
+                    {idea.likeCount}
+                  </span>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleLike(idea.id, idea.isLikedByCurrentUser || false, idea.author.id);
+                    }}
+                    className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
+                      idea.isLikedByCurrentUser
+                        ? 'text-red-500'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-red-500'
+                    }`}
+                  >
+                    {idea.isLikedByCurrentUser ? (
+                      <HeartSolidIcon className="w-5 h-5" />
+                    ) : (
+                      <HeartIcon className="w-5 h-5" />
+                    )}
+                    {idea.likeCount}
+                  </button>
+                )}
 
                 <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                   <ChatBubbleLeftIcon className="w-5 h-5" />

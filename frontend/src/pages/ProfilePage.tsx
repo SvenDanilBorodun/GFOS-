@@ -3,11 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { TrophyIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { ideaService } from '../services/ideaService';
 import { authService } from '../services/authService';
+import userService from '../services/userService';
 import { Idea, UserBadge, Badge } from '../types';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
-const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500];
+// Synced with backend GamificationService.LEVEL_THRESHOLDS
+const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000];
 
 const LEVEL_NAMES = [
   'Newcomer',
@@ -16,12 +18,17 @@ const LEVEL_NAMES = [
   'Expert',
   'Master',
   'Legend',
+  'Champion',
+  'Hero',
+  'Titan',
+  'Legendary',
 ];
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const [myIdeas, setMyIdeas] = useState<Idea[]>([]);
-  const [badges, setBadges] = useState<UserBadge[]>([]);
+  const [earnedBadges, setEarnedBadges] = useState<UserBadge[]>([]);
+  const [allBadges, setAllBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,14 +43,19 @@ export default function ProfilePage() {
 
   const fetchProfileData = async () => {
     try {
-      const ideas = await ideaService.getIdeas({
-        authorId: user?.id,
-        size: 10,
-        sort: 'createdAt',
-        direction: 'DESC',
-      });
-      setMyIdeas(ideas.content);
-      // Note: badges would come from a separate endpoint
+      const [ideasResponse, userBadges, badges] = await Promise.all([
+        ideaService.getIdeas({
+          authorId: user?.id,
+          size: 10,
+          sort: 'createdAt',
+          direction: 'DESC',
+        }),
+        userService.getCurrentUserBadges(),
+        userService.getAllBadges(),
+      ]);
+      setMyIdeas(ideasResponse.content);
+      setEarnedBadges(userBadges);
+      setAllBadges(badges);
     } catch (error) {
       console.error('Failed to fetch profile data:', error);
     } finally {
@@ -250,35 +262,50 @@ export default function ProfilePage() {
       <div className="card p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <TrophyIcon className="w-5 h-5 text-yellow-500" />
-          Badges Earned
+          Badges ({earnedBadges.length}/{allBadges.length} Earned)
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {/* Example badges - these would come from API */}
-          <BadgeCard
-            name="First Idea"
-            description="Submitted your first idea"
-            icon="lightbulb"
-            earned={true}
-          />
-          <BadgeCard
-            name="Popular"
-            description="Get 10 likes on an idea"
-            icon="star"
-            earned={false}
-          />
-          <BadgeCard
-            name="Commentator"
-            description="Leave 50 comments"
-            icon="chat"
-            earned={false}
-          />
-          <BadgeCard
-            name="Supporter"
-            description="Use all likes 4 weeks in a row"
-            icon="heart"
-            earned={false}
-          />
+          {allBadges.length > 0 ? (
+            allBadges.map((badge) => {
+              const earnedBadge = earnedBadges.find(
+                (eb) => eb.badge.id === badge.id
+              );
+              return (
+                <BadgeCard
+                  key={badge.id}
+                  name={badge.displayName || badge.name}
+                  description={badge.description}
+                  earned={!!earnedBadge}
+                  earnedAt={earnedBadge?.earnedAt}
+                />
+              );
+            })
+          ) : (
+            <>
+              {/* Fallback badges when no badges exist in system */}
+              <BadgeCard
+                name="First Idea"
+                description="Submit your first idea"
+                earned={earnedBadges.some((b) => b.badge.name === 'first_idea')}
+              />
+              <BadgeCard
+                name="Popular"
+                description="Get 10 likes on an idea"
+                earned={earnedBadges.some((b) => b.badge.name === 'popular')}
+              />
+              <BadgeCard
+                name="Commentator"
+                description="Leave 50 comments"
+                earned={earnedBadges.some((b) => b.badge.name === 'commentator')}
+              />
+              <BadgeCard
+                name="Supporter"
+                description="Use all likes 4 weeks in a row"
+                earned={earnedBadges.some((b) => b.badge.name === 'supporter')}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -337,11 +364,11 @@ export default function ProfilePage() {
 interface BadgeCardProps {
   name: string;
   description: string;
-  icon: string;
   earned: boolean;
+  earnedAt?: string;
 }
 
-function BadgeCard({ name, description, icon, earned }: BadgeCardProps) {
+function BadgeCard({ name, description, earned, earnedAt }: BadgeCardProps) {
   return (
     <div
       className={`p-4 rounded-lg border-2 text-center transition-all ${
@@ -365,6 +392,11 @@ function BadgeCard({ name, description, icon, earned }: BadgeCardProps) {
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
         {description}
       </p>
+      {earned && earnedAt && (
+        <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+          Earned {format(new Date(earnedAt), 'MMM d, yyyy')}
+        </p>
+      )}
     </div>
   );
 }

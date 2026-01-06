@@ -1,19 +1,5 @@
 import api from './api';
-import { User } from '../types';
-
-interface PaginatedResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
-
-interface UserStats {
-  totalUsers: number;
-  activeUsers: number;
-  ideasPerUser: number;
-}
+import { User, UserBadge, Badge } from '../types';
 
 const userService = {
   async getCurrentUser(): Promise<User> {
@@ -49,8 +35,18 @@ const userService = {
     return response.data;
   },
 
-  async getUserBadges(userId: number): Promise<any[]> {
-    const response = await api.get<any[]>(`/users/${userId}/badges`);
+  async getUserBadges(userId: number): Promise<UserBadge[]> {
+    const response = await api.get<UserBadge[]>(`/users/${userId}/badges`);
+    return response.data;
+  },
+
+  async getCurrentUserBadges(): Promise<UserBadge[]> {
+    const response = await api.get<UserBadge[]>('/users/me/badges');
+    return response.data;
+  },
+
+  async getAllBadges(): Promise<Badge[]> {
+    const response = await api.get<Badge[]>('/users/badges');
     return response.data;
   },
 

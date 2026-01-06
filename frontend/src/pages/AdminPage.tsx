@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import api from '../services/api';
-import { User, AuditLog, DashboardStats } from '../types';
+import { User, AuditLog } from '../types';
 import toast from 'react-hot-toast';
 
 export default function AdminPage() {
