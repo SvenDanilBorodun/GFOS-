@@ -30,6 +30,9 @@ public class LikeService {
     @Inject
     private NotificationService notificationService;
 
+    @Inject
+    private GamificationService gamificationService;
+
     public int getRemainingLikes(Long userId) {
         LocalDateTime weekStart = getLastSundayMidnight();
         Long usedLikes = em.createNamedQuery("Like.countByUserSince", Long.class)
@@ -80,12 +83,11 @@ public class LikeService {
         like.setIdea(idea);
         em.persist(like);
 
-        // Update idea like count
-        idea.incrementLikeCount();
-        em.merge(idea);
+        // Note: like_count is automatically updated by database trigger
+        // Do NOT manually increment here to avoid double counting
 
-        // Award XP to idea author
-        userService.addXp(idea.getAuthor().getId(), XP_FOR_LIKE_RECEIVED);
+        // Award XP to idea author and check badges
+        gamificationService.awardXpForLikeReceived(idea.getAuthor().getId());
 
         // Notify idea author
         notificationService.notifyLike(idea, user);
@@ -98,9 +100,8 @@ public class LikeService {
             throw ApiException.notFound("Like not found");
         }
 
-        Idea idea = like.getIdea();
-        idea.decrementLikeCount();
-        em.merge(idea);
+        // Note: like_count is automatically updated by database trigger
+        // Do NOT manually decrement here to avoid double counting
 
         em.remove(like);
     }

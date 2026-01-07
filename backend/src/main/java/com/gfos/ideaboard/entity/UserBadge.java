@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @NamedQueries({
     @NamedQuery(name = "UserBadge.findByUser",
                 query = "SELECT ub FROM UserBadge ub WHERE ub.user.id = :userId ORDER BY ub.earnedAt DESC"),
-    @NamedQuery(name = "UserBadge.hasUserBadge",
-                query = "SELECT COUNT(ub) > 0 FROM UserBadge ub WHERE ub.user.id = :userId AND ub.badge.id = :badgeId")
+    @NamedQuery(name = "UserBadge.countByUserAndBadge",
+                query = "SELECT COUNT(ub) FROM UserBadge ub WHERE ub.user.id = :userId AND ub.badge.id = :badgeId")
 })
 public class UserBadge {
 

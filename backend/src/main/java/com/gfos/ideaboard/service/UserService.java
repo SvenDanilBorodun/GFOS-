@@ -4,7 +4,9 @@ import com.gfos.ideaboard.dto.UserDTO;
 import com.gfos.ideaboard.entity.User;
 import com.gfos.ideaboard.entity.UserRole;
 import com.gfos.ideaboard.exception.ApiException;
+import com.gfos.ideaboard.security.PasswordUtil;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -16,6 +18,9 @@ public class UserService {
 
     @PersistenceContext(unitName = "IdeaBoardPU")
     private EntityManager em;
+
+    @Inject
+    private PasswordUtil passwordUtil;
 
     public User findById(Long id) {
         return em.find(User.class, id);
@@ -108,5 +113,24 @@ public class UserService {
         return users.stream()
                 .map(UserDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = findById(userId);
+        if (user == null) {
+            throw ApiException.notFound("User not found");
+        }
+
+        if (!passwordUtil.verifyPassword(oldPassword, user.getPasswordHash())) {
+            throw ApiException.badRequest("Current password is incorrect");
+        }
+
+        if (newPassword == null || newPassword.length() < 6) {
+            throw ApiException.badRequest("New password must be at least 6 characters");
+        }
+
+        user.setPasswordHash(passwordUtil.hashPassword(newPassword));
+        em.merge(user);
     }
 }

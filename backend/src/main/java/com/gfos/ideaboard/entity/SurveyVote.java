@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @NamedQueries({
     @NamedQuery(name = "SurveyVote.findByUserAndSurvey",
                 query = "SELECT v FROM SurveyVote v WHERE v.user.id = :userId AND v.survey.id = :surveyId"),
-    @NamedQuery(name = "SurveyVote.hasUserVoted",
-                query = "SELECT COUNT(v) > 0 FROM SurveyVote v WHERE v.user.id = :userId AND v.survey.id = :surveyId")
+    @NamedQuery(name = "SurveyVote.countByUserAndSurvey",
+                query = "SELECT COUNT(v) FROM SurveyVote v WHERE v.user.id = :userId AND v.survey.id = :surveyId")
 })
 public class SurveyVote {
 

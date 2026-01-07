@@ -38,4 +38,8 @@ public class ApiException extends RuntimeException {
     public static ApiException conflict(String message) {
         return new ApiException(message, Response.Status.CONFLICT);
     }
+
+    public static ApiException serverError(String message) {
+        return new ApiException(message, Response.Status.INTERNAL_SERVER_ERROR);
+    }
 }

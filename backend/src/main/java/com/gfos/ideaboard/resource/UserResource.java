@@ -55,6 +55,22 @@ public class UserResource {
         return Response.ok(updated).build();
     }
 
+    @PUT
+    @Path("/me/password")
+    @Secured
+    public Response changePassword(@Context ContainerRequestContext requestContext, Map<String, String> body) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+
+        if (oldPassword == null || newPassword == null) {
+            throw ApiException.badRequest("Both old and new passwords are required");
+        }
+
+        userService.changePassword(userId, oldPassword, newPassword);
+        return Response.ok(Map.of("message", "Password changed successfully")).build();
+    }
+
     @GET
     @Path("/me/likes/remaining")
     @Secured

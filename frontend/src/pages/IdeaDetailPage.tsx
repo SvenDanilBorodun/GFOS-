@@ -143,7 +143,21 @@ export default function IdeaDetailPage() {
     try {
       await ideaService.addReaction(commentId, emoji);
       fetchComments();
-    } catch (error) {
+    } catch (error: unknown) {
+      // If 409 conflict, user already reacted - try to remove instead
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 409) {
+          try {
+            await ideaService.removeReaction(commentId, emoji);
+            fetchComments();
+            return;
+          } catch {
+            toast.error('Failed to remove reaction');
+            return;
+          }
+        }
+      }
       toast.error('Failed to add reaction');
     }
   };

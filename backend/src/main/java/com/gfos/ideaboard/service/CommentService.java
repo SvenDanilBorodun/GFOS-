@@ -27,6 +27,9 @@ public class CommentService {
     @Inject
     private NotificationService notificationService;
 
+    @Inject
+    private GamificationService gamificationService;
+
     public List<CommentDTO> getCommentsByIdea(Long ideaId) {
         List<Comment> comments = em.createNamedQuery("Comment.findByIdea", Comment.class)
                 .setParameter("ideaId", ideaId)
@@ -61,12 +64,11 @@ public class CommentService {
         comment.setContent(content.trim());
         em.persist(comment);
 
-        // Update idea comment count
-        idea.incrementCommentCount();
-        em.merge(idea);
+        // Note: comment_count is automatically updated by database trigger
+        // Do NOT manually increment here to avoid double counting
 
-        // Award XP
-        userService.addXp(authorId, XP_FOR_COMMENT);
+        // Award XP and check badges
+        gamificationService.awardXpForComment(authorId);
 
         // Notify idea author (if not commenting on own idea)
         if (!idea.getAuthor().getId().equals(authorId)) {
@@ -90,9 +92,8 @@ public class CommentService {
             throw ApiException.forbidden("Not authorized to delete this comment");
         }
 
-        Idea idea = comment.getIdea();
-        idea.decrementCommentCount();
-        em.merge(idea);
+        // Note: comment_count is automatically updated by database trigger
+        // Do NOT manually decrement here to avoid double counting
 
         em.remove(comment);
     }
@@ -121,8 +122,8 @@ public class CommentService {
         reaction.setEmoji(emoji);
         em.persist(reaction);
 
-        comment.incrementReactionCount();
-        em.merge(comment);
+        // Note: reaction_count is automatically updated by database trigger
+        // Do NOT manually increment here to avoid double counting
 
         // Notify comment author
         if (!comment.getAuthor().getId().equals(userId)) {
@@ -137,9 +138,8 @@ public class CommentService {
             throw ApiException.notFound("Reaction not found");
         }
 
-        Comment comment = reaction.getComment();
-        comment.decrementReactionCount();
-        em.merge(comment);
+        // Note: reaction_count is automatically updated by database trigger
+        // Do NOT manually decrement here to avoid double counting
 
         em.remove(reaction);
     }

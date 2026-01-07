@@ -1,6 +1,7 @@
 package com.gfos.ideaboard.resource;
 
 import com.gfos.ideaboard.dto.IdeaDTO;
+import com.gfos.ideaboard.entity.IdeaStatus;
 import com.gfos.ideaboard.security.Secured;
 import com.gfos.ideaboard.service.IdeaService;
 import com.gfos.ideaboard.service.SurveyService;
@@ -12,6 +13,10 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,17 +50,21 @@ public class DashboardResource {
         Long totalUsers = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.isActive = true", Long.class).getSingleResult();
         stats.put("totalUsers", totalUsers);
 
-        // Ideas this week
+        // Ideas this week - get the previous or same Sunday
+        LocalDateTime weekStartTime = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
         Long ideasThisWeek = em.createQuery(
                 "SELECT COUNT(i) FROM Idea i WHERE i.createdAt >= :weekStart", Long.class)
-                .setParameter("weekStart", java.time.LocalDate.now().with(java.time.DayOfWeek.SUNDAY).atStartOfDay())
+                .setParameter("weekStart", weekStartTime)
                 .getSingleResult();
         stats.put("ideasThisWeek", ideasThisWeek);
 
-        // Status counts
-        Long conceptIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = 'CONCEPT'", Long.class).getSingleResult();
-        Long inProgressIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = 'IN_PROGRESS'", Long.class).getSingleResult();
-        Long completedIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = 'COMPLETED'", Long.class).getSingleResult();
+        // Status counts - use enum parameters instead of string literals
+        Long conceptIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
+                .setParameter("status", IdeaStatus.CONCEPT).getSingleResult();
+        Long inProgressIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
+                .setParameter("status", IdeaStatus.IN_PROGRESS).getSingleResult();
+        Long completedIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
+                .setParameter("status", IdeaStatus.COMPLETED).getSingleResult();
         stats.put("conceptIdeas", conceptIdeas);
         stats.put("inProgressIdeas", inProgressIdeas);
         stats.put("completedIdeas", completedIdeas);
@@ -89,17 +98,20 @@ public class DashboardResource {
                 .collect(Collectors.toList());
         stats.put("categoryBreakdown", categoryBreakdown);
 
-        // Weekly activity (ideas created per day this week)
-        List<Object[]> weeklyActivity = em.createQuery(
-                "SELECT FUNCTION('DATE', i.createdAt), COUNT(i) FROM Idea i " +
-                "WHERE i.createdAt >= :weekStart GROUP BY FUNCTION('DATE', i.createdAt) ORDER BY FUNCTION('DATE', i.createdAt)", Object[].class)
-                .setParameter("weekStart", java.time.LocalDate.now().with(java.time.DayOfWeek.SUNDAY).atStartOfDay())
+        // Weekly activity (ideas created per day this week) - use native query for PostgreSQL date truncation
+        // Reuse weekStartTime from above
+        java.sql.Timestamp weekStartTs = java.sql.Timestamp.valueOf(weekStartTime);
+        @SuppressWarnings("unchecked")
+        List<Object[]> weeklyActivity = em.createNativeQuery(
+                "SELECT DATE(created_at) as day, COUNT(*) as cnt FROM ideas " +
+                "WHERE created_at >= ?1 GROUP BY DATE(created_at) ORDER BY day")
+                .setParameter(1, weekStartTs)
                 .getResultList();
         List<Map<String, Object>> activityData = weeklyActivity.stream()
                 .map(row -> {
                     Map<String, Object> item = new HashMap<>();
                     item.put("date", row[0].toString());
-                    item.put("ideas", row[1]);
+                    item.put("ideas", ((Number) row[1]).longValue());
                     return item;
                 })
                 .collect(Collectors.toList());

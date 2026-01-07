@@ -132,10 +132,10 @@ public class ExportService {
 
         Table overviewTable = new Table(UnitValue.createPercentArray(new float[]{50, 50}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableRow(overviewTable, "Total Ideas", String.valueOf(totalIdeas), regularFont);
-        addTableRow(overviewTable, "Total Users", String.valueOf(totalUsers), regularFont);
-        addTableRow(overviewTable, "Total Likes", String.valueOf(totalLikes), regularFont);
-        addTableRow(overviewTable, "Total Comments", String.valueOf(totalComments), regularFont);
+        addTableRow(overviewTable, "Total Ideas", String.valueOf(totalIdeas));
+        addTableRow(overviewTable, "Total Users", String.valueOf(totalUsers));
+        addTableRow(overviewTable, "Total Likes", String.valueOf(totalLikes));
+        addTableRow(overviewTable, "Total Comments", String.valueOf(totalComments));
         document.add(overviewTable);
 
         // Ideas by Status
@@ -143,13 +143,13 @@ public class ExportService {
 
         Table statusTable = new Table(UnitValue.createPercentArray(new float[]{60, 40}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableHeader(statusTable, "Status", "Count", boldFont);
+        addTableHeader(statusTable, "Status", "Count");
 
         for (IdeaStatus status : IdeaStatus.values()) {
             Long count = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
                     .setParameter("status", status)
                     .getSingleResult();
-            addTableRow(statusTable, status.name(), String.valueOf(count), regularFont);
+            addTableRow(statusTable, status.name(), String.valueOf(count));
         }
         document.add(statusTable);
 
@@ -163,10 +163,10 @@ public class ExportService {
 
         Table categoryTable = new Table(UnitValue.createPercentArray(new float[]{60, 40}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableHeader(categoryTable, "Category", "Count", boldFont);
+        addTableHeader(categoryTable, "Category", "Count");
 
         for (Object[] row : categoryStats) {
-            addTableRow(categoryTable, String.valueOf(row[0]), String.valueOf(row[1]), regularFont);
+            addTableRow(categoryTable, String.valueOf(row[0]), String.valueOf(row[1]));
         }
         document.add(categoryTable);
 
@@ -180,14 +180,13 @@ public class ExportService {
 
         Table topIdeasTable = new Table(UnitValue.createPercentArray(new float[]{50, 25, 25}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableHeader(topIdeasTable, "Title", "Author", "Likes", boldFont);
+        addTableHeader(topIdeasTable, "Title", "Author", "Likes");
 
         for (Idea idea : topIdeas) {
             addTableRow(topIdeasTable,
                     truncate(idea.getTitle(), 40),
                     idea.getAuthor().getUsername(),
-                    String.valueOf(idea.getLikeCount()),
-                    regularFont);
+                    String.valueOf(idea.getLikeCount()));
         }
         document.add(topIdeasTable);
 

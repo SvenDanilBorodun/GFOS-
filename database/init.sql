@@ -17,16 +17,8 @@ DROP TABLE IF EXISTS idea_tags CASCADE;
 DROP TABLE IF EXISTS ideas CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
--- Enum Types
-DROP TYPE IF EXISTS user_role CASCADE;
-DROP TYPE IF EXISTS idea_status CASCADE;
-DROP TYPE IF EXISTS notification_type CASCADE;
-DROP TYPE IF EXISTS audit_action CASCADE;
-
-CREATE TYPE user_role AS ENUM ('EMPLOYEE', 'PROJECT_MANAGER', 'ADMIN');
-CREATE TYPE idea_status AS ENUM ('CONCEPT', 'IN_PROGRESS', 'COMPLETED');
-CREATE TYPE notification_type AS ENUM ('LIKE', 'COMMENT', 'REACTION', 'STATUS_CHANGE', 'BADGE_EARNED', 'LEVEL_UP', 'MENTION');
-CREATE TYPE audit_action AS ENUM ('CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE', 'LOGIN', 'LOGOUT');
+-- Note: Using VARCHAR instead of PostgreSQL enum types for JPA compatibility
+-- The enum values are validated at the application level
 
 -- =====================================================
 -- USERS TABLE
@@ -38,7 +30,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
-    role user_role NOT NULL DEFAULT 'EMPLOYEE',
+    role VARCHAR(20) NOT NULL DEFAULT 'EMPLOYEE' CHECK (role IN ('EMPLOYEE', 'PROJECT_MANAGER', 'ADMIN')),
     avatar_url VARCHAR(500),
     xp_points INTEGER NOT NULL DEFAULT 0,
     level INTEGER NOT NULL DEFAULT 1,
@@ -60,7 +52,7 @@ CREATE TABLE ideas (
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
     category VARCHAR(100) NOT NULL,
-    status idea_status NOT NULL DEFAULT 'CONCEPT',
+    status VARCHAR(20) NOT NULL DEFAULT 'CONCEPT' CHECK (status IN ('CONCEPT', 'IN_PROGRESS', 'COMPLETED')),
     progress_percentage INTEGER NOT NULL DEFAULT 0 CHECK (progress_percentage >= 0 AND progress_percentage <= 100),
     author_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     like_count INTEGER NOT NULL DEFAULT 0,
@@ -237,7 +229,7 @@ CREATE INDEX idx_user_badges_badge ON user_badges(badge_id);
 CREATE TABLE audit_logs (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
-    action audit_action NOT NULL,
+    action VARCHAR(20) NOT NULL CHECK (action IN ('CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE', 'LOGIN', 'LOGOUT')),
     entity_type VARCHAR(50) NOT NULL,
     entity_id BIGINT,
     old_value JSONB,
@@ -258,7 +250,7 @@ CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
 CREATE TABLE notifications (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    type notification_type NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('LIKE', 'COMMENT', 'REACTION', 'STATUS_CHANGE', 'BADGE_EARNED', 'LEVEL_UP', 'MENTION')),
     title VARCHAR(200) NOT NULL,
     message VARCHAR(500) NOT NULL,
     link VARCHAR(500),

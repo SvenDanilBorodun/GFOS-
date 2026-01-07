@@ -123,11 +123,18 @@ public class SurveyService {
             vote.setUser(user);
             em.persist(vote);
 
-            option.incrementVoteCount();
-            survey.incrementTotalVotes();
+            // Note: vote_count and total_votes are automatically updated by database trigger
+            // Do NOT manually increment here to avoid double counting
         }
 
-        em.merge(survey);
+        // Flush to ensure triggers have run before returning
+        em.flush();
+
+        // Refresh entities to get updated counts from database triggers
+        em.refresh(survey);
+        for (SurveyOption opt : survey.getOptions()) {
+            em.refresh(opt);
+        }
 
         return SurveyDTO.fromEntity(survey, getUserVotedOptionIds(surveyId, userId));
     }

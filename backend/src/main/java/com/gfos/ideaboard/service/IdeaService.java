@@ -34,10 +34,14 @@ public class IdeaService {
     @Inject
     private NotificationService notificationService;
 
+    @Inject
+    private GamificationService gamificationService;
+
     public Idea findById(Long id) {
         return em.find(Idea.class, id);
     }
 
+    @Transactional
     public IdeaDTO getIdeaById(Long id, Long currentUserId) {
         Idea idea = findById(id);
         if (idea == null) {
@@ -147,8 +151,8 @@ public class IdeaService {
 
         em.persist(idea);
 
-        // Award XP
-        userService.addXp(authorId, XP_FOR_IDEA);
+        // Award XP and check badges
+        gamificationService.awardXpForIdea(authorId);
 
         // Audit log
         auditService.log(authorId, AuditAction.CREATE, "Idea", idea.getId(), null, null);
@@ -209,7 +213,7 @@ public class IdeaService {
         if (status == IdeaStatus.COMPLETED) {
             idea.setProgressPercentage(100);
             // Award XP to author for completion
-            userService.addXp(idea.getAuthor().getId(), XP_FOR_COMPLETED);
+            gamificationService.awardXpForIdeaCompleted(idea.getAuthor().getId());
         } else if (status == IdeaStatus.CONCEPT) {
             idea.setProgressPercentage(0);
         }
@@ -252,20 +256,14 @@ public class IdeaService {
     }
 
     public List<IdeaDTO> getTopIdeasThisWeek(int limit, Long currentUserId) {
-        LocalDateTime weekStart = getLastSundayMidnight();
-
-        // Get ideas with most likes this week
-        List<Object[]> results = em.createQuery(
-                "SELECT i, COUNT(l) as weeklyLikes FROM Idea i " +
-                "LEFT JOIN Like l ON l.idea = i AND l.createdAt >= :weekStart " +
-                "GROUP BY i ORDER BY weeklyLikes DESC, i.likeCount DESC", Object[].class)
-                .setParameter("weekStart", weekStart)
+        // Get ideas with most likes (simplified - ordering by total likes)
+        List<Idea> ideas = em.createQuery(
+                "SELECT i FROM Idea i ORDER BY i.likeCount DESC, i.createdAt DESC", Idea.class)
                 .setMaxResults(limit)
                 .getResultList();
 
-        return results.stream()
-                .map(row -> {
-                    Idea idea = (Idea) row[0];
+        return ideas.stream()
+                .map(idea -> {
                     return IdeaDTO.fromEntity(idea, isLikedByUser(idea.getId(), currentUserId));
                 })
                 .collect(Collectors.toList());
