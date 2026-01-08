@@ -232,8 +232,8 @@ CREATE TABLE audit_logs (
     action VARCHAR(20) NOT NULL CHECK (action IN ('CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE', 'LOGIN', 'LOGOUT')),
     entity_type VARCHAR(50) NOT NULL,
     entity_id BIGINT,
-    old_value JSONB,
-    new_value JSONB,
+    old_value TEXT,
+    new_value TEXT,
     ip_address VARCHAR(45),
     user_agent VARCHAR(500),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

@@ -37,8 +37,8 @@
             <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
             <property name="eclipselink.jdbc.batch-writing.size" value="100"/>
 
-            <!-- Cache Settings -->
-            <property name="eclipselink.cache.shared.default" value="true"/>
+            <!-- Cache Settings - set to false for development to avoid stale data issues -->
+            <property name="eclipselink.cache.shared.default" value="false"/>
             <property name="eclipselink.cache.size.default" value="500"/>
         </properties>
     </persistence-unit>
