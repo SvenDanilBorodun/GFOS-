@@ -216,6 +216,44 @@ export interface SendMessageRequest {
   ideaId?: number;
 }
 
+// Group types
+export type GroupMemberRole = 'CREATOR' | 'MEMBER';
+
+export interface GroupMember {
+  id: number;
+  groupId: number;
+  user: User;
+  role: GroupMemberRole;
+  joinedAt: string;
+}
+
+export interface GroupMessage {
+  id: number;
+  groupId: number;
+  sender: User;
+  content: string;
+  createdAt: string;
+}
+
+export interface IdeaGroup {
+  id: number;
+  ideaId: number;
+  ideaTitle: string;
+  name: string;
+  description?: string;
+  createdBy: User;
+  members: GroupMember[];
+  memberCount: number;
+  unreadCount: number;
+  lastMessage?: GroupMessage;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SendGroupMessageRequest {
+  content: string;
+}
+
 // Audit log types
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'STATUS_CHANGE' | 'LOGIN' | 'LOGOUT';
 

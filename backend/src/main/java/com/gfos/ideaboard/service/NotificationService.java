@@ -1,7 +1,15 @@
 package com.gfos.ideaboard.service;
 
 import com.gfos.ideaboard.dto.NotificationDTO;
-import com.gfos.ideaboard.entity.*;
+import com.gfos.ideaboard.entity.Badge;
+import com.gfos.ideaboard.entity.Comment;
+import com.gfos.ideaboard.entity.GroupMember;
+import com.gfos.ideaboard.entity.Idea;
+import com.gfos.ideaboard.entity.IdeaGroup;
+import com.gfos.ideaboard.entity.IdeaStatus;
+import com.gfos.ideaboard.entity.Notification;
+import com.gfos.ideaboard.entity.NotificationType;
+import com.gfos.ideaboard.entity.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -144,6 +152,40 @@ public class NotificationService {
             notification.setLink("/profile");
         }
         em.persist(notification);
+    }
+
+    @Transactional
+    public void notifyGroupJoin(IdeaGroup group, User joiner) {
+        // Notify the group creator
+        Notification notification = new Notification();
+        notification.setUser(group.getCreatedBy());
+        notification.setType(NotificationType.MESSAGE);
+        notification.setTitle("New Group Member");
+        notification.setMessage(joiner.getFirstName() + " " + joiner.getLastName() + " joined the group \"" + truncate(group.getName(), 30) + "\"");
+        notification.setLink("/messages?group=" + group.getId());
+        notification.setSender(joiner);
+        notification.setRelatedEntityType("IdeaGroup");
+        notification.setRelatedEntityId(group.getId());
+        em.persist(notification);
+    }
+
+    @Transactional
+    public void notifyGroupMessage(IdeaGroup group, User sender, String content) {
+        // Notify all group members except the sender
+        for (GroupMember member : group.getMembers()) {
+            if (!member.getUser().getId().equals(sender.getId())) {
+                Notification notification = new Notification();
+                notification.setUser(member.getUser());
+                notification.setType(NotificationType.MESSAGE);
+                notification.setTitle("New Group Message");
+                notification.setMessage(sender.getFirstName() + " in \"" + truncate(group.getName(), 20) + "\": " + truncate(content, 50));
+                notification.setLink("/messages?group=" + group.getId());
+                notification.setSender(sender);
+                notification.setRelatedEntityType("IdeaGroup");
+                notification.setRelatedEntityId(group.getId());
+                em.persist(notification);
+            }
+        }
     }
 
     private String truncate(String text, int maxLength) {

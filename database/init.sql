@@ -2,6 +2,10 @@
 -- PostgreSQL 15+
 
 -- Drop existing tables if they exist (for clean reinstall)
+DROP TABLE IF EXISTS group_message_reads CASCADE;
+DROP TABLE IF EXISTS group_messages CASCADE;
+DROP TABLE IF EXISTS group_members CASCADE;
+DROP TABLE IF EXISTS idea_groups CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS checklist_items CASCADE;
 DROP TABLE IF EXISTS user_badges CASCADE;
@@ -305,6 +309,66 @@ CREATE INDEX idx_messages_unread ON messages(recipient_id, is_read) WHERE is_rea
 CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
 
 -- =====================================================
+-- IDEA GROUPS TABLE (Auto-created when idea is created)
+-- =====================================================
+CREATE TABLE idea_groups (
+    id BIGSERIAL PRIMARY KEY,
+    idea_id BIGINT NOT NULL UNIQUE REFERENCES ideas(id) ON DELETE CASCADE,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    created_by BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_idea_groups_idea ON idea_groups(idea_id);
+CREATE INDEX idx_idea_groups_created_by ON idea_groups(created_by);
+
+-- =====================================================
+-- GROUP MEMBERS TABLE (Junction table for group membership)
+-- =====================================================
+CREATE TABLE group_members (
+    id BIGSERIAL PRIMARY KEY,
+    group_id BIGINT NOT NULL REFERENCES idea_groups(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL DEFAULT 'MEMBER' CHECK (role IN ('CREATOR', 'MEMBER')),
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(group_id, user_id)
+);
+
+CREATE INDEX idx_group_members_group ON group_members(group_id);
+CREATE INDEX idx_group_members_user ON group_members(user_id);
+
+-- =====================================================
+-- GROUP MESSAGES TABLE (Messages within idea groups)
+-- =====================================================
+CREATE TABLE group_messages (
+    id BIGSERIAL PRIMARY KEY,
+    group_id BIGINT NOT NULL REFERENCES idea_groups(id) ON DELETE CASCADE,
+    sender_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_group_messages_group ON group_messages(group_id);
+CREATE INDEX idx_group_messages_sender ON group_messages(sender_id);
+CREATE INDEX idx_group_messages_created_at ON group_messages(created_at DESC);
+
+-- =====================================================
+-- GROUP MESSAGE READ STATUS TABLE (Track who has read which messages)
+-- =====================================================
+CREATE TABLE group_message_reads (
+    id BIGSERIAL PRIMARY KEY,
+    message_id BIGINT NOT NULL REFERENCES group_messages(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(message_id, user_id)
+);
+
+CREATE INDEX idx_group_message_reads_message ON group_message_reads(message_id);
+CREATE INDEX idx_group_message_reads_user ON group_message_reads(user_id);
+
+-- =====================================================
 -- FUNCTIONS AND TRIGGERS
 -- =====================================================
 
@@ -332,6 +396,10 @@ CREATE TRIGGER update_comments_updated_at
 
 CREATE TRIGGER update_checklist_items_updated_at
     BEFORE UPDATE ON checklist_items
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_idea_groups_updated_at
+    BEFORE UPDATE ON idea_groups
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function to update idea like count

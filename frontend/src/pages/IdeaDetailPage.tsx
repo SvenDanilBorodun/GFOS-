@@ -12,10 +12,13 @@ import {
   PlusIcon,
   ClipboardDocumentListIcon,
   EnvelopeIcon,
+  UserGroupIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { ideaService } from '../services/ideaService';
+import { groupService } from '../services/groupService';
 import { Idea, Comment, IdeaStatus, ChecklistItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
@@ -44,6 +47,9 @@ export default function IdeaDetailPage() {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [newChecklistItem, setNewChecklistItem] = useState('');
   const [addingChecklistItem, setAddingChecklistItem] = useState(false);
+  const [isGroupMember, setIsGroupMember] = useState(false);
+  const [groupId, setGroupId] = useState<number | null>(null);
+  const [joiningGroup, setJoiningGroup] = useState(false);
 
   const canManageStatus = user?.role === 'PROJECT_MANAGER' || user?.role === 'ADMIN';
   const canDelete = user?.role === 'ADMIN';
@@ -53,6 +59,7 @@ export default function IdeaDetailPage() {
     if (id) {
       fetchIdea();
       fetchComments();
+      checkGroupMembership();
     }
   }, [id]);
 
@@ -67,6 +74,32 @@ export default function IdeaDetailPage() {
       navigate('/ideas');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkGroupMembership = async () => {
+    try {
+      const result = await groupService.checkMembershipByIdea(Number(id));
+      setIsGroupMember(result.isMember);
+      if (result.groupId) {
+        setGroupId(result.groupId);
+      }
+    } catch (error) {
+      console.error('Failed to check group membership:', error);
+    }
+  };
+
+  const handleJoinGroup = async () => {
+    setJoiningGroup(true);
+    try {
+      const group = await groupService.joinGroupByIdea(Number(id));
+      setIsGroupMember(true);
+      setGroupId(group.id);
+      toast.success('Joined the idea group successfully!');
+    } catch (error) {
+      toast.error('Failed to join group');
+    } finally {
+      setJoiningGroup(false);
     }
   };
 
@@ -358,15 +391,35 @@ export default function IdeaDetailPage() {
                 </p>
               </div>
             </div>
-            {!isAuthor && (
-              <Link
-                to={`/messages?user=${idea.author.id}`}
-                className="btn-secondary flex items-center gap-2"
-              >
-                <EnvelopeIcon className="w-4 h-4" />
-                Message Creator
-              </Link>
-            )}
+            <div className="flex items-center gap-2">
+              {!isAuthor && (
+                <Link
+                  to={`/messages?user=${idea.author.id}`}
+                  className="btn-secondary flex items-center gap-2"
+                >
+                  <EnvelopeIcon className="w-4 h-4" />
+                  Message Creator
+                </Link>
+              )}
+              {isGroupMember ? (
+                <Link
+                  to={`/messages?group=${groupId}`}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                  Group Chat
+                </Link>
+              ) : (
+                <button
+                  onClick={handleJoinGroup}
+                  disabled={joiningGroup}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <UserGroupIcon className="w-4 h-4" />
+                  {joiningGroup ? 'Joining...' : 'Join Idea Group'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

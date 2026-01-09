@@ -52,8 +52,8 @@ public class ChecklistService {
         }
 
         // Get the next ordinal position
-        Long maxPosition = em.createQuery(
-                "SELECT COALESCE(MAX(c.ordinalPosition), -1) FROM ChecklistItem c WHERE c.idea.id = :ideaId", Long.class)
+        Integer maxPosition = em.createQuery(
+                "SELECT COALESCE(MAX(c.ordinalPosition), -1) FROM ChecklistItem c WHERE c.idea.id = :ideaId", Integer.class)
                 .setParameter("ideaId", ideaId)
                 .getSingleResult();
 
@@ -61,7 +61,7 @@ public class ChecklistService {
         item.setIdea(idea);
         item.setTitle(title.trim());
         item.setIsCompleted(false);
-        item.setOrdinalPosition(maxPosition.intValue() + 1);
+        item.setOrdinalPosition(maxPosition + 1);
 
         em.persist(item);
 

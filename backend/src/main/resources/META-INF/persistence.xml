@@ -23,6 +23,10 @@
         <class>com.gfos.ideaboard.entity.AuditLog</class>
         <class>com.gfos.ideaboard.entity.Notification</class>
         <class>com.gfos.ideaboard.entity.Message</class>
+        <class>com.gfos.ideaboard.entity.IdeaGroup</class>
+        <class>com.gfos.ideaboard.entity.GroupMember</class>
+        <class>com.gfos.ideaboard.entity.GroupMessage</class>
+        <class>com.gfos.ideaboard.entity.GroupMessageRead</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 

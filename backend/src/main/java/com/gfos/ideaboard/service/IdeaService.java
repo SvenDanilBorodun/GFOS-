@@ -37,6 +37,9 @@ public class IdeaService {
     @Inject
     private GamificationService gamificationService;
 
+    @Inject
+    private GroupService groupService;
+
     public Idea findById(Long id) {
         return em.find(Idea.class, id);
     }
@@ -151,6 +154,9 @@ public class IdeaService {
 
         em.persist(idea);
 
+        // Create a group for this idea automatically
+        groupService.createGroupForIdea(idea, author);
+
         // Award XP and check badges
         gamificationService.awardXpForIdea(authorId);
 
@@ -195,7 +201,7 @@ public class IdeaService {
             throw ApiException.notFound("Idea not found");
         }
 
-        // Check permission (only PM or Admin)
+        // Check permission (only PM or Admin can change status)
         User currentUser = em.find(User.class, currentUserId);
         if (currentUser == null ||
             (currentUser.getRole() != UserRole.PROJECT_MANAGER && currentUser.getRole() != UserRole.ADMIN)) {
@@ -205,11 +211,9 @@ public class IdeaService {
         IdeaStatus oldStatus = idea.getStatus();
         idea.setStatus(status);
 
-        if (progressPercentage != null) {
-            idea.setProgressPercentage(progressPercentage);
-        }
-
-        // Auto-set progress based on status
+        // Progress can only be set by the idea creator via checklist
+        // PM/Admin can only change status; progress updates automatically from checklist
+        // Exception: When status changes to COMPLETED or CONCEPT, auto-set progress
         if (status == IdeaStatus.COMPLETED) {
             idea.setProgressPercentage(100);
             // Award XP to author for completion
@@ -217,6 +221,7 @@ public class IdeaService {
         } else if (status == IdeaStatus.CONCEPT) {
             idea.setProgressPercentage(0);
         }
+        // Note: For IN_PROGRESS, progress is managed by the checklist system only
 
         em.merge(idea);
 

@@ -1,23 +1,41 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
   PaperAirplaneIcon,
   ChatBubbleLeftRightIcon,
   ArrowLeftIcon,
+  UserGroupIcon,
+  UserIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { messageService } from '../services/messageService';
+import { groupService } from '../services/groupService';
 import userService from '../services/userService';
-import { Message, Conversation, User } from '../types';
+import { Message, Conversation, User, IdeaGroup, GroupMessage } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { format, isToday, isYesterday } from 'date-fns';
 import toast from 'react-hot-toast';
 
+type ChatMode = 'direct' | 'group';
+
 export default function MessagesPage() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Mode state
+  const [activeTab, setActiveTab] = useState<ChatMode>('direct');
+
+  // Direct message state
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // Group chat state
+  const [groups, setGroups] = useState<IdeaGroup[]>([]);
+  const [groupMessages, setGroupMessages] = useState<GroupMessage[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<IdeaGroup | null>(null);
+
+  // Common state
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -27,22 +45,29 @@ export default function MessagesPage() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Check if user id is in URL params
+  // Check URL params for user or group
   useEffect(() => {
     const userId = searchParams.get('user');
-    if (userId) {
+    const groupId = searchParams.get('group');
+
+    if (groupId) {
+      setActiveTab('group');
+      loadGroupFromUrl(Number(groupId));
+    } else if (userId) {
+      setActiveTab('direct');
       loadConversationFromUrl(Number(userId));
     }
   }, [searchParams]);
 
   useEffect(() => {
     fetchConversations();
+    fetchGroups();
     fetchAllUsers();
   }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, groupMessages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,11 +79,24 @@ export default function MessagesPage() {
       const targetUser = users.find(u => u.id === userId);
       if (targetUser) {
         setSelectedUser(targetUser);
+        setSelectedGroup(null);
         setShowMobileList(false);
         await fetchMessages(userId);
       }
     } catch (error) {
       console.error('Failed to load conversation from URL:', error);
+    }
+  };
+
+  const loadGroupFromUrl = async (groupId: number) => {
+    try {
+      const group = await groupService.getGroup(groupId);
+      setSelectedGroup(group);
+      setSelectedUser(null);
+      setShowMobileList(false);
+      await fetchGroupMessages(groupId);
+    } catch (error) {
+      console.error('Failed to load group from URL:', error);
     }
   };
 
@@ -73,10 +111,18 @@ export default function MessagesPage() {
     }
   };
 
+  const fetchGroups = async () => {
+    try {
+      const data = await groupService.getUserGroups();
+      setGroups(data);
+    } catch (error) {
+      console.error('Failed to fetch groups:', error);
+    }
+  };
+
   const fetchAllUsers = async () => {
     try {
       const users = await userService.getAllUsers();
-      // Filter out current user
       setAllUsers(users.filter(u => u.id !== user?.id));
     } catch (error) {
       console.error('Failed to fetch users:', error);
@@ -87,9 +133,7 @@ export default function MessagesPage() {
     try {
       const data = await messageService.getConversation(userId);
       setMessages(data);
-      // Mark conversation as read
       await messageService.markConversationAsRead(userId);
-      // Update unread count in conversations list
       setConversations(prev =>
         prev.map(c =>
           c.otherUser.id === userId ? { ...c, unreadCount: 0 } : c
@@ -100,16 +144,41 @@ export default function MessagesPage() {
     }
   };
 
+  const fetchGroupMessages = async (groupId: number) => {
+    try {
+      const data = await groupService.getGroupMessages(groupId);
+      setGroupMessages(data);
+      await groupService.markAllAsRead(groupId);
+      setGroups(prev =>
+        prev.map(g =>
+          g.id === groupId ? { ...g, unreadCount: 0 } : g
+        )
+      );
+    } catch (error) {
+      console.error('Failed to fetch group messages:', error);
+    }
+  };
+
   const handleSelectConversation = async (otherUser: User) => {
     setSelectedUser(otherUser);
+    setSelectedGroup(null);
     setShowMobileList(false);
     setShowNewConversation(false);
     setSearchParams({ user: otherUser.id.toString() });
     await fetchMessages(otherUser.id);
   };
 
+  const handleSelectGroup = async (group: IdeaGroup) => {
+    setSelectedGroup(group);
+    setSelectedUser(null);
+    setShowMobileList(false);
+    setSearchParams({ group: group.id.toString() });
+    await fetchGroupMessages(group.id);
+  };
+
   const handleStartNewConversation = (targetUser: User) => {
     setSelectedUser(targetUser);
+    setSelectedGroup(null);
     setMessages([]);
     setShowNewConversation(false);
     setShowMobileList(false);
@@ -118,39 +187,57 @@ export default function MessagesPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedUser) return;
+    if (!newMessage.trim()) return;
 
     setSendingMessage(true);
     try {
-      const message = await messageService.sendMessage({
-        recipientId: selectedUser.id,
-        content: newMessage.trim(),
-      });
-      setMessages(prev => [...prev, message]);
-      setNewMessage('');
+      if (selectedGroup) {
+        // Send group message
+        const message = await groupService.sendGroupMessage(selectedGroup.id, newMessage.trim());
+        setGroupMessages(prev => [...prev, message]);
+        setNewMessage('');
 
-      // Update or add conversation in list
-      const existingConvIndex = conversations.findIndex(c => c.otherUser.id === selectedUser.id);
-      if (existingConvIndex >= 0) {
-        setConversations(prev => {
-          const updated = [...prev];
-          updated[existingConvIndex] = {
-            ...updated[existingConvIndex],
-            lastMessage: message,
-            lastMessageAt: message.createdAt,
-          };
+        // Update group's last message
+        setGroups(prev => {
+          const updated = prev.map(g =>
+            g.id === selectedGroup.id
+              ? { ...g, lastMessage: message, updatedAt: message.createdAt }
+              : g
+          );
           return updated.sort((a, b) =>
-            new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
           );
         });
-      } else {
-        // Add new conversation
-        setConversations(prev => [{
-          otherUser: selectedUser,
-          lastMessage: message,
-          unreadCount: 0,
-          lastMessageAt: message.createdAt,
-        }, ...prev]);
+      } else if (selectedUser) {
+        // Send direct message
+        const message = await messageService.sendMessage({
+          recipientId: selectedUser.id,
+          content: newMessage.trim(),
+        });
+        setMessages(prev => [...prev, message]);
+        setNewMessage('');
+
+        const existingConvIndex = conversations.findIndex(c => c.otherUser.id === selectedUser.id);
+        if (existingConvIndex >= 0) {
+          setConversations(prev => {
+            const updated = [...prev];
+            updated[existingConvIndex] = {
+              ...updated[existingConvIndex],
+              lastMessage: message,
+              lastMessageAt: message.createdAt,
+            };
+            return updated.sort((a, b) =>
+              new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+            );
+          });
+        } else {
+          setConversations(prev => [{
+            otherUser: selectedUser,
+            lastMessage: message,
+            unreadCount: 0,
+            lastMessageAt: message.createdAt,
+          }, ...prev]);
+        }
       }
     } catch (error) {
       toast.error('Failed to send message');
@@ -159,9 +246,24 @@ export default function MessagesPage() {
     }
   };
 
+  const handleLeaveGroup = async (groupId: number) => {
+    if (!confirm('Are you sure you want to leave this group?')) return;
+
+    try {
+      await groupService.leaveGroup(groupId);
+      setGroups(prev => prev.filter(g => g.id !== groupId));
+      setSelectedGroup(null);
+      setSearchParams({});
+      toast.success('Left group successfully');
+    } catch (error) {
+      toast.error('Failed to leave group');
+    }
+  };
+
   const handleBackToList = () => {
     setShowMobileList(true);
     setSelectedUser(null);
+    setSelectedGroup(null);
     setSearchParams({});
   };
 
@@ -212,59 +314,142 @@ export default function MessagesPage() {
       </div>
 
       <div className="flex-1 flex card overflow-hidden">
-        {/* Conversations List */}
+        {/* Conversations/Groups List */}
         <div className={`w-full md:w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col ${
           !showMobileList ? 'hidden md:flex' : 'flex'
         }`}>
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="font-semibold text-gray-900 dark:text-white">Conversations</h2>
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setActiveTab('direct')}
+              className={`flex-1 p-3 flex items-center justify-center gap-2 font-medium transition-colors ${
+                activeTab === 'direct'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              <UserIcon className="w-4 h-4" />
+              Direct
+            </button>
+            <button
+              onClick={() => setActiveTab('group')}
+              className={`flex-1 p-3 flex items-center justify-center gap-2 font-medium transition-colors ${
+                activeTab === 'group'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              <UserGroupIcon className="w-4 h-4" />
+              Groups
+              {groups.reduce((sum, g) => sum + g.unreadCount, 0) > 0 && (
+                <span className="bg-primary-600 text-white text-xs rounded-full px-1.5 py-0.5">
+                  {groups.reduce((sum, g) => sum + g.unreadCount, 0)}
+                </span>
+              )}
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {conversations.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No conversations yet</p>
-                <p className="text-sm mt-1">Start a new message to begin chatting</p>
-              </div>
+            {activeTab === 'direct' ? (
+              // Direct Conversations
+              conversations.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No conversations yet</p>
+                  <p className="text-sm mt-1">Start a new message to begin chatting</p>
+                </div>
+              ) : (
+                conversations.map((conv) => (
+                  <button
+                    key={conv.otherUser.id}
+                    onClick={() => handleSelectConversation(conv.otherUser)}
+                    className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left border-b border-gray-100 dark:border-gray-700 ${
+                      selectedUser?.id === conv.otherUser.id
+                        ? 'bg-primary-50 dark:bg-primary-900/20'
+                        : ''
+                    }`}
+                  >
+                    <div className="avatar-md flex-shrink-0">
+                      {conv.otherUser.firstName?.[0]}{conv.otherUser.lastName?.[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900 dark:text-white truncate">
+                          {conv.otherUser.firstName} {conv.otherUser.lastName}
+                        </span>
+                        {conv.lastMessageAt && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                            {formatConversationDate(conv.lastMessageAt)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                          {conv.lastMessage?.content}
+                        </p>
+                        {conv.unreadCount > 0 && (
+                          <span className="ml-2 bg-primary-600 text-white text-xs rounded-full px-2 py-0.5 flex-shrink-0">
+                            {conv.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )
             ) : (
-              conversations.map((conv) => (
-                <button
-                  key={conv.otherUser.id}
-                  onClick={() => handleSelectConversation(conv.otherUser)}
-                  className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left border-b border-gray-100 dark:border-gray-700 ${
-                    selectedUser?.id === conv.otherUser.id
-                      ? 'bg-primary-50 dark:bg-primary-900/20'
-                      : ''
-                  }`}
-                >
-                  <div className="avatar-md flex-shrink-0">
-                    {conv.otherUser.firstName?.[0]}{conv.otherUser.lastName?.[0]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 dark:text-white truncate">
-                        {conv.otherUser.firstName} {conv.otherUser.lastName}
-                      </span>
-                      {conv.lastMessageAt && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
-                          {formatConversationDate(conv.lastMessageAt)}
-                        </span>
-                      )}
+              // Group Chats
+              groups.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <UserGroupIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No group chats yet</p>
+                  <p className="text-sm mt-1">Join an idea group to start chatting</p>
+                  <Link to="/ideas" className="btn-primary mt-4 inline-block">
+                    Browse Ideas
+                  </Link>
+                </div>
+              ) : (
+                groups.map((group) => (
+                  <button
+                    key={group.id}
+                    onClick={() => handleSelectGroup(group)}
+                    className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left border-b border-gray-100 dark:border-gray-700 ${
+                      selectedGroup?.id === group.id
+                        ? 'bg-primary-50 dark:bg-primary-900/20'
+                        : ''
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center flex-shrink-0">
+                      <UserGroupIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                        {conv.lastMessage?.content}
-                      </p>
-                      {conv.unreadCount > 0 && (
-                        <span className="ml-2 bg-primary-600 text-white text-xs rounded-full px-2 py-0.5 flex-shrink-0">
-                          {conv.unreadCount}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900 dark:text-white truncate">
+                          {group.name}
                         </span>
-                      )}
+                        {group.lastMessage && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                            {formatConversationDate(group.lastMessage.createdAt)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                          {group.lastMessage
+                            ? `${group.lastMessage.sender.firstName}: ${group.lastMessage.content}`
+                            : `${group.memberCount} members`
+                          }
+                        </p>
+                        {group.unreadCount > 0 && (
+                          <span className="ml-2 bg-primary-600 text-white text-xs rounded-full px-2 py-0.5 flex-shrink-0">
+                            {group.unreadCount}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))
+                  </button>
+                ))
+              )
             )}
           </div>
         </div>
@@ -273,71 +458,153 @@ export default function MessagesPage() {
         <div className={`flex-1 flex flex-col ${
           showMobileList ? 'hidden md:flex' : 'flex'
         }`}>
-          {selectedUser ? (
+          {selectedUser || selectedGroup ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-                <button
-                  onClick={handleBackToList}
-                  className="md:hidden btn-icon"
-                >
-                  <ArrowLeftIcon className="w-5 h-5" />
-                </button>
-                <div className="avatar-md">
-                  {selectedUser.firstName?.[0]}{selectedUser.lastName?.[0]}
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleBackToList}
+                    className="md:hidden btn-icon"
+                  >
+                    <ArrowLeftIcon className="w-5 h-5" />
+                  </button>
+                  {selectedGroup ? (
+                    <>
+                      <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center">
+                        <UserGroupIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900 dark:text-white">
+                          {selectedGroup.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {selectedGroup.memberCount} members
+                        </p>
+                      </div>
+                    </>
+                  ) : selectedUser ? (
+                    <>
+                      <div className="avatar-md">
+                        {selectedUser.firstName?.[0]}{selectedUser.lastName?.[0]}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900 dark:text-white">
+                          {selectedUser.firstName} {selectedUser.lastName}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          @{selectedUser.username}
+                        </p>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white">
-                    {selectedUser.firstName} {selectedUser.lastName}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    @{selectedUser.username}
-                  </p>
-                </div>
+                {selectedGroup && selectedGroup.createdBy.id !== user?.id && (
+                  <button
+                    onClick={() => handleLeaveGroup(selectedGroup.id)}
+                    className="btn-icon text-gray-400 hover:text-error-500"
+                    title="Leave group"
+                  >
+                    <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                  </button>
+                )}
               </div>
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
-                    <div className="text-center">
-                      <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No messages yet</p>
-                      <p className="text-sm">Send a message to start the conversation</p>
+                {selectedGroup ? (
+                  // Group messages
+                  groupMessages.length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+                      <div className="text-center">
+                        <UserGroupIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No messages yet</p>
+                        <p className="text-sm">Be the first to say something!</p>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  messages.map((msg) => {
-                    const isSentByMe = msg.sender.id === user?.id;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
-                      >
+                  ) : (
+                    groupMessages.map((msg) => {
+                      const isSentByMe = msg.sender.id === user?.id;
+                      return (
                         <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                            isSentByMe
-                              ? 'bg-primary-600 text-white rounded-br-sm'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm'
-                          }`}
+                          key={msg.id}
+                          className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
                         >
-                          <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                          {msg.ideaTitle && (
+                          <div className={`flex gap-2 max-w-[70%] ${isSentByMe ? 'flex-row-reverse' : ''}`}>
+                            {!isSentByMe && (
+                              <div className="avatar-sm flex-shrink-0 mt-1">
+                                {msg.sender.firstName?.[0]}{msg.sender.lastName?.[0]}
+                              </div>
+                            )}
+                            <div>
+                              {!isSentByMe && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 ml-1">
+                                  {msg.sender.firstName} {msg.sender.lastName}
+                                </p>
+                              )}
+                              <div
+                                className={`rounded-2xl px-4 py-2 ${
+                                  isSentByMe
+                                    ? 'bg-primary-600 text-white rounded-br-sm'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm'
+                                }`}
+                              >
+                                <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                                <p className={`text-xs mt-1 ${
+                                  isSentByMe ? 'text-primary-200' : 'text-gray-500 dark:text-gray-400'
+                                }`}>
+                                  {formatMessageDate(msg.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )
+                ) : (
+                  // Direct messages
+                  messages.length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+                      <div className="text-center">
+                        <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No messages yet</p>
+                        <p className="text-sm">Send a message to start the conversation</p>
+                      </div>
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isSentByMe = msg.sender.id === user?.id;
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                              isSentByMe
+                                ? 'bg-primary-600 text-white rounded-br-sm'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                            {msg.ideaTitle && (
+                              <p className={`text-xs mt-1 ${
+                                isSentByMe ? 'text-primary-200' : 'text-gray-500 dark:text-gray-400'
+                              }`}>
+                                Re: {msg.ideaTitle}
+                              </p>
+                            )}
                             <p className={`text-xs mt-1 ${
                               isSentByMe ? 'text-primary-200' : 'text-gray-500 dark:text-gray-400'
                             }`}>
-                              Re: {msg.ideaTitle}
+                              {formatMessageDate(msg.createdAt)}
                             </p>
-                          )}
-                          <p className={`text-xs mt-1 ${
-                            isSentByMe ? 'text-primary-200' : 'text-gray-500 dark:text-gray-400'
-                          }`}>
-                            {formatMessageDate(msg.createdAt)}
-                          </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })
+                  )
                 )}
                 <div ref={messagesEndRef} />
               </div>
