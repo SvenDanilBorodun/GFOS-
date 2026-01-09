@@ -81,6 +81,10 @@ public class Idea {
     @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("ordinalPosition ASC")
+    private List<ChecklistItem> checklistItems = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -207,6 +211,10 @@ public class Idea {
 
     public List<Comment> getComments() {
         return comments;
+    }
+
+    public List<ChecklistItem> getChecklistItems() {
+        return checklistItems;
     }
 
     public void incrementLikeCount() {

@@ -14,6 +14,7 @@ import CreateIdeaPage from './pages/CreateIdeaPage';
 import SurveysPage from './pages/SurveysPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
+import MessagesPage from './pages/MessagesPage';
 
 // Protected Route Component
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
@@ -94,6 +95,7 @@ export default function App() {
         <Route path="ideas/:id" element={<IdeaDetailPage />} />
         <Route path="ideas/:id/edit" element={<CreateIdeaPage />} />
         <Route path="surveys" element={<SurveysPage />} />
+        <Route path="messages" element={<MessagesPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route
           path="admin/*"

@@ -15,10 +15,15 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 
 @ApplicationScoped
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @PersistenceContext(unitName = "IdeaBoardPU")
     private EntityManager em;
@@ -31,19 +36,26 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(AuthRequest request) {
+        logger.debug("Login attempt for username: {}", request.getUsername());
+
         User user = findByUsername(request.getUsername());
 
         if (user == null) {
+            logger.warn("Login failed: User not found - {}", request.getUsername());
             throw ApiException.unauthorized("Invalid username or password");
         }
 
         if (!user.getIsActive()) {
+            logger.warn("Login failed: Account deactivated - {}", request.getUsername());
             throw ApiException.unauthorized("Account is deactivated");
         }
 
         if (!passwordUtil.verifyPassword(request.getPassword(), user.getPasswordHash())) {
+            logger.warn("Login failed: Invalid password for user - {}", request.getUsername());
             throw ApiException.unauthorized("Invalid username or password");
         }
+
+        logger.info("Login successful for user: {} ({})", request.getUsername(), user.getRole());
 
         // Update last login
         user.setLastLogin(LocalDateTime.now());

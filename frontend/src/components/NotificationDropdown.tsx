@@ -8,6 +8,7 @@ import {
   ArrowPathIcon,
   TrophyIcon,
   ArrowTrendingUpIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import { dashboardService } from '../services/dashboardService';
@@ -25,6 +26,7 @@ const notificationIcons: Record<NotificationType, React.ComponentType<{ classNam
   BADGE_EARNED: TrophyIcon,
   LEVEL_UP: ArrowTrendingUpIcon,
   MENTION: ChatBubbleLeftIcon,
+  MESSAGE: EnvelopeIcon,
 };
 
 const notificationColors: Record<NotificationType, string> = {
@@ -35,6 +37,7 @@ const notificationColors: Record<NotificationType, string> = {
   BADGE_EARNED: 'text-amber-500 bg-amber-50 dark:bg-amber-900/20',
   LEVEL_UP: 'text-green-500 bg-green-50 dark:bg-green-900/20',
   MENTION: 'text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20',
+  MESSAGE: 'text-teal-500 bg-teal-50 dark:bg-teal-900/20',
 };
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {

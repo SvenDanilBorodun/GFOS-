@@ -7,7 +7,8 @@ import {
   IdeaFilter,
   Comment,
   CommentCreateRequest,
-  LikeStatus
+  LikeStatus,
+  ChecklistItem
 } from '../types';
 
 export const ideaService = {
@@ -126,5 +127,30 @@ export const ideaService = {
   async getPopularTags(limit: number = 20): Promise<string[]> {
     const response = await api.get<string[]>(`/ideas/tags/popular?limit=${limit}`);
     return response.data;
+  },
+
+  // Checklist
+  async getChecklist(ideaId: number): Promise<ChecklistItem[]> {
+    const response = await api.get<ChecklistItem[]>(`/ideas/${ideaId}/checklist`);
+    return response.data;
+  },
+
+  async createChecklistItem(ideaId: number, title: string): Promise<ChecklistItem> {
+    const response = await api.post<ChecklistItem>(`/ideas/${ideaId}/checklist`, { title });
+    return response.data;
+  },
+
+  async toggleChecklistItem(ideaId: number, itemId: number): Promise<ChecklistItem> {
+    const response = await api.patch<ChecklistItem>(`/ideas/${ideaId}/checklist/${itemId}/toggle`);
+    return response.data;
+  },
+
+  async updateChecklistItem(ideaId: number, itemId: number, title: string): Promise<ChecklistItem> {
+    const response = await api.put<ChecklistItem>(`/ideas/${ideaId}/checklist/${itemId}`, { title });
+    return response.data;
+  },
+
+  async deleteChecklistItem(ideaId: number, itemId: number): Promise<void> {
+    await api.delete(`/ideas/${ideaId}/checklist/${itemId}`);
   },
 };

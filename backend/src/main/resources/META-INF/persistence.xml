@@ -13,6 +13,7 @@
         <class>com.gfos.ideaboard.entity.Like</class>
         <class>com.gfos.ideaboard.entity.Comment</class>
         <class>com.gfos.ideaboard.entity.CommentReaction</class>
+        <class>com.gfos.ideaboard.entity.ChecklistItem</class>
         <class>com.gfos.ideaboard.entity.FileAttachment</class>
         <class>com.gfos.ideaboard.entity.Survey</class>
         <class>com.gfos.ideaboard.entity.SurveyOption</class>
@@ -21,6 +22,7 @@
         <class>com.gfos.ideaboard.entity.UserBadge</class>
         <class>com.gfos.ideaboard.entity.AuditLog</class>
         <class>com.gfos.ideaboard.entity.Notification</class>
+        <class>com.gfos.ideaboard.entity.Message</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 

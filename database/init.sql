@@ -2,6 +2,8 @@
 -- PostgreSQL 15+
 
 -- Drop existing tables if they exist (for clean reinstall)
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS checklist_items CASCADE;
 DROP TABLE IF EXISTS user_badges CASCADE;
 DROP TABLE IF EXISTS badges CASCADE;
 DROP TABLE IF EXISTS audit_logs CASCADE;
@@ -132,6 +134,22 @@ CREATE INDEX idx_comments_author ON comments(author_id);
 CREATE INDEX idx_comments_created_at ON comments(created_at DESC);
 
 -- =====================================================
+-- CHECKLIST ITEMS TABLE
+-- =====================================================
+CREATE TABLE checklist_items (
+    id BIGSERIAL PRIMARY KEY,
+    idea_id BIGINT NOT NULL REFERENCES ideas(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    ordinal_position INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_checklist_items_idea ON checklist_items(idea_id);
+CREATE INDEX idx_checklist_items_position ON checklist_items(idea_id, ordinal_position);
+
+-- =====================================================
 -- COMMENT REACTIONS TABLE
 -- =====================================================
 CREATE TABLE comment_reactions (
@@ -250,7 +268,7 @@ CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
 CREATE TABLE notifications (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('LIKE', 'COMMENT', 'REACTION', 'STATUS_CHANGE', 'BADGE_EARNED', 'LEVEL_UP', 'MENTION')),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('LIKE', 'COMMENT', 'REACTION', 'STATUS_CHANGE', 'BADGE_EARNED', 'LEVEL_UP', 'MENTION', 'MESSAGE')),
     title VARCHAR(200) NOT NULL,
     message VARCHAR(500) NOT NULL,
     link VARCHAR(500),
@@ -264,6 +282,27 @@ CREATE TABLE notifications (
 CREATE INDEX idx_notifications_user ON notifications(user_id);
 CREATE INDEX idx_notifications_unread ON notifications(user_id, is_read) WHERE is_read = FALSE;
 CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
+
+-- =====================================================
+-- MESSAGES TABLE (User-to-User Messaging)
+-- =====================================================
+CREATE TABLE messages (
+    id BIGSERIAL PRIMARY KEY,
+    sender_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    idea_id BIGINT REFERENCES ideas(id) ON DELETE SET NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_different_users CHECK (sender_id != recipient_id)
+);
+
+CREATE INDEX idx_messages_sender ON messages(sender_id);
+CREATE INDEX idx_messages_recipient ON messages(recipient_id);
+CREATE INDEX idx_messages_idea ON messages(idea_id);
+CREATE INDEX idx_messages_conversation ON messages(LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id));
+CREATE INDEX idx_messages_unread ON messages(recipient_id, is_read) WHERE is_read = FALSE;
+CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
 
 -- =====================================================
 -- FUNCTIONS AND TRIGGERS
@@ -289,6 +328,10 @@ CREATE TRIGGER update_ideas_updated_at
 
 CREATE TRIGGER update_comments_updated_at
     BEFORE UPDATE ON comments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_checklist_items_updated_at
+    BEFORE UPDATE ON checklist_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function to update idea like count
@@ -387,14 +430,16 @@ INSERT INTO badges (name, display_name, description, icon, criteria, xp_reward) 
     ('early_bird', 'Early Bird', 'One of the first 100 users', 'schedule', 'Register in first 100 users', 50);
 
 -- Insert admin user (password: admin123)
+-- Hash generated with BCrypt cost factor 12, verified to match PasswordUtil implementation
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, xp_points, level) VALUES
-    ('admin', 'admin@gfos.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.G.xZ7VQq0CkX8G', 'System', 'Administrator', 'ADMIN', 0, 1);
+    ('admin', 'admin@gfos.com', '$2a$12$MMbkxZQfQePt3aApd8bCsuSv0U7pT54rR708XyXXNq9gcnfjrsTBy', 'System', 'Administrator', 'ADMIN', 0, 1);
 
 -- Insert test users (password: password123)
+-- Hash generated with BCrypt cost factor 12, verified to match PasswordUtil implementation
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, xp_points, level) VALUES
-    ('jsmith', 'john.smith@gfos.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'John', 'Smith', 'EMPLOYEE', 150, 2),
-    ('mwilson', 'mary.wilson@gfos.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Mary', 'Wilson', 'PROJECT_MANAGER', 350, 3),
-    ('tjohnson', 'tom.johnson@gfos.com', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Tom', 'Johnson', 'EMPLOYEE', 75, 1);
+    ('jsmith', 'john.smith@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'John', 'Smith', 'EMPLOYEE', 150, 2),
+    ('mwilson', 'mary.wilson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Mary', 'Wilson', 'PROJECT_MANAGER', 350, 3),
+    ('tjohnson', 'tom.johnson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Tom', 'Johnson', 'EMPLOYEE', 75, 1);
 
 -- Insert sample ideas
 INSERT INTO ideas (title, description, category, status, progress_percentage, author_id) VALUES
@@ -448,3 +493,11 @@ INSERT INTO user_badges (user_id, badge_id) VALUES
     (2, 1), -- John: First Idea
     (3, 1), -- Mary: First Idea
     (4, 1); -- Tom: First Idea
+
+-- Insert sample messages
+INSERT INTO messages (sender_id, recipient_id, idea_id, content, is_read) VALUES
+    (3, 2, 1, 'Hi John! I love your AI-Powered Customer Support idea. Do you have any specific chatbot frameworks in mind?', true),
+    (2, 3, 1, 'Thanks Mary! I was thinking of using either Rasa or Dialogflow. Both have good NLP capabilities.', true),
+    (3, 2, 1, 'Great choices! I have experience with Rasa from a previous project. Happy to share insights if you need.', false),
+    (4, 2, NULL, 'Hey John, I saw your idea about the mobile app for field workers. Would love to collaborate on that!', false),
+    (2, 4, 4, 'That would be awesome Tom! Let''s schedule a meeting to discuss the requirements.', true);

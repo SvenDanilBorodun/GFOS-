@@ -8,10 +8,15 @@ import {
   ArrowLeftIcon,
   PaperClipIcon,
   ArrowDownTrayIcon,
+  CheckCircleIcon,
+  PlusIcon,
+  ClipboardDocumentListIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
+import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { ideaService } from '../services/ideaService';
-import { Idea, Comment, IdeaStatus } from '../types';
+import { Idea, Comment, IdeaStatus, ChecklistItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -36,6 +41,9 @@ export default function IdeaDetailPage() {
   const [newComment, setNewComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const [newChecklistItem, setNewChecklistItem] = useState('');
+  const [addingChecklistItem, setAddingChecklistItem] = useState(false);
 
   const canManageStatus = user?.role === 'PROJECT_MANAGER' || user?.role === 'ADMIN';
   const canDelete = user?.role === 'ADMIN';
@@ -52,6 +60,7 @@ export default function IdeaDetailPage() {
     try {
       const data = await ideaService.getIdea(Number(id));
       setIdea(data);
+      setChecklistItems(data.checklistItems || []);
     } catch (error) {
       console.error('Failed to fetch idea:', error);
       toast.error('Failed to load idea');
@@ -201,6 +210,61 @@ export default function IdeaDetailPage() {
     }
   };
 
+  // Checklist handlers
+  const handleAddChecklistItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChecklistItem.trim() || newChecklistItem.length > 200) return;
+
+    setAddingChecklistItem(true);
+    try {
+      const item = await ideaService.createChecklistItem(Number(id), newChecklistItem.trim());
+      setChecklistItems((prev) => [...prev, item]);
+      setNewChecklistItem('');
+      // Update progress in idea
+      const updatedIdea = await ideaService.getIdea(Number(id));
+      setIdea(updatedIdea);
+      toast.success('Checklist item added');
+    } catch (error) {
+      toast.error('Failed to add checklist item');
+    } finally {
+      setAddingChecklistItem(false);
+    }
+  };
+
+  const handleToggleChecklistItem = async (itemId: number) => {
+    try {
+      const updatedItem = await ideaService.toggleChecklistItem(Number(id), itemId);
+      setChecklistItems((prev) =>
+        prev.map((item) => (item.id === itemId ? updatedItem : item))
+      );
+      // Update progress in idea
+      const updatedIdea = await ideaService.getIdea(Number(id));
+      setIdea(updatedIdea);
+    } catch (error) {
+      toast.error('Failed to update checklist item');
+    }
+  };
+
+  const handleDeleteChecklistItem = async (itemId: number) => {
+    if (!confirm('Delete this checklist item?')) return;
+
+    try {
+      await ideaService.deleteChecklistItem(Number(id), itemId);
+      setChecklistItems((prev) => prev.filter((item) => item.id !== itemId));
+      // Update progress in idea
+      const updatedIdea = await ideaService.getIdea(Number(id));
+      setIdea(updatedIdea);
+      toast.success('Checklist item deleted');
+    } catch (error) {
+      toast.error('Failed to delete checklist item');
+    }
+  };
+
+  // Calculate checklist progress
+  const checklistProgress = checklistItems.length > 0
+    ? Math.round((checklistItems.filter((item) => item.isCompleted).length / checklistItems.length) * 100)
+    : 0;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -280,18 +344,29 @@ export default function IdeaDetailPage() {
           </h1>
 
           {/* Author info */}
-          <div className="flex items-center gap-3">
-            <div className="avatar-md">
-              {idea.author.firstName?.[0]}{idea.author.lastName?.[0]}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="avatar-md">
+                {idea.author.firstName?.[0]}{idea.author.lastName?.[0]}
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {idea.author.firstName} {idea.author.lastName}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {format(new Date(idea.createdAt), 'MMMM d, yyyy')}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">
-                {idea.author.firstName} {idea.author.lastName}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {format(new Date(idea.createdAt), 'MMMM d, yyyy')}
-              </p>
-            </div>
+            {!isAuthor && (
+              <Link
+                to={`/messages?user=${idea.author.id}`}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <EnvelopeIcon className="w-4 h-4" />
+                Message Creator
+              </Link>
+            )}
           </div>
         </div>
 
@@ -309,6 +384,118 @@ export default function IdeaDetailPage() {
               </span>
             ))}
           </div>
+        </div>
+
+        {/* Checklist Section */}
+        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+              <ClipboardDocumentListIcon className="w-5 h-5" />
+              Checklist
+              {checklistItems.length > 0 && (
+                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  ({checklistItems.filter((item) => item.isCompleted).length}/{checklistItems.length})
+                </span>
+              )}
+            </h3>
+            {checklistItems.length > 0 && (
+              <span className="text-sm font-medium text-primary-600">{checklistProgress}%</span>
+            )}
+          </div>
+
+          {/* Progress bar for checklist */}
+          {checklistItems.length > 0 && (
+            <div className="progress-bar h-2 mb-4">
+              <div
+                className="progress-bar-fill bg-primary-500 transition-all duration-300"
+                style={{ width: `${checklistProgress}%` }}
+              />
+            </div>
+          )}
+
+          {/* Checklist items */}
+          <div className="space-y-2">
+            {checklistItems.length === 0 && !isAuthor && (
+              <p className="text-gray-500 dark:text-gray-400 text-sm">No checklist items yet.</p>
+            )}
+            {checklistItems.map((item) => (
+              <div
+                key={item.id}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                  item.isCompleted
+                    ? 'bg-success-50 dark:bg-success-900/20'
+                    : 'bg-gray-50 dark:bg-gray-700/50'
+                }`}
+              >
+                {isAuthor ? (
+                  <button
+                    onClick={() => handleToggleChecklistItem(item.id)}
+                    className="flex-shrink-0 focus:outline-none"
+                    title="Toggle completion"
+                  >
+                    {item.isCompleted ? (
+                      <CheckCircleSolidIcon className="w-6 h-6 text-success-500" />
+                    ) : (
+                      <CheckCircleIcon className="w-6 h-6 text-gray-400 hover:text-primary-500" />
+                    )}
+                  </button>
+                ) : (
+                  <div className="flex-shrink-0">
+                    {item.isCompleted ? (
+                      <CheckCircleSolidIcon className="w-6 h-6 text-success-500" />
+                    ) : (
+                      <CheckCircleIcon className="w-6 h-6 text-gray-400" />
+                    )}
+                  </div>
+                )}
+                <span
+                  className={`flex-1 ${
+                    item.isCompleted
+                      ? 'text-gray-500 dark:text-gray-400 line-through'
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                >
+                  {item.title}
+                </span>
+                {isAuthor && (
+                  <button
+                    onClick={() => handleDeleteChecklistItem(item.id)}
+                    className="btn-icon text-gray-400 hover:text-error-500 flex-shrink-0"
+                    title="Delete item"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Add new checklist item (only for author) */}
+          {isAuthor && (
+            <form onSubmit={handleAddChecklistItem} className="mt-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newChecklistItem}
+                  onChange={(e) => setNewChecklistItem(e.target.value)}
+                  placeholder="Add a checklist item..."
+                  maxLength={200}
+                  className="input flex-1"
+                />
+                <button
+                  type="submit"
+                  disabled={!newChecklistItem.trim() || addingChecklistItem}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  {addingChecklistItem ? 'Adding...' : 'Add'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Only you can check off items on this checklist.
+              </p>
+            </form>
+          )}
         </div>
 
         {/* Progress (for in-progress ideas) */}

@@ -1,5 +1,6 @@
 package com.gfos.ideaboard.resource;
 
+import com.gfos.ideaboard.dto.ChecklistItemDTO;
 import com.gfos.ideaboard.dto.CommentDTO;
 import com.gfos.ideaboard.dto.FileAttachmentDTO;
 import com.gfos.ideaboard.dto.IdeaDTO;
@@ -7,6 +8,7 @@ import com.gfos.ideaboard.entity.FileAttachment;
 import com.gfos.ideaboard.entity.IdeaStatus;
 import com.gfos.ideaboard.exception.ApiException;
 import com.gfos.ideaboard.security.Secured;
+import com.gfos.ideaboard.service.ChecklistService;
 import com.gfos.ideaboard.service.CommentService;
 import com.gfos.ideaboard.service.FileService;
 import com.gfos.ideaboard.service.IdeaService;
@@ -41,6 +43,9 @@ public class IdeaResource {
 
     @Inject
     private FileService fileService;
+
+    @Inject
+    private ChecklistService checklistService;
 
     @GET
     public Response getIdeas(
@@ -242,6 +247,58 @@ public class IdeaResource {
             @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         fileService.deleteFile(id, fileId, userId);
+        return Response.noContent().build();
+    }
+
+    // Checklist endpoints
+    @GET
+    @Path("/{id}/checklist")
+    public Response getChecklist(@PathParam("id") Long id) {
+        List<ChecklistItemDTO> items = checklistService.getChecklistByIdea(id);
+        return Response.ok(items).build();
+    }
+
+    @POST
+    @Path("/{id}/checklist")
+    public Response createChecklistItem(@PathParam("id") Long id, Map<String, String> body,
+                                        @Context ContainerRequestContext requestContext) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        String title = body.get("title");
+
+        if (title == null || title.trim().isEmpty()) {
+            throw ApiException.badRequest("Title is required");
+        }
+
+        ChecklistItemDTO item = checklistService.createChecklistItem(id, title, userId);
+        return Response.status(Response.Status.CREATED).entity(item).build();
+    }
+
+    @PATCH
+    @Path("/{id}/checklist/{itemId}/toggle")
+    public Response toggleChecklistItem(@PathParam("id") Long id, @PathParam("itemId") Long itemId,
+                                        @Context ContainerRequestContext requestContext) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        ChecklistItemDTO item = checklistService.toggleChecklistItem(id, itemId, userId);
+        return Response.ok(item).build();
+    }
+
+    @PUT
+    @Path("/{id}/checklist/{itemId}")
+    public Response updateChecklistItem(@PathParam("id") Long id, @PathParam("itemId") Long itemId,
+                                        Map<String, String> body,
+                                        @Context ContainerRequestContext requestContext) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        String title = body.get("title");
+        ChecklistItemDTO item = checklistService.updateChecklistItem(id, itemId, title, userId);
+        return Response.ok(item).build();
+    }
+
+    @DELETE
+    @Path("/{id}/checklist/{itemId}")
+    public Response deleteChecklistItem(@PathParam("id") Long id, @PathParam("itemId") Long itemId,
+                                        @Context ContainerRequestContext requestContext) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        checklistService.deleteChecklistItem(id, itemId, userId);
         return Response.noContent().build();
     }
 

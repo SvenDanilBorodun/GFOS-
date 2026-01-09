@@ -146,6 +146,43 @@ npm run dev
 
 The frontend will be available at: `http://localhost:5173`
 
+### 5. Verify Your Installation
+
+After setup, verify everything is working correctly:
+
+```powershell
+# Run the verification script
+.\verify-system.ps1
+
+# For quick checks only (skips full tests)
+.\verify-system.ps1 -Quick
+```
+
+This will check:
+- ✓ Database connectivity and seed data
+- ✓ User authentication works correctly
+- ✓ GlassFish server is running
+- ✓ Backend API is accessible
+- ✓ Frontend is running
+- ✓ All integration tests pass
+
+**Important**: Always run verification after database initialization or changes!
+
+### Alternative: One-Command Startup
+
+Use the automated startup script that handles everything:
+
+```powershell
+# Full startup (database, backend, frontend)
+.\start-project.ps1
+
+# Options:
+.\start-project.ps1 -SkipChecks        # Skip dependency checks
+.\start-project.ps1 -SkipBuild         # Skip Maven build
+.\start-project.ps1 -FrontendOnly      # Start only frontend
+.\start-project.ps1 -BackendOnly       # Start only backend + database
+```
+
 ## Default Credentials
 
 After running the database init.sql, these test accounts are available:
@@ -337,6 +374,57 @@ rm -rf .vite
 
 ### CORS Issues
 The backend is configured to allow CORS from `http://localhost:5173`. If you change the frontend port, update `CorsFilter.java`.
+
+## Development Best Practices
+
+### ⚠️ Important: Preventing Common Issues
+
+To avoid issues like authentication failures, database errors, and deployment problems:
+
+1. **Always validate after database changes:**
+   ```bash
+   cd backend
+   mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
+   ```
+
+2. **Run tests before committing:**
+   ```bash
+   mvn test
+   ```
+
+3. **Use the verification script regularly:**
+   ```powershell
+   .\verify-system.ps1
+   ```
+
+4. **Check logs when troubleshooting:**
+   ```bash
+   tail -f glassfish7/glassfish/domains/domain1/logs/server.log
+   ```
+
+### Development Guide
+
+**📖 Read the full [DEVELOPMENT-GUIDE.md](DEVELOPMENT-GUIDE.md)** for comprehensive information on:
+
+- Database management and validation
+- Testing strategies and integration tests
+- Development workflow best practices
+- Error handling and logging
+- Troubleshooting common issues
+- CI/CD recommendations
+
+**Key utilities available:**
+
+- `ValidateDatabase` - Verify database integrity and authentication
+- `PasswordHashGenerator` - Generate correct BCrypt password hashes
+- `FixPasswordHashes` - Fix incorrect password hashes in database
+- `AuthenticationIntegrationTest` - Test authentication system
+
+**Before each deployment, ensure:**
+- ✅ All tests pass: `mvn test`
+- ✅ Database validation passes: `mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"`
+- ✅ System verification passes: `.\verify-system.ps1`
+- ✅ Manual smoke test (login, create idea, etc.)
 
 ## License
 

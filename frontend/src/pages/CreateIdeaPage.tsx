@@ -1,7 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
-import { XMarkIcon, PaperClipIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import {
+  XMarkIcon,
+  PaperClipIcon,
+  ArrowLeftIcon,
+  DocumentIcon,
+  PhotoIcon,
+  DocumentTextIcon,
+  TableCellsIcon,
+  CloudArrowUpIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon
+} from '@heroicons/react/24/outline';
 import { ideaService } from '../services/ideaService';
 import { Idea } from '../types';
 import toast from 'react-hot-toast';
@@ -19,6 +30,30 @@ const CATEGORIES = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+// File type configurations
+const FILE_TYPE_CONFIG: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; label: string }> = {
+  'image/jpeg': { icon: PhotoIcon, color: 'text-blue-500', label: 'Image' },
+  'image/png': { icon: PhotoIcon, color: 'text-blue-500', label: 'Image' },
+  'image/gif': { icon: PhotoIcon, color: 'text-blue-500', label: 'Image' },
+  'image/webp': { icon: PhotoIcon, color: 'text-blue-500', label: 'Image' },
+  'application/pdf': { icon: DocumentTextIcon, color: 'text-red-500', label: 'PDF' },
+  'application/msword': { icon: DocumentIcon, color: 'text-blue-600', label: 'Word' },
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { icon: DocumentIcon, color: 'text-blue-600', label: 'Word' },
+  'application/vnd.ms-excel': { icon: TableCellsIcon, color: 'text-green-600', label: 'Excel' },
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': { icon: TableCellsIcon, color: 'text-green-600', label: 'Excel' },
+  'text/plain': { icon: DocumentTextIcon, color: 'text-gray-500', label: 'Text' },
+  'text/csv': { icon: TableCellsIcon, color: 'text-green-500', label: 'CSV' },
+};
+
+interface FileWithPreview extends File {
+  preview?: string;
+}
+
+interface UploadStatus {
+  status: 'pending' | 'uploading' | 'success' | 'error';
+  error?: string;
+}
+
 export default function CreateIdeaPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,9 +68,11 @@ export default function CreateIdeaPage() {
     tags: [] as string[],
   });
   const [tagInput, setTagInput] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
-  const [existingFiles, setExistingFiles] = useState<{ id: number; name: string }[]>([]);
+  const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [uploadStatuses, setUploadStatuses] = useState<Map<string, UploadStatus>>(new Map());
+  const [existingFiles, setExistingFiles] = useState<{ id: number; name: string; mimeType?: string }[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -53,7 +90,7 @@ export default function CreateIdeaPage() {
         tags: idea.tags,
       });
       setExistingFiles(
-        idea.attachments.map((a) => ({ id: a.id, name: a.originalName }))
+        idea.attachments.map((a) => ({ id: a.id, name: a.originalName, mimeType: a.mimeType }))
       );
     } catch (error) {
       toast.error('Failed to load idea');
@@ -63,24 +100,52 @@ export default function CreateIdeaPage() {
     }
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      const validFiles = acceptedFiles.filter((file) => {
-        if (file.size > MAX_FILE_SIZE) {
-          toast.error(`${file.name} is too large (max 10MB)`);
-          return false;
-        }
-        return true;
+  // Clean up previews when component unmounts
+  useEffect(() => {
+    return () => {
+      files.forEach(file => {
+        if (file.preview) URL.revokeObjectURL(file.preview);
       });
-      setFiles((prev) => [...prev, ...validFiles]);
-    },
+    };
+  }, [files]);
+
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
+    // Handle rejected files
+    rejectedFiles.forEach(({ file, errors }) => {
+      const errorMessages = errors.map((e: any) => {
+        if (e.code === 'file-too-large') return 'File is too large (max 10MB)';
+        if (e.code === 'file-invalid-type') return 'File type not supported';
+        return e.message;
+      }).join(', ');
+      toast.error(`${file.name}: ${errorMessages}`);
+    });
+
+    // Process accepted files with previews
+    const filesWithPreviews = acceptedFiles.map(file => {
+      const fileWithPreview = file as FileWithPreview;
+      if (file.type.startsWith('image/')) {
+        fileWithPreview.preview = URL.createObjectURL(file);
+      }
+      return fileWithPreview;
+    });
+
+    setFiles(prev => [...prev, ...filesWithPreviews]);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
+    onDrop,
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
       'application/pdf': ['.pdf'],
       'application/msword': ['.doc'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'text/plain': ['.txt'],
+      'text/csv': ['.csv'],
     },
     maxSize: MAX_FILE_SIZE,
+    multiple: true,
   });
 
   const validate = () => {
@@ -118,9 +183,50 @@ export default function CreateIdeaPage() {
         idea = await ideaService.createIdea(formData);
       }
 
-      // Upload new files
-      for (const file of files) {
-        await ideaService.uploadFile(idea.id, file);
+      // Upload new files with progress tracking
+      if (files.length > 0) {
+        setIsUploading(true);
+        const newStatuses = new Map<string, UploadStatus>();
+        files.forEach(file => newStatuses.set(file.name, { status: 'pending' }));
+        setUploadStatuses(newStatuses);
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const file of files) {
+          setUploadStatuses(prev => {
+            const updated = new Map(prev);
+            updated.set(file.name, { status: 'uploading' });
+            return updated;
+          });
+
+          try {
+            await ideaService.uploadFile(idea.id, file);
+            setUploadStatuses(prev => {
+              const updated = new Map(prev);
+              updated.set(file.name, { status: 'success' });
+              return updated;
+            });
+            successCount++;
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+            setUploadStatuses(prev => {
+              const updated = new Map(prev);
+              updated.set(file.name, { status: 'error', error: errorMessage });
+              return updated;
+            });
+            errorCount++;
+          }
+        }
+
+        setIsUploading(false);
+
+        if (errorCount > 0) {
+          toast.error(`${errorCount} file(s) failed to upload`);
+        }
+        if (successCount > 0) {
+          toast.success(`${successCount} file(s) uploaded successfully`);
+        }
       }
 
       toast.success(isEditing ? 'Idea updated!' : 'Idea submitted!');
@@ -130,6 +236,7 @@ export default function CreateIdeaPage() {
       toast.error(message);
     } finally {
       setLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -162,7 +269,30 @@ export default function CreateIdeaPage() {
   };
 
   const handleRemoveFile = (index: number) => {
+    const fileToRemove = files[index];
+    if (fileToRemove.preview) {
+      URL.revokeObjectURL(fileToRemove.preview);
+    }
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    setUploadStatuses(prev => {
+      const updated = new Map(prev);
+      updated.delete(fileToRemove.name);
+      return updated;
+    });
+  };
+
+  const getFileIcon = (mimeType?: string) => {
+    if (!mimeType) return { Icon: PaperClipIcon, color: 'text-gray-400' };
+    const config = FILE_TYPE_CONFIG[mimeType];
+    if (config) return { Icon: config.icon, color: config.color };
+    if (mimeType.startsWith('image/')) return { Icon: PhotoIcon, color: 'text-blue-500' };
+    return { Icon: DocumentIcon, color: 'text-gray-400' };
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   const handleRemoveExistingFile = async (fileId: number) => {
@@ -301,78 +431,180 @@ export default function CreateIdeaPage() {
         {/* File Upload */}
         <div className="form-group">
           <label className="label">Attachments</label>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            Add documents, images, or spreadsheets to support your idea
+          </p>
 
           {/* Existing files */}
           {existingFiles.length > 0 && (
-            <div className="space-y-2 mb-3">
-              {existingFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
-                >
-                  <div className="flex items-center gap-2">
-                    <PaperClipIcon className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveExistingFile(file.id)}
-                    className="text-gray-400 hover:text-error-500"
+            <div className="space-y-2 mb-4">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Current Attachments
+              </p>
+              {existingFiles.map((file) => {
+                const { Icon, color } = getFileIcon(file.mimeType);
+                return (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
                   >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 ${color}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                        {file.name}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExistingFile(file.id)}
+                      className="p-1 text-gray-400 hover:text-error-500 hover:bg-error-50 dark:hover:bg-error-900/20 rounded transition-colors"
+                      title="Remove file"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
           {/* New files */}
           {files.length > 0 && (
-            <div className="space-y-2 mb-3">
-              {files.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
-                >
-                  <div className="flex items-center gap-2">
-                    <PaperClipIcon className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
-                    <span className="text-xs text-gray-500">
-                      ({(file.size / 1024).toFixed(1)} KB)
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFile(index)}
-                    className="text-gray-400 hover:text-error-500"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
+            <div className="space-y-2 mb-4">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Files to Upload ({files.length})
+              </p>
+              <div className="grid gap-2">
+                {files.map((file, index) => {
+                  const { Icon, color } = getFileIcon(file.type);
+                  const uploadStatus = uploadStatuses.get(file.name);
+                  const isImage = file.type.startsWith('image/');
+
+                  return (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all
+                        ${uploadStatus?.status === 'error'
+                          ? 'bg-error-50 dark:bg-error-900/20 border-error-300 dark:border-error-700'
+                          : uploadStatus?.status === 'success'
+                          ? 'bg-success-50 dark:bg-success-900/20 border-success-300 dark:border-success-700'
+                          : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
+                        }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Image preview or file icon */}
+                        {isImage && file.preview ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+                            <img
+                              src={file.preview}
+                              alt={file.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 flex-shrink-0 ${color}`}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {formatFileSize(file.size)}
+                            {uploadStatus?.error && (
+                              <span className="text-error-600 dark:text-error-400 ml-2">
+                                - {uploadStatus.error}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Status indicators */}
+                      <div className="flex items-center gap-2 ml-2">
+                        {uploadStatus?.status === 'uploading' && (
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-500 border-t-transparent" />
+                        )}
+                        {uploadStatus?.status === 'success' && (
+                          <CheckCircleIcon className="w-5 h-5 text-success-500" />
+                        )}
+                        {uploadStatus?.status === 'error' && (
+                          <ExclamationCircleIcon className="w-5 h-5 text-error-500" />
+                        )}
+                        {(!uploadStatus || uploadStatus.status === 'pending') && !isUploading && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(index)}
+                            className="p-1 text-gray-400 hover:text-error-500 hover:bg-error-50 dark:hover:bg-error-900/20 rounded transition-colors"
+                            title="Remove file"
+                          >
+                            <XMarkIcon className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
           {/* Dropzone */}
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-                       ${
-                         isDragActive
-                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                           : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
-                       }`}
+            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all
+              ${isDragReject
+                ? 'border-error-500 bg-error-50 dark:bg-error-900/20'
+                : isDragActive
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 scale-[1.02]'
+                : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+              }`}
           >
             <input {...getInputProps()} />
-            <PaperClipIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600 dark:text-gray-400">
-              {isDragActive
-                ? 'Drop files here...'
-                : 'Drag & drop files here, or click to select'}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Supports images, PDF, Word (max 10MB each)
-            </p>
+            <div className="flex flex-col items-center">
+              <div className={`p-3 rounded-full mb-3 transition-colors
+                ${isDragActive
+                  ? 'bg-primary-100 dark:bg-primary-900/50'
+                  : 'bg-gray-100 dark:bg-gray-800'
+                }`}>
+                <CloudArrowUpIcon className={`w-8 h-8 transition-colors
+                  ${isDragActive
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-gray-400'
+                  }`}
+                />
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 font-medium">
+                {isDragReject
+                  ? 'File type not supported'
+                  : isDragActive
+                  ? 'Drop files here...'
+                  : 'Drag & drop files here'}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                or <span className="text-primary-600 dark:text-primary-400 font-medium">browse</span> to select
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                  <PhotoIcon className="w-3 h-3 mr-1" /> Images
+                </span>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                  <DocumentTextIcon className="w-3 h-3 mr-1" /> PDF
+                </span>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                  <DocumentIcon className="w-3 h-3 mr-1" /> Word
+                </span>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                  <TableCellsIcon className="w-3 h-3 mr-1" /> Excel
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-3">
+                Max 10MB per file
+              </p>
+            </div>
           </div>
         </div>
 
@@ -382,16 +614,20 @@ export default function CreateIdeaPage() {
             type="button"
             onClick={() => navigate(-1)}
             className="btn-secondary"
+            disabled={loading || isUploading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={loading}
-            className="btn-primary"
+            disabled={loading || isUploading}
+            className="btn-primary min-w-[140px]"
           >
-            {loading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white" />
+            {loading || isUploading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                <span>{isUploading ? 'Uploading...' : 'Saving...'}</span>
+              </div>
             ) : isEditing ? (
               'Update Idea'
             ) : (

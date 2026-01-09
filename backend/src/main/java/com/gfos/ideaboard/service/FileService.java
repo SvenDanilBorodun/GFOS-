@@ -3,6 +3,7 @@ package com.gfos.ideaboard.service;
 import com.gfos.ideaboard.dto.FileAttachmentDTO;
 import com.gfos.ideaboard.entity.FileAttachment;
 import com.gfos.ideaboard.entity.Idea;
+import com.gfos.ideaboard.entity.User;
 import com.gfos.ideaboard.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -42,6 +43,11 @@ public class FileService {
             throw ApiException.notFound("Idea not found");
         }
 
+        User uploader = em.find(User.class, uploaderId);
+        if (uploader == null) {
+            throw ApiException.notFound("User not found");
+        }
+
         // Validate file size
         if (fileData.length > MAX_FILE_SIZE) {
             throw ApiException.badRequest("File size exceeds maximum allowed (10MB)");
@@ -79,6 +85,8 @@ public class FileService {
         attachment.setOriginalName(originalFilename);
         attachment.setMimeType(mimeType);
         attachment.setFileSize((long) fileData.length);
+        attachment.setFilePath(filePath.toString());
+        attachment.setUploadedBy(uploader);
 
         em.persist(attachment);
 

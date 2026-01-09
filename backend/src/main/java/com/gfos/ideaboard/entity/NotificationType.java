@@ -7,5 +7,6 @@ public enum NotificationType {
     STATUS_CHANGE,
     BADGE_EARNED,
     LEVEL_UP,
-    MENTION
+    MENTION,
+    MESSAGE
 }

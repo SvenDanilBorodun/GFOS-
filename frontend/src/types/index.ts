@@ -46,6 +46,18 @@ export interface Idea {
   isFeatured: boolean;
   isLikedByCurrentUser?: boolean;
   attachments: FileAttachment[];
+  checklistItems: ChecklistItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Checklist types
+export interface ChecklistItem {
+  id: number;
+  ideaId: number;
+  title: string;
+  isCompleted: boolean;
+  ordinalPosition: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -165,7 +177,8 @@ export type NotificationType =
   | 'STATUS_CHANGE'
   | 'BADGE_EARNED'
   | 'LEVEL_UP'
-  | 'MENTION';
+  | 'MENTION'
+  | 'MESSAGE';
 
 export interface Notification {
   id: number;
@@ -176,6 +189,31 @@ export interface Notification {
   isRead: boolean;
   sender?: User;
   createdAt: string;
+}
+
+// Message types
+export interface Message {
+  id: number;
+  sender: User;
+  recipient: User;
+  ideaId?: number;
+  ideaTitle?: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface Conversation {
+  otherUser: User;
+  lastMessage: Message;
+  unreadCount: number;
+  lastMessageAt: string;
+}
+
+export interface SendMessageRequest {
+  recipientId: number;
+  content: string;
+  ideaId?: number;
 }
 
 // Audit log types

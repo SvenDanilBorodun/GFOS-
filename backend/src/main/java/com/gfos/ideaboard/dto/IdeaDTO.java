@@ -3,6 +3,7 @@ package com.gfos.ideaboard.dto;
 import com.gfos.ideaboard.entity.Idea;
 import com.gfos.ideaboard.entity.IdeaStatus;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ public class IdeaDTO {
     private Integer viewCount;
     private Boolean isFeatured;
     private Boolean isLikedByCurrentUser;
+    private List<ChecklistItemDTO> checklistItems = new ArrayList<>();
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -49,6 +51,9 @@ public class IdeaDTO {
         dto.setViewCount(idea.getViewCount());
         dto.setIsFeatured(idea.getIsFeatured());
         dto.setIsLikedByCurrentUser(isLikedByCurrentUser);
+        dto.setChecklistItems(idea.getChecklistItems().stream()
+                .map(ChecklistItemDTO::fromEntity)
+                .collect(Collectors.toList()));
         dto.setCreatedAt(idea.getCreatedAt());
         dto.setUpdatedAt(idea.getUpdatedAt());
         return dto;
@@ -165,6 +170,14 @@ public class IdeaDTO {
 
     public void setIsLikedByCurrentUser(Boolean isLikedByCurrentUser) {
         this.isLikedByCurrentUser = isLikedByCurrentUser;
+    }
+
+    public List<ChecklistItemDTO> getChecklistItems() {
+        return checklistItems;
+    }
+
+    public void setChecklistItems(List<ChecklistItemDTO> checklistItems) {
+        this.checklistItems = checklistItems;
     }
 
     public LocalDateTime getCreatedAt() {

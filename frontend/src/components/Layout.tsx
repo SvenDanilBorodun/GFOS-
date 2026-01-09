@@ -14,12 +14,14 @@ import {
   Bars3Icon,
   XMarkIcon,
   BellIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import NotificationDropdown from './NotificationDropdown';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Ideas', href: '/ideas', icon: LightBulbIcon },
+  { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
   { name: 'Surveys', href: '/surveys', icon: ChartBarIcon },
   { name: 'Profile', href: '/profile', icon: UserCircleIcon },
 ];
