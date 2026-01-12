@@ -1,68 +1,68 @@
-# GFOS Digital Idea Board - Development Guide
+# GFOS Digital Ideen-Board - Entwicklungshandbuch
 
-## Preventing Common Issues - Best Practices
+## Verhinderung häufiger Probleme - Best Practices
 
-This guide outlines best practices to prevent issues like the password hash mismatch and ensure reliable development and deployment.
-
----
-
-## Table of Contents
-
-1. [Database Management](#database-management)
-2. [Testing Strategy](#testing-strategy)
-3. [Development Workflow](#development-workflow)
-4. [Validation and Health Checks](#validation-and-health-checks)
-5. [Error Handling and Logging](#error-handling-and-logging)
-6. [Continuous Integration](#continuous-integration)
-7. [Troubleshooting](#troubleshooting)
+Dieses Handbuch beschreibt Best Practices zur Vermeidung von Problemen wie Passwort-Hash Nichtübereinstimmungen und zur Gewährleistung zuverlässiger Entwicklung und Bereitstellung.
 
 ---
 
-## 1. Database Management
+## Inhaltsverzeichnis
 
-### Always Validate Seed Data
+1. [Datenbankverwaltung](#datenbankverwaltung)
+2. [Test-Strategie](#test-strategie)
+3. [Entwicklungsworkflow](#entwicklungsworkflow)
+4. [Validierung und Integritätsprüfungen](#validierung-und-integritätsprüfungen)
+5. [Fehlerbehandlung und Protokollierung](#fehlerbehandlung-und-protokollierung)
+6. [Kontinuierliche Integration](#kontinuierliche-integration)
+7. [Fehlerbehebung](#fehlerbehebung)
 
-**Problem**: The database initialization script had incorrect BCrypt password hashes.
+---
 
-**Solution**:
+## 1. Datenbankverwaltung
+
+### Seed-Daten immer validieren
+
+**Problem**: Das Datenbank-Initialisierungsskript hatte fehlerhafte BCrypt-Passwort-Hashes.
+
+**Lösung**:
 ```bash
-# After database initialization, ALWAYS run validation
+# Nach der Datenbankinitialisierung IMMER Validierung ausführen
 cd backend
 mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
 ```
 
-This utility tests:
-- ✓ User credentials work correctly
-- ✓ Password hashes verify with BCrypt
-- ✓ All tables have seed data
-- ✓ Data integrity constraints are met
+Dieses Utility testet:
+- ✓ Benutzeranmeldedaten funktionieren korrekt
+- ✓ Passwort-Hashes verifizieren mit BCrypt
+- ✓ Alle Tabellen haben Seed-Daten
+- ✓ Datenintegrität Beschränkungen werden erfüllt
 
-### Generating Password Hashes
+### Passwort-Hashes generieren
 
-**Never** hardcode password hashes. Always generate them using the application's PasswordUtil:
+**Niemals** Passwort-Hashes hardcodieren. Immer die PasswordUtil der Anwendung verwenden:
 
 ```bash
-# Generate correct BCrypt hashes
+# Korrekte BCrypt Hashes generieren
 cd backend
 mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.PasswordHashGenerator"
 ```
 
-### Database Reset Procedure
+### Datenbank zurücksetzen Prozedur
 
-If you need to reset the database:
+Wenn Sie die Datenbank zurücksetzen müssen:
 
-1. Drop and recreate database:
+1. Datenbank löschen und neu erstellen:
    ```sql
    DROP DATABASE IF EXISTS ideaboard;
    CREATE DATABASE ideaboard OWNER ideaboard_user;
    ```
 
-2. Run initialization script:
+2. Initialisierungsskript ausführen:
    ```bash
    psql -U ideaboard_user -h localhost -d ideaboard -f database/init.sql
    ```
 
-3. **ALWAYS validate** after initialization:
+3. **IMMER validieren** nach der Initialisierung:
    ```bash
    cd backend
    mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
@@ -70,95 +70,95 @@ If you need to reset the database:
 
 ---
 
-## 2. Testing Strategy
+## 2. Test-Strategie
 
-### Integration Tests
+### Integrationstests
 
-Integration tests verify the entire system works together correctly.
+Integrationstests verifizieren, dass das gesamte System korrekt zusammenarbeitet.
 
-**Run authentication tests:**
+**Authentifizierungstests ausführen:**
 ```bash
 cd backend
 mvn test -Dtest=AuthenticationIntegrationTest
 ```
 
-**Location**: `backend/src/test/java/com/gfos/ideaboard/integration/`
+**Standort**: `backend/src/test/java/com/gfos/ideaboard/integration/`
 
-These tests verify:
-- ✓ Database connection works
-- ✓ User accounts exist
-- ✓ Password verification works
-- ✓ BCrypt hashes are correct
-- ✓ Invalid passwords are rejected
+Diese Tests verifizieren:
+- ✓ Datenbankverbindung funktioniert
+- ✓ Benutzerkonten existieren
+- ✓ Passwort-Verifikation funktioniert
+- ✓ BCrypt Hashes sind korrekt
+- ✓ Ungültige Passwörter werden abgelehnt
 
-### Testing Checklist Before Deployment
+### Test-Checkliste vor der Bereitstellung
 
-- [ ] Run database validation: `mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"`
-- [ ] Run integration tests: `mvn test`
-- [ ] Test login via API: `curl -X POST http://localhost:8080/ideaboard/api/auth/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin123"}'`
-- [ ] Test frontend login at http://localhost:3000
-- [ ] Check GlassFish logs for errors
+- [ ] Datenbank-Validierung ausführen: `mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"`
+- [ ] Integrationstests ausführen: `mvn test`
+- [ ] Anmeldung via API testen: `curl -X POST http://localhost:8080/ideaboard/api/auth/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin123"}'`
+- [ ] Frontend Anmeldung bei http://localhost:3000 testen
+- [ ] GlassFish Logs auf Fehler überprüfen
 
 ---
 
-## 3. Development Workflow
+## 3. Entwicklungsworkflow
 
-### Before Committing Code
+### Vor dem Commit von Code
 
-1. **Test your changes**
+1. **Testen Sie Ihre Änderungen**
    ```bash
    mvn clean test
    ```
 
-2. **Validate database if you changed schema or seed data**
+2. **Validieren Sie die Datenbank, wenn Sie Schema oder Seed-Daten geändert haben**
    ```bash
    mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
    ```
 
-3. **Check for errors in logs**
+3. **Überprüfen Sie Fehler in den Logs**
    - Backend: `glassfish7/glassfish/domains/domain1/logs/server.log`
-   - Frontend: Browser console and terminal
+   - Frontend: Browser Konsole und Terminal
 
-4. **Test the full user flow**
-   - Login
-   - Create/view ideas
-   - Test permissions by role
+4. **Testen Sie den vollständigen Benutzerablauf**
+   - Anmeldung
+   - Ideen erstellen/ansehen
+   - Berechtigungen nach Rolle testen
 
-### Code Review Checklist
+### Code Review Checkliste
 
-- [ ] Are password hashes generated using PasswordUtil?
-- [ ] Are there tests for new features?
-- [ ] Is error logging added for failure cases?
-- [ ] Are configuration values externalized (not hardcoded)?
-- [ ] Does the code handle edge cases and validation?
+- [ ] Werden Passwort-Hashes mit PasswordUtil generiert?
+- [ ] Gibt es Tests für neue Features?
+- [ ] Wird Fehlerprotokollierung für Fehlerfälle hinzugefügt?
+- [ ] Sind Konfigurationswerte externalisiert (nicht hardcodiert)?
+- [ ] Behandelt der Code Grenzfälle und Validierung?
 
 ---
 
-## 4. Validation and Health Checks
+## 4. Validierung und Integritätsprüfungen
 
-### Automated Validation Tools
+### Automatisierte Validierungswerkzeuge
 
-| Tool | Purpose | When to Run |
+| Werkzeug | Zweck | Wann ausführen |
 |------|---------|-------------|
-| `ValidateDatabase` | Verify database seed data | After DB init, before deployment |
-| `PasswordHashGenerator` | Generate BCrypt hashes | When adding new test users |
-| `AuthenticationIntegrationTest` | Test login system | Before every deployment |
+| `ValidateDatabase` | Seed-Daten Datenbank verifizieren | Nach DB Init, vor Bereitstellung |
+| `PasswordHashGenerator` | BCrypt Hashes generieren | Beim Hinzufügen neuer Test-Benutzer |
+| `AuthenticationIntegrationTest` | Anmeldesystem testen | Vor jeder Bereitstellung |
 
-### Application Health Check
+### Anwendungs-Integritätsprüfung
 
-Add this to your deployment checklist:
+Fügen Sie dies zu Ihrer Bereitstellungs-Checkliste hinzu:
 
 ```bash
-# 1. Check database connectivity
+# 1. Datenbankverbindung überprüfen
 psql -U ideaboard_user -h localhost -d ideaboard -c "SELECT COUNT(*) FROM users;"
 
-# 2. Check GlassFish is running
+# 2. GlassFish läuft überprüfen
 curl http://localhost:8080/ideaboard/api/ideas
 
-# 3. Check frontend can connect to backend
+# 3. Frontend kann sich mit Backend verbinden überprüfen
 curl http://localhost:3000
 
-# 4. Verify authentication
+# 4. Authentifizierung verifizieren
 curl -X POST http://localhost:8080/ideaboard/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
@@ -166,58 +166,58 @@ curl -X POST http://localhost:8080/ideaboard/api/auth/login \
 
 ---
 
-## 5. Error Handling and Logging
+## 5. Fehlerbehandlung und Protokollierung
 
-### Logging Best Practices
+### Best Practices für Protokollierung
 
-The application now includes comprehensive logging:
+Die Anwendung enthält jetzt umfangreiche Protokollierung:
 
-**Authentication events are logged:**
-- `INFO`: Successful logins
-- `WARN`: Failed login attempts
-- `DEBUG`: Login attempt details
+**Authentifizierungsereignisse werden protokolliert:**
+- `INFO`: Erfolgreiche Anmeldungen
+- `WARN`: Fehlgeschlagene Anmeldeversuche
+- `DEBUG`: Details zu Anmeldeversuchen
 
-**Check logs for issues:**
+**Logs auf Probleme überprüfen:**
 ```bash
-# GlassFish server log
+# GlassFish Server Log
 tail -f "C:/glassfish-7.1.0/glassfish7/glassfish/domains/domain1/logs/server.log"
 ```
 
-### Common Error Patterns
+### Häufige Fehlermuster
 
-| Error | Cause | Solution |
+| Fehler | Ursache | Lösung |
 |-------|-------|----------|
-| "Invalid username or password" | Wrong credentials OR bad password hash | Run ValidateDatabase, check init.sql hashes |
-| "Account is deactivated" | User's is_active=false | Check database: `SELECT * FROM users WHERE username='...'` |
-| 401 Unauthorized | Token expired or invalid | Clear localStorage, login again |
-| Database connection failed | PostgreSQL not running | Start PostgreSQL service |
-| JDBC pool error | Wrong database credentials | Check glassfish JDBC configuration |
+| "Invalid username or password" | Falsche Anmeldeinformationen ODER schlechter Passwort-Hash | Führen Sie ValidateDatabase aus, überprüfen Sie init.sql Hashes |
+| "Account is deactivated" | Benutzer is_active=false | Überprüfen Sie Datenbank: `SELECT * FROM users WHERE username='...'` |
+| 401 Unauthorized | Token abgelaufen oder ungültig | localStorage löschen, erneut anmelden |
+| Database connection failed | PostgreSQL läuft nicht | PostgreSQL Service starten |
+| JDBC pool error | Falsche Datenbankdaten | Überprüfen Sie GlassFish JDBC Konfiguration |
 
-### Debugging Authentication Issues
+### Debugging von Authentifizierungsproblemen
 
 ```bash
-# 1. Check user exists
+# 1. Benutzer existiert überprüfen
 psql -U ideaboard_user -d ideaboard -c "SELECT username, is_active FROM users WHERE username='admin';"
 
-# 2. Test password hash manually
+# 2. Passwort-Hash manuell testen
 cd backend
 mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.PasswordHashGenerator"
 
-# 3. Check GlassFish logs for detailed error
+# 3. GlassFish Logs auf detaillierten Fehler überprüfen
 grep -i "auth" glassfish7/glassfish/domains/domain1/logs/server.log
 
-# 4. Run validation
+# 4. Validierung ausführen
 mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
 ```
 
 ---
 
-## 6. Continuous Integration
+## 6. Kontinuierliche Integration
 
-### Recommended CI/CD Pipeline
+### Empfohlene CI/CD Pipeline
 
 ```yaml
-# Example GitHub Actions / GitLab CI pipeline
+# Beispiel GitHub Actions / GitLab CI Pipeline
 
 stages:
   - build
@@ -245,165 +245,165 @@ integration_tests:
 deploy:
   script:
     - ./start-project.ps1
-    - # Run smoke tests
+    - # Smoke Tests ausführen
 ```
 
-### Pre-commit Hooks
+### Pre-Commit Hooks
 
-Create `.git/hooks/pre-commit`:
+Erstelle `.git/hooks/pre-commit`:
 ```bash
 #!/bin/bash
-echo "Running pre-commit checks..."
+echo "Starte Pre-Commit Überprüfungen..."
 
-# Run tests
+# Führe Tests aus
 mvn test || {
-    echo "Tests failed! Commit aborted."
+    echo "Tests fehlgeschlagen! Commit abgebrochen."
     exit 1
 }
 
-echo "All checks passed!"
+echo "Alle Überprüfungen bestanden!"
 ```
 
 ---
 
-## 7. Troubleshooting
+## 7. Fehlerbehebung
 
-### Quick Diagnostic Commands
+### Schnelle Diagnose-Befehle
 
 ```bash
-# Check all services are running
+# Überprüfen Sie, dass alle Services laufen
 netstat -an | findstr "8080 3000 5432"
 
-# Database user count
+# Datenbank-Benutzeranzahl
 psql -U ideaboard_user -d ideaboard -c "SELECT COUNT(*) FROM users;"
 
-# Test admin login API
+# Admin-Anmeldungs-API testen
 curl -X POST http://localhost:8080/ideaboard/api/auth/login \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"admin\",\"password\":\"admin123\"}"
 
-# Check GlassFish deployment status
+# GlassFish Bereitstellungsstatus überprüfen
 asadmin list-applications
 ```
 
-### Common Issues and Solutions
+### Häufige Probleme und Lösungen
 
-#### Issue: "Cannot login with admin/admin123"
+#### Problem: "Kann nicht mit admin/admin123 anmelden"
 
-**Diagnosis:**
+**Diagnose:**
 ```bash
 cd backend
 mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
 ```
 
-**Solutions:**
-1. If validation fails, password hashes are wrong:
+**Lösungen:**
+1. Wenn Validierung fehlschlägt, sind Passwort-Hashes falsch:
    ```bash
    mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.FixPasswordHashes"
    ```
 
-2. If user doesn't exist, reinitialize database:
+2. Wenn Benutzer nicht existiert, Datenbank neu initialisieren:
    ```bash
    psql -U ideaboard_user -d ideaboard -f database/init.sql
    ```
 
-#### Issue: "Tests passing but login still fails"
+#### Problem: "Tests bestanden, aber Anmeldung schlägt fehl"
 
-**Check frontend is hitting correct backend:**
+**Überprüfen Sie, dass Frontend das richtige Backend trifft:**
 ```javascript
 // frontend/vite.config.ts
 proxy: {
   '/api': {
-    target: 'http://localhost:8080/ideaboard',  // ← Must match backend URL
+    target: 'http://localhost:8080/ideaboard',  // ← Muss Backend URL entsprechen
     changeOrigin: true,
   },
 }
 ```
 
-**Verify API endpoint:**
+**API Endpunkt verifizieren:**
 ```bash
-# Should return JWT token
+# Sollte JWT Token zurückgeben
 curl -X POST http://localhost:8080/ideaboard/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
 ```
 
-#### Issue: "Database validation fails"
+#### Problem: "Datenbank-Validierung schlägt fehl"
 
-1. Check PostgreSQL is running
-2. Verify database credentials in validation script
-3. Ensure database has been initialized: `psql -f database/init.sql`
-4. Check database grants: `GRANT ALL ON DATABASE ideaboard TO ideaboard_user;`
-
----
-
-## Summary: Prevention Checklist
-
-✅ **Before Coding:**
-- Pull latest code
-- Run `start-project.ps1` to verify environment
-
-✅ **During Development:**
-- Write tests for new features
-- Add logging for error conditions
-- Use validation utilities for database changes
-
-✅ **Before Committing:**
-- Run `mvn test`
-- Run `ValidateDatabase` if database changed
-- Test manually in browser
-- Check for errors in logs
-
-✅ **Before Deployment:**
-- All tests pass
-- Database validation passes
-- API tests pass (curl commands)
-- Frontend connects successfully
-- Documentation updated
-
-✅ **After Deployment:**
-- Run smoke tests
-- Monitor logs for errors
-- Verify user can login
-- Check all critical features work
+1. Überprüfen Sie, dass PostgreSQL läuft
+2. Verifizieren Sie Datenbankzugangsangaben in Validierungsskript
+3. Stellen Sie sicher, dass Datenbank initialisiert wurde: `psql -f database/init.sql`
+4. Überprüfen Sie Datenbankberechtigungen: `GRANT ALL ON DATABASE ideaboard TO ideaboard_user;`
 
 ---
 
-## Quick Reference
+## Zusammenfassung: Präventions-Checkliste
+
+✅ **Vor dem Programmieren:**
+- Rufen Sie den neuesten Code ab
+- Führen Sie `start-project.ps1` aus, um die Umgebung zu verifizieren
+
+✅ **Während der Entwicklung:**
+- Schreiben Sie Tests für neue Features
+- Fügen Sie Protokollierung für Fehlerfälle hinzu
+- Verwenden Sie Validierungswerkzeuge für Datenbankänderungen
+
+✅ **Vor dem Commit:**
+- Führen Sie `mvn test` aus
+- Führen Sie `ValidateDatabase` aus, wenn die Datenbank geändert wurde
+- Testen Sie manuell im Browser
+- Überprüfen Sie auf Fehler in Logs
+
+✅ **Vor der Bereitstellung:**
+- Alle Tests bestehen
+- Datenbank-Validierung bestanden
+- API Tests bestanden (curl Befehle)
+- Frontend verbindet sich erfolgreich
+- Dokumentation aktualisiert
+
+✅ **Nach der Bereitstellung:**
+- Führen Sie Smoke Tests aus
+- Überwachen Sie Logs auf Fehler
+- Überprüfen Sie, dass Benutzer anmelden kann
+- Überprüfen Sie, dass alle kritischen Features funktionieren
+
+---
+
+## Schnellreferenz
 
 ```bash
-# Start application
+# Anwendung starten
 .\start-project.ps1
 
-# Validate database
+# Datenbank validieren
 cd backend && mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.ValidateDatabase"
 
-# Run tests
+# Tests ausführen
 cd backend && mvn test
 
-# Fix password hashes
+# Passwort-Hashes reparieren
 cd backend && mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.FixPasswordHashes"
 
-# Generate password hashes
+# Passwort-Hashes generieren
 cd backend && mvn exec:java -Dexec.mainClass="com.gfos.ideaboard.util.PasswordHashGenerator"
 
-# Test login API
+# Anmeldungs-API testen
 curl -X POST http://localhost:8080/ideaboard/api/auth/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin123"}'
 
-# Check logs
+# Logs anzeigen
 tail -f glassfish7/glassfish/domains/domain1/logs/server.log
 ```
 
 ---
 
-## Getting Help
+## Hilfe anfordern
 
-If you encounter issues:
+Wenn Sie auf Probleme stoßen:
 
-1. Check this guide's troubleshooting section
-2. Run `ValidateDatabase` to identify the problem
-3. Check GlassFish logs for detailed errors
-4. Review the test results: `mvn test`
-5. Verify configuration matches this guide
+1. Überprüfen Sie den Abschnitt Fehlerbehebung in diesem Handbuch
+2. Führen Sie `ValidateDatabase` aus, um das Problem zu identifizieren
+3. Überprüfen Sie GlassFish Logs für detaillierte Fehler
+4. Überprüfen Sie die Test-Ergebnisse: `mvn test`
+5. Überprüfen Sie, dass die Konfiguration diesem Handbuch entspricht
 
-**Remember**: Most issues can be prevented by running validation tools after making changes!
+**Denken Sie daran**: Die meisten Probleme können durch regelmäßige Ausführung von Validierungswerkzeugen nach Änderungen verhindert werden!

@@ -35,11 +35,11 @@ public class CommentResource {
         String emoji = body.get("emoji");
         if (emoji == null || emoji.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Emoji is required"))
+                    .entity(Map.of("error", "Emoji ist erforderlich"))
                     .build();
         }
         commentService.addReaction(id, emoji, userId);
-        return Response.ok(Map.of("message", "Reaction added")).build();
+        return Response.ok(Map.of("message", "Reaktion hinzugefügt")).build();
     }
 
     @DELETE
@@ -48,6 +48,6 @@ public class CommentResource {
                                    @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         commentService.removeReaction(id, emoji, userId);
-        return Response.ok(Map.of("message", "Reaction removed")).build();
+        return Response.ok(Map.of("message", "Reaktion entfernt")).build();
     }
 }

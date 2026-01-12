@@ -27,20 +27,20 @@ public class JwtFilter implements ContainerRequestFilter {
         String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            abortWithUnauthorized(requestContext, "Missing or invalid Authorization header");
+            abortWithUnauthorized(requestContext, "Autorisierungs-Header fehlt oder ist ungültig");
             return;
         }
 
         String token = authHeader.substring(BEARER_PREFIX.length()).trim();
 
         if (!jwtUtil.isTokenValid(token)) {
-            abortWithUnauthorized(requestContext, "Invalid or expired token");
+            abortWithUnauthorized(requestContext, "Ungültiger oder abgelaufener Token");
             return;
         }
 
-        // Don't accept refresh tokens for regular API calls
+        // Akzeptieren Sie keine Aktualisierungs-Token für reguläre API-Aufrufe
         if (jwtUtil.isRefreshToken(token)) {
-            abortWithUnauthorized(requestContext, "Refresh token not accepted");
+            abortWithUnauthorized(requestContext, "Aktualisierungs-Token wird nicht akzeptiert");
             return;
         }
 
@@ -48,7 +48,7 @@ public class JwtFilter implements ContainerRequestFilter {
         String username = jwtUtil.getUsernameFromToken(token);
         String role = jwtUtil.getRoleFromToken(token);
 
-        // Set security context
+        // Sicherheitskontext einstellen
         requestContext.setSecurityContext(new SecurityContext() {
             @Override
             public Principal getUserPrincipal() {
@@ -71,7 +71,7 @@ public class JwtFilter implements ContainerRequestFilter {
             }
         });
 
-        // Store user info in request properties for later use
+        // Benutzerinformationen in Anfrageeigenschaften speichern zur späteren Verwendung
         requestContext.setProperty("userId", userId);
         requestContext.setProperty("username", username);
         requestContext.setProperty("role", role);

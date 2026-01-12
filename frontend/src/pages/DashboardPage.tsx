@@ -29,11 +29,11 @@ import { dashboardService } from '../services/dashboardService';
 import { DashboardStats, TopIdea, Idea, Survey } from '../types';
 import { format } from 'date-fns';
 
-// Chart colors
+// Diagrammfarben
 const STATUS_COLORS = {
-  Concept: '#9CA3AF',
-  'In Progress': '#F59E0B',
-  Completed: '#10B981',
+  Konzept: '#9CA3AF',
+  'In Bearbeitung': '#F59E0B',
+  Abgeschlossen: '#10B981',
 };
 
 const CATEGORY_COLORS = [
@@ -80,25 +80,25 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      name: 'Total Ideas',
+      name: 'Gesamtideen',
       value: stats?.totalIdeas || 0,
       icon: LightBulbIcon,
       color: 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400',
     },
     {
-      name: 'Active Users',
+      name: 'Aktive Benutzer',
       value: stats?.totalUsers || 0,
       icon: UserGroupIcon,
       color: 'bg-success-50 dark:bg-success-900/20 text-success-600 dark:text-success-400',
     },
     {
-      name: 'Total Likes',
+      name: 'Gesamtlikes',
       value: stats?.totalLikes || 0,
       icon: HeartIcon,
       color: 'bg-error-50 dark:bg-error-900/20 text-error-600 dark:text-error-400',
     },
     {
-      name: 'Comments',
+      name: 'Kommentare',
       value: stats?.totalComments || 0,
       icon: ChatBubbleLeftRightIcon,
       color: 'bg-warning-50 dark:bg-warning-900/20 text-warning-600 dark:text-warning-400',
@@ -120,20 +120,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
+      {/* Seitenkopf */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Übersicht</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Welcome back! Here's what's happening with your ideas.
+            Willkommen zurück! Hier sehen Sie, was mit Ihren Ideen los ist.
           </p>
         </div>
         <Link to="/ideas/new" className="btn-primary">
-          Submit New Idea
+          Neue Idee einreichen
         </Link>
       </div>
 
-      {/* Stats cards */}
+      {/* Statistikkarten */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
           <div key={stat.name} className="card p-5">
@@ -153,20 +153,20 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top 3 Ideas of the Week */}
+        {/* Top 3 Ideen der Woche */}
         <div className="lg:col-span-2 card">
           <div className="p-5 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <FireIcon className="w-5 h-5 text-orange-500" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Top 3 Ideas of the Week
+                Top 3 Ideen der Woche
               </h2>
             </div>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {topIdeas.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                No ideas this week yet. Be the first to submit!
+                Diese Woche noch keine Ideen. Seien Sie der Erste, der eine einreicht!
               </div>
             ) : (
               topIdeas.map((item) => (
@@ -202,19 +202,19 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Status Pie Chart */}
+        {/* Statuskreisdiagramm */}
         <div className="card p-5">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Ideas by Status
+            Ideen nach Status
           </h2>
           {stats && (stats.conceptIdeas > 0 || stats.inProgressIdeas > 0 || stats.completedIdeas > 0) ? (
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Concept', value: stats.conceptIdeas || 0 },
-                    { name: 'In Progress', value: stats.inProgressIdeas || 0 },
-                    { name: 'Completed', value: stats.completedIdeas || 0 },
+                    { name: 'Konzept', value: stats.conceptIdeas || 0 },
+                    { name: 'In Bearbeitung', value: stats.inProgressIdeas || 0 },
+                    { name: 'Abgeschlossen', value: stats.completedIdeas || 0 },
                   ].filter(d => d.value > 0)}
                   cx="50%"
                   cy="50%"
@@ -226,33 +226,33 @@ export default function DashboardPage() {
                   labelLine={false}
                 >
                   {[
-                    { name: 'Concept', value: stats.conceptIdeas || 0 },
-                    { name: 'In Progress', value: stats.inProgressIdeas || 0 },
-                    { name: 'Completed', value: stats.completedIdeas || 0 },
+                    { name: 'Konzept', value: stats.conceptIdeas || 0 },
+                    { name: 'In Bearbeitung', value: stats.inProgressIdeas || 0 },
+                    { name: 'Abgeschlossen', value: stats.completedIdeas || 0 },
                   ].filter(d => d.value > 0).map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={STATUS_COLORS[entry.name as keyof typeof STATUS_COLORS]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value} ideas`, '']} />
+                <Tooltip formatter={(value) => [`${value} Ideen`, '']} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-[250px] text-gray-500 dark:text-gray-400">
-              No data available
+              Keine Daten verfügbar
             </div>
           )}
         </div>
       </div>
 
-      {/* Charts Row */}
+      {/* Diagramme-Zeile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Category Bar Chart */}
+        {/* Kategorie-Balkendiagramm */}
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-4">
             <ChartBarIcon className="w-5 h-5 text-primary-600" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Ideas by Category
+              Ideen nach Kategorie
             </h2>
           </div>
           {stats?.categoryBreakdown && stats.categoryBreakdown.length > 0 ? (
@@ -265,8 +265,8 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis type="number" allowDecimals={false} />
                 <YAxis dataKey="category" type="category" width={70} tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(value) => [`${value} ideas`, 'Count']} />
-                <Bar dataKey="count" name="Ideas" radius={[0, 4, 4, 0]}>
+                <Tooltip formatter={(value) => [`${value} Ideen`, 'Anzahl']} />
+                <Bar dataKey="count" name="Ideen" radius={[0, 4, 4, 0]}>
                   {stats.categoryBreakdown.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                   ))}
@@ -275,17 +275,17 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
-              No category data available
+              Keine Kategoriedaten verfügbar
             </div>
           )}
         </div>
 
-        {/* Weekly Activity Line Chart */}
+        {/* Wöchentliche Aktivitäten-Liniendiagramm */}
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-4">
             <ArrowTrendingUpIcon className="w-5 h-5 text-success-600" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Weekly Activity
+              Wöchentliche Aktivität
             </h2>
           </div>
           {stats?.weeklyActivity && stats.weeklyActivity.length > 0 ? (
@@ -300,11 +300,11 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="date" />
                 <YAxis allowDecimals={false} />
-                <Tooltip formatter={(value) => [`${value} ideas`, 'New Ideas']} />
+                <Tooltip formatter={(value) => [`${value} Ideen`, 'Neue Ideen']} />
                 <Line
                   type="monotone"
                   dataKey="ideas"
-                  name="New Ideas"
+                  name="Neue Ideen"
                   stroke="#3B82F6"
                   strokeWidth={3}
                   dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
@@ -316,7 +316,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
               <div className="text-center">
                 <ArrowTrendingUpIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No activity this week yet</p>
+                <p>Diese Woche noch keine Aktivität</p>
               </div>
             </div>
           )}
@@ -324,20 +324,20 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* New Ideas */}
+        {/* Neue Ideen */}
         <div className="card">
           <div className="p-5 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <ArrowTrendingUpIcon className="w-5 h-5 text-primary-600" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Recently Submitted
+                Kürzlich eingereicht
               </h2>
             </div>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {newIdeas.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                No recent ideas
+                Keine aktuellen Ideen
               </div>
             ) : (
               newIdeas.map((idea) => (
@@ -362,25 +362,25 @@ export default function DashboardPage() {
           </div>
           <div className="p-4 border-t border-gray-100 dark:border-gray-700">
             <Link to="/ideas" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
-              View all ideas
+              Alle Ideen ansehen
             </Link>
           </div>
         </div>
 
-        {/* Active Surveys */}
+        {/* Aktive Umfragen */}
         <div className="card">
           <div className="p-5 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <ChartBarIcon className="w-5 h-5 text-secondary-600" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Active Surveys
+                Aktive Umfragen
               </h2>
             </div>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {surveys.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                No active surveys
+                Keine aktiven Umfragen
               </div>
             ) : (
               surveys.slice(0, 3).map((survey) => (
@@ -393,8 +393,8 @@ export default function DashboardPage() {
                     {survey.question}
                   </h3>
                   <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                    <span>{survey.totalVotes} votes</span>
-                    <span>by {survey.creator.firstName}</span>
+                    <span>{survey.totalVotes} Stimmen</span>
+                    <span>von {survey.creator.firstName}</span>
                   </div>
                 </Link>
               ))
@@ -402,7 +402,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-4 border-t border-gray-100 dark:border-gray-700">
             <Link to="/surveys" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
-              View all surveys
+              Alle Umfragen ansehen
             </Link>
           </div>
         </div>

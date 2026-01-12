@@ -36,28 +36,28 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(AuthRequest request) {
-        logger.debug("Login attempt for username: {}", request.getUsername());
+        logger.debug("Anmeldeversuch für Benutzername: {}", request.getUsername());
 
         User user = findByUsername(request.getUsername());
 
         if (user == null) {
-            logger.warn("Login failed: User not found - {}", request.getUsername());
-            throw ApiException.unauthorized("Invalid username or password");
+            logger.warn("Anmeldung fehlgeschlagen: Benutzer nicht gefunden - {}", request.getUsername());
+            throw ApiException.unauthorized("Ungültiger Benutzername oder Passwort");
         }
 
         if (!user.getIsActive()) {
-            logger.warn("Login failed: Account deactivated - {}", request.getUsername());
-            throw ApiException.unauthorized("Account is deactivated");
+            logger.warn("Anmeldung fehlgeschlagen: Konto deaktiviert - {}", request.getUsername());
+            throw ApiException.unauthorized("Konto ist deaktiviert");
         }
 
         if (!passwordUtil.verifyPassword(request.getPassword(), user.getPasswordHash())) {
-            logger.warn("Login failed: Invalid password for user - {}", request.getUsername());
-            throw ApiException.unauthorized("Invalid username or password");
+            logger.warn("Anmeldung fehlgeschlagen: Ungültiges Passwort für Benutzer - {}", request.getUsername());
+            throw ApiException.unauthorized("Ungültiger Benutzername oder Passwort");
         }
 
-        logger.info("Login successful for user: {} ({})", request.getUsername(), user.getRole());
+        logger.info("Anmeldung erfolgreich für Benutzer: {} ({})", request.getUsername(), user.getRole());
 
-        // Update last login
+        // Letzte Anmeldung aktualisieren
         user.setLastLogin(LocalDateTime.now());
         em.merge(user);
 
@@ -66,17 +66,17 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Check if username exists
+        // Prüfe, ob Benutzername bereits existiert
         if (findByUsername(request.getUsername()) != null) {
-            throw ApiException.conflict("Username already exists");
+            throw ApiException.conflict("Benutzername existiert bereits");
         }
 
-        // Check if email exists
+        // Prüfe, ob E-Mail bereits existiert
         if (findByEmail(request.getEmail()) != null) {
-            throw ApiException.conflict("Email already exists");
+            throw ApiException.conflict("E-Mail existiert bereits");
         }
 
-        // Create new user
+        // Erstelle neuen Benutzer
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -96,14 +96,14 @@ public class AuthService {
 
     public AuthResponse refreshToken(String refreshToken) {
         if (!jwtUtil.isTokenValid(refreshToken) || !jwtUtil.isRefreshToken(refreshToken)) {
-            throw ApiException.unauthorized("Invalid refresh token");
+            throw ApiException.unauthorized("Ungültiger Aktualisierungstoken");
         }
 
         Long userId = jwtUtil.getUserIdFromToken(refreshToken);
         User user = em.find(User.class, userId);
 
         if (user == null || !user.getIsActive()) {
-            throw ApiException.unauthorized("User not found or inactive");
+            throw ApiException.unauthorized("Benutzer nicht gefunden oder inaktiv");
         }
 
         return createAuthResponse(user);

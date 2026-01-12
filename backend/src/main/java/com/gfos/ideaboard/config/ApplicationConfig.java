@@ -11,7 +11,7 @@ public class ApplicationConfig extends Application {
     @Override
     public Map<String, Object> getProperties() {
         Map<String, Object> props = new HashMap<>();
-        // Enable Jackson JSON provider
+        // Jackson JSON Provider aktivieren
         props.put("jersey.config.server.provider.packages",
                 "com.gfos.ideaboard.resource," +
                 "com.gfos.ideaboard.config," +

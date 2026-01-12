@@ -33,25 +33,25 @@ public class ChecklistService {
 
     @Transactional
     public ChecklistItemDTO createChecklistItem(Long ideaId, String title, Long currentUserId) {
-        // Validate input
+        // Eingabe validieren
         if (title == null || title.trim().isEmpty()) {
-            throw ApiException.badRequest("Checklist item title is required");
+            throw ApiException.badRequest("Checklistenelement-Titel ist erforderlich");
         }
         if (title.length() > MAX_TITLE_LENGTH) {
-            throw ApiException.badRequest("Checklist item title must be " + MAX_TITLE_LENGTH + " characters or less");
+            throw ApiException.badRequest("Checklistenelement-Titel muss " + MAX_TITLE_LENGTH + " Zeichen oder weniger sein");
         }
 
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Only the idea author can add checklist items
+        // Nur der Ideenschöpfer kann Checklistenelemente hinzufügen
         if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Only the idea creator can add checklist items");
+            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente hinzufügen");
         }
 
-        // Get the next ordinal position
+        // Nächste Ordinalposition abrufen
         Integer maxPosition = em.createQuery(
                 "SELECT COALESCE(MAX(c.ordinalPosition), -1) FROM ChecklistItem c WHERE c.idea.id = :ideaId", Integer.class)
                 .setParameter("ideaId", ideaId)
@@ -65,7 +65,7 @@ public class ChecklistService {
 
         em.persist(item);
 
-        // Update idea progress based on checklist
+        // Ideenfortschritt basierend auf der Checkliste aktualisieren
         updateIdeaProgress(idea);
 
         return ChecklistItemDTO.fromEntity(item);
@@ -75,29 +75,29 @@ public class ChecklistService {
     public ChecklistItemDTO toggleChecklistItem(Long ideaId, Long itemId, Long currentUserId) {
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // IMPORTANT: Only the idea author can check/uncheck items
+        // WICHTIG: Nur der Ideenschöpfer kann Elemente abhaken
         if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Only the idea creator can update checklist items");
+            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente aktualisieren");
         }
 
         ChecklistItem item = em.find(ChecklistItem.class, itemId);
         if (item == null) {
-            throw ApiException.notFound("Checklist item not found");
+            throw ApiException.notFound("Checklistenelement nicht gefunden");
         }
 
-        // Verify the item belongs to this idea
+        // Prüfe, ob das Element zu dieser Idee gehört
         if (!item.getIdea().getId().equals(ideaId)) {
-            throw ApiException.badRequest("Checklist item does not belong to this idea");
+            throw ApiException.badRequest("Checklistenelement gehört nicht zu dieser Idee");
         }
 
-        // Toggle the completion status
+        // Fertigstellungsstatus umschalten
         item.setIsCompleted(!item.getIsCompleted());
         em.merge(item);
 
-        // Update idea progress based on checklist completion
+        // Ideenfortschritt basierend auf Checklistenfertigstellung aktualisieren
         updateIdeaProgress(idea);
 
         return ChecklistItemDTO.fromEntity(item);
@@ -107,27 +107,27 @@ public class ChecklistService {
     public void deleteChecklistItem(Long ideaId, Long itemId, Long currentUserId) {
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Only author can delete checklist items
+        // Nur der Autor kann Checklistenelemente löschen
         if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Only the idea creator can delete checklist items");
+            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente löschen");
         }
 
         ChecklistItem item = em.find(ChecklistItem.class, itemId);
         if (item == null) {
-            throw ApiException.notFound("Checklist item not found");
+            throw ApiException.notFound("Checklistenelement nicht gefunden");
         }
 
-        // Verify the item belongs to this idea
+        // Prüfe, ob das Element zu dieser Idee gehört
         if (!item.getIdea().getId().equals(ideaId)) {
-            throw ApiException.badRequest("Checklist item does not belong to this idea");
+            throw ApiException.badRequest("Checklistenelement gehört nicht zu dieser Idee");
         }
 
         em.remove(item);
 
-        // Update idea progress
+        // Ideenfortschritt aktualisieren
         updateIdeaProgress(idea);
     }
 
@@ -135,29 +135,29 @@ public class ChecklistService {
     public ChecklistItemDTO updateChecklistItem(Long ideaId, Long itemId, String title, Long currentUserId) {
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Only author can update checklist items
+        // Nur der Autor kann Checklistenelemente aktualisieren
         if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Only the idea creator can update checklist items");
+            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente aktualisieren");
         }
 
         if (title == null || title.trim().isEmpty()) {
-            throw ApiException.badRequest("Checklist item title is required");
+            throw ApiException.badRequest("Checklistenelement-Titel ist erforderlich");
         }
         if (title.length() > MAX_TITLE_LENGTH) {
-            throw ApiException.badRequest("Checklist item title must be " + MAX_TITLE_LENGTH + " characters or less");
+            throw ApiException.badRequest("Checklistenelement-Titel muss " + MAX_TITLE_LENGTH + " Zeichen oder weniger sein");
         }
 
         ChecklistItem item = em.find(ChecklistItem.class, itemId);
         if (item == null) {
-            throw ApiException.notFound("Checklist item not found");
+            throw ApiException.notFound("Checklistenelement nicht gefunden");
         }
 
-        // Verify the item belongs to this idea
+        // Prüfe, ob das Element zu dieser Idee gehört
         if (!item.getIdea().getId().equals(ideaId)) {
-            throw ApiException.badRequest("Checklist item does not belong to this idea");
+            throw ApiException.badRequest("Checklistenelement gehört nicht zu dieser Idee");
         }
 
         item.setTitle(title.trim());
@@ -167,8 +167,8 @@ public class ChecklistService {
     }
 
     /**
-     * Updates the idea's progress percentage based on checklist completion.
-     * Progress = (completed items / total items) * 100
+     * Aktualisiert den Fortschrittsprozentsatz der Idee basierend auf der Checklistenfertigstellung.
+     * Fortschritt = (fertiggestellte Elemente / Gesamtelemente) * 100
      */
     private void updateIdeaProgress(Idea idea) {
         List<ChecklistItem> items = em.createNamedQuery("ChecklistItem.findByIdea", ChecklistItem.class)
@@ -176,7 +176,7 @@ public class ChecklistService {
                 .getResultList();
 
         if (items.isEmpty()) {
-            // No checklist items, don't change progress
+            // Keine Checklistenelemente, Fortschritt nicht ändern
             return;
         }
 

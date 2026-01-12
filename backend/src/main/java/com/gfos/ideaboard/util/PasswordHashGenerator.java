@@ -9,17 +9,18 @@ public class PasswordHashGenerator {
     public static void main(String[] args) {
         String[] passwords = {"admin123", "password123"};
 
-        System.out.println("BCrypt Password Hashes:");
+        System.out.println("BCrypt-Passwort-Hashes:");
         System.out.println("======================");
 
         for (String password : passwords) {
+            // Generieren Sie den Passwort-Hash mit BCrypt
             String hash = BCrypt.withDefaults().hashToString(BCRYPT_COST, password.toCharArray());
-            System.out.println("\nPassword: " + password);
+            System.out.println("\nPasswort: " + password);
             System.out.println("Hash: " + hash);
 
-            // Verify it works
+            // Überprüfen Sie, ob es funktioniert
             BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), hash);
-            System.out.println("Verification: " + (result.verified ? "SUCCESS" : "FAILED"));
+            System.out.println("Überprüfung: " + (result.verified ? "ERFOLG" : "FEHLGESCHLAGEN"));
         }
     }
 }

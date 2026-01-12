@@ -8,20 +8,20 @@ import { Idea, UserBadge, Badge } from '../types';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
-// Synced with backend GamificationService.LEVEL_THRESHOLDS
+// Synchronisiert mit backend GamificationService.LEVEL_THRESHOLDS
 const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000];
 
 const LEVEL_NAMES = [
-  'Newcomer',
-  'Contributor',
+  'Anfänger',
+  'Mitwirkender',
   'Innovator',
-  'Expert',
-  'Master',
-  'Legend',
+  'Experte',
+  'Meister',
+  'Legende',
   'Champion',
-  'Hero',
+  'Held',
   'Titan',
-  'Legendary',
+  'Legendär',
 ];
 
 export default function ProfilePage() {
@@ -57,7 +57,7 @@ export default function ProfilePage() {
       setEarnedBadges(userBadges);
       setAllBadges(badges);
     } catch (error) {
-      console.error('Failed to fetch profile data:', error);
+      console.error('Fehler beim Abrufen von Profildaten:', error);
     } finally {
       setLoading(false);
     }
@@ -68,9 +68,9 @@ export default function ProfilePage() {
       const updated = await authService.updateProfile(formData);
       updateUser(updated);
       setEditing(false);
-      toast.success('Profile updated');
+      toast.success('Profil aktualisiert');
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error('Fehler beim Aktualisieren des Profils');
     }
   };
 

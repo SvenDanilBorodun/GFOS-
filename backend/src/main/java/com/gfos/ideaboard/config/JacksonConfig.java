@@ -14,11 +14,11 @@ public class JacksonConfig implements ContextResolver<ObjectMapper> {
 
     public JacksonConfig() {
         objectMapper = new ObjectMapper();
-        // Support Java 8 date/time types
+        // Unterstützen Sie Java 8 Datums-/Zeittypen
         objectMapper.registerModule(new JavaTimeModule());
-        // Write dates as ISO strings, not timestamps
+        // Schreiben Sie Daten als ISO-Strings, nicht als Zeitstempel
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        // Ignore unknown properties when deserializing
+        // Unbekannte Eigenschaften beim Deserialisieren ignorieren
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 

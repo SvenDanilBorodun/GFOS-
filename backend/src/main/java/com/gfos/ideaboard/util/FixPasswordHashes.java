@@ -15,22 +15,22 @@ public class FixPasswordHashes {
 
     public static void main(String[] args) {
         try {
-            // Generate correct hashes
+            // Generieren Sie korrekte Hashes
             String adminHash = BCrypt.withDefaults().hashToString(BCRYPT_COST, "admin123".toCharArray());
             String userHash = BCrypt.withDefaults().hashToString(BCRYPT_COST, "password123".toCharArray());
 
-            System.out.println("Connecting to database...");
+            System.out.println("Verbindung zur Datenbank wird hergestellt...");
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 
-            // Update admin password
+            // Aktualisieren Sie das Admin-Passwort
             String updateAdmin = "UPDATE users SET password_hash = ? WHERE username = ?";
             PreparedStatement stmt1 = conn.prepareStatement(updateAdmin);
             stmt1.setString(1, adminHash);
             stmt1.setString(2, "admin");
             int count1 = stmt1.executeUpdate();
-            System.out.println("Updated admin password: " + count1 + " row(s)");
+            System.out.println("Admin-Passwort aktualisiert: " + count1 + " Zeile(n)");
 
-            // Update test users
+            // Aktualisieren Sie Test-Benutzer-Passwörter
             String updateUsers = "UPDATE users SET password_hash = ? WHERE username IN (?, ?, ?)";
             PreparedStatement stmt2 = conn.prepareStatement(updateUsers);
             stmt2.setString(1, userHash);
@@ -38,14 +38,14 @@ public class FixPasswordHashes {
             stmt2.setString(3, "mwilson");
             stmt2.setString(4, "tjohnson");
             int count2 = stmt2.executeUpdate();
-            System.out.println("Updated test users passwords: " + count2 + " row(s)");
+            System.out.println("Test-Benutzer-Passwörter aktualisiert: " + count2 + " Zeile(n)");
 
-            // Verify
+            // Überprüfen Sie
             String query = "SELECT username, role FROM users ORDER BY username";
             PreparedStatement stmt3 = conn.prepareStatement(query);
             ResultSet rs = stmt3.executeQuery();
 
-            System.out.println("\nUsers in database:");
+            System.out.println("\nBenutzer in der Datenbank:");
             while (rs.next()) {
                 System.out.println("  - " + rs.getString("username") + " (" + rs.getString("role") + ")");
             }
@@ -56,15 +56,15 @@ public class FixPasswordHashes {
             stmt3.close();
             conn.close();
 
-            System.out.println("\n✓ Password hashes updated successfully!");
-            System.out.println("\nYou can now login with:");
+            System.out.println("\n✓ Passwort-Hashes erfolgreich aktualisiert!");
+            System.out.println("\nSie können sich jetzt anmelden mit:");
             System.out.println("  admin / admin123");
             System.out.println("  jsmith / password123");
             System.out.println("  mwilson / password123");
             System.out.println("  tjohnson / password123");
 
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("Fehler: " + e.getMessage());
             e.printStackTrace();
         }
     }

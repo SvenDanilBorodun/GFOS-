@@ -12,8 +12,8 @@ import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- * CORS filter that handles preflight OPTIONS requests and adds CORS headers to all responses.
- * Uses @PreMatching to intercept OPTIONS requests BEFORE authentication filters run.
+ * CORS-Filter, der Preflight-OPTIONS-Anfragen verarbeitet und CORS-Header zu allen Antworten hinzufügt.
+ * Verwendet @PreMatching, um OPTIONS-Anfragen VOR dem Ausführen von Authentifizierungsfiltern abzufangen.
  */
 @Provider
 @PreMatching
@@ -26,11 +26,11 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     private static final String MAX_AGE = "86400";
 
     /**
-     * Request filter - handles OPTIONS preflight requests immediately without authentication.
+     * Anfrage-Filter - verarbeitet OPTIONS-Preflight-Anfragen sofort ohne Authentifizierung.
      */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        // Handle preflight OPTIONS requests - abort before authentication
+        // Verarbeiten Sie Preflight-OPTIONS-Anfragen - brechen Sie vor der Authentifizierung ab
         if ("OPTIONS".equalsIgnoreCase(requestContext.getMethod())) {
             requestContext.abortWith(
                 Response.ok()
@@ -45,12 +45,12 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     }
 
     /**
-     * Response filter - adds CORS headers to all non-OPTIONS responses.
+     * Antwort-Filter - fügt CORS-Header zu allen Nicht-OPTIONS-Antworten hinzu.
      */
     @Override
     public void filter(ContainerRequestContext requestContext,
                        ContainerResponseContext responseContext) throws IOException {
-        // Add CORS headers to all responses
+        // Fügen Sie CORS-Header zu allen Antworten hinzu
         responseContext.getHeaders().add("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
         responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
         responseContext.getHeaders().add("Access-Control-Allow-Headers", ALLOWED_HEADERS);

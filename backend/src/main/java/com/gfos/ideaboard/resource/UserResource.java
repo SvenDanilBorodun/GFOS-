@@ -64,11 +64,11 @@ public class UserResource {
         String newPassword = body.get("newPassword");
 
         if (oldPassword == null || newPassword == null) {
-            throw ApiException.badRequest("Both old and new passwords are required");
+            throw ApiException.badRequest("Altes und neues Passwort sind erforderlich");
         }
 
         userService.changePassword(userId, oldPassword, newPassword);
-        return Response.ok(Map.of("message", "Password changed successfully")).build();
+        return Response.ok(Map.of("message", "Passwort erfolgreich geändert")).build();
     }
 
     @GET
@@ -90,7 +90,7 @@ public class UserResource {
     public Response getAllUsers(@Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can list all users");
+            throw ApiException.forbidden("Nur Administratoren können alle Benutzer auflisten");
         }
         List<UserDTO> users = userService.getAllUsers();
         return Response.ok(users).build();
@@ -102,7 +102,7 @@ public class UserResource {
     public Response getUserById(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can view other users");
+            throw ApiException.forbidden("Nur Administratoren können andere Benutzer anzeigen");
         }
         UserDTO user = userService.getUserById(id);
         return Response.ok(user).build();
@@ -115,20 +115,20 @@ public class UserResource {
                                @Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can change roles");
+            throw ApiException.forbidden("Nur Administratoren können Rollen ändern");
         }
 
         String newRole = body.get("role");
         if (newRole == null) {
-            throw ApiException.badRequest("Role is required");
+            throw ApiException.badRequest("Rolle ist erforderlich");
         }
 
         try {
             UserRole userRole = UserRole.valueOf(newRole);
             userService.updateRole(id, userRole);
-            return Response.ok(Map.of("message", "Role updated")).build();
+            return Response.ok(Map.of("message", "Rolle aktualisiert")).build();
         } catch (IllegalArgumentException e) {
-            throw ApiException.badRequest("Invalid role");
+            throw ApiException.badRequest("Ungültige Rolle");
         }
     }
 
@@ -139,16 +139,16 @@ public class UserResource {
                                  @Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can change user status");
+            throw ApiException.forbidden("Nur Administratoren können den Benutzerstatus ändern");
         }
 
         Boolean isActive = body.get("isActive");
         if (isActive == null) {
-            throw ApiException.badRequest("isActive is required");
+            throw ApiException.badRequest("isActive ist erforderlich");
         }
 
         userService.setUserActive(id, isActive);
-        return Response.ok(Map.of("message", "Status updated")).build();
+        return Response.ok(Map.of("message", "Status aktualisiert")).build();
     }
 
     @GET
@@ -158,9 +158,9 @@ public class UserResource {
         Long currentUserId = (Long) requestContext.getProperty("userId");
         String role = (String) requestContext.getProperty("role");
 
-        // Users can view their own badges, admins can view anyone's
+        // Benutzer können ihre eigenen Abzeichen ansehen, Administratoren können die Abzeichen aller ansehen.
         if (!currentUserId.equals(id) && !"ADMIN".equals(role)) {
-            throw ApiException.forbidden("You can only view your own badges");
+            throw ApiException.forbidden("Sie können nur Ihre eigenen Abzeichen anzeigen");
         }
 
         List<UserBadgeDTO> badges = gamificationService.getUserBadges(id).stream()

@@ -15,13 +15,13 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin-Panel</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Manage users, view audit logs, and export data
+          Verwalten Sie Benutzer, sehen Sie Audit-Logs ein und exportieren Sie Daten
         </p>
       </div>
 
-      {/* Navigation tabs */}
+      {/* Navigations-Reiter */}
       <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
         <NavLink
           to="/admin/users"
@@ -35,7 +35,7 @@ export default function AdminPage() {
         >
           <div className="flex items-center gap-2">
             <UserGroupIcon className="w-4 h-4" />
-            Users
+            Benutzer
           </div>
         </NavLink>
         <NavLink
@@ -50,7 +50,7 @@ export default function AdminPage() {
         >
           <div className="flex items-center gap-2">
             <ClipboardDocumentListIcon className="w-4 h-4" />
-            Audit Logs
+            Audit-Logs
           </div>
         </NavLink>
         <NavLink
@@ -94,7 +94,7 @@ function UsersManagement() {
       const response = await api.get<User[]>('/users');
       setUsers(response.data);
     } catch (error) {
-      toast.error('Failed to load users');
+      toast.error('Fehler beim Laden von Benutzern');
     } finally {
       setLoading(false);
     }
@@ -108,9 +108,9 @@ function UsersManagement() {
           u.id === userId ? { ...u, role: newRole as User['role'] } : u
         )
       );
-      toast.success('Role updated');
+      toast.success('Rolle aktualisiert');
     } catch (error) {
-      toast.error('Failed to update role');
+      toast.error('Fehler beim Aktualisieren der Rolle');
     }
   };
 
@@ -122,9 +122,9 @@ function UsersManagement() {
           u.id === userId ? { ...u, isActive: !isActive } : u
         )
       );
-      toast.success(isActive ? 'User deactivated' : 'User activated');
+      toast.success(isActive ? 'Benutzer deaktiviert' : 'Benutzer aktiviert');
     } catch (error) {
-      toast.error('Failed to update user status');
+      toast.error('Fehler beim Aktualisieren des Benutzerstatus');
     }
   };
 
@@ -242,7 +242,7 @@ function AuditLogs() {
       const response = await api.get<AuditLog[]>('/audit-logs');
       setLogs(response.data);
     } catch (error) {
-      toast.error('Failed to load audit logs');
+      toast.error('Fehler beim Laden von Audit-Logs');
     } finally {
       setLoading(false);
     }
@@ -298,7 +298,7 @@ function AuditLogs() {
             {logs.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                  No audit logs found
+                  Keine Audit-Logs gefunden
                 </td>
               </tr>
             ) : (
@@ -350,9 +350,9 @@ function ExportData() {
       a.click();
       window.URL.revokeObjectURL(url);
 
-      toast.success('Export downloaded');
+      toast.success('Export heruntergeladen');
     } catch (error) {
-      toast.error('Failed to export');
+      toast.error('Fehler beim Export');
     } finally {
       setExporting(null);
     }
@@ -360,20 +360,20 @@ function ExportData() {
 
   const exportOptions = [
     {
-      title: 'Statistics Report',
-      description: 'Export KPIs and dashboard statistics',
+      title: 'Statistikbericht',
+      description: 'KPIs und Dashboard-Statistiken exportieren',
       type: 'statistics',
       formats: ['csv', 'pdf'],
     },
     {
-      title: 'Ideas Data',
-      description: 'Export all ideas with details',
+      title: 'Ideen-Daten',
+      description: 'Alle Ideen mit Details exportieren',
       type: 'ideas',
       formats: ['csv'],
     },
     {
-      title: 'User Activity',
-      description: 'Export user activity and contributions',
+      title: 'Benutzeraktivität',
+      description: 'Benutzeraktivität und Beiträge exportieren',
       type: 'users',
       formats: ['csv'],
     },

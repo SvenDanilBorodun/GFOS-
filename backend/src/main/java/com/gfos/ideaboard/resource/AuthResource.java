@@ -39,7 +39,7 @@ public class AuthResource {
         String refreshToken = body.get("refreshToken");
         if (refreshToken == null || refreshToken.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Refresh token is required"))
+                    .entity(Map.of("error", "Aktualisierungstoken ist erforderlich"))
                     .build();
         }
         AuthResponse response = authService.refreshToken(refreshToken);
@@ -49,8 +49,8 @@ public class AuthResource {
     @POST
     @Path("/logout")
     public Response logout() {
-        // JWT is stateless, so logout is handled client-side
-        // This endpoint exists for future token blacklisting implementation
-        return Response.ok(Map.of("message", "Logged out successfully")).build();
+        // JWT ist statuslos, daher wird die Abmeldung auf der Client-Seite behandelt.
+        // Dieser Endpunkt existiert für eine zukünftige Token-Blacklist-Implementierung.
+        return Response.ok(Map.of("message", "Erfolgreich abgemeldet")).build();
     }
 }

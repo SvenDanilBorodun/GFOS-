@@ -24,7 +24,7 @@ public class ExportResource {
     public Response exportIdeasCsv(@Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role) && !"PROJECT_MANAGER".equals(role)) {
-            throw ApiException.forbidden("Only admins and project managers can export data");
+            throw ApiException.forbidden("Nur Administratoren und Projektmanager können Daten exportieren");
         }
 
         byte[] csv = exportService.exportIdeasToCsv();
@@ -39,7 +39,7 @@ public class ExportResource {
     public Response exportStatisticsCsv(@Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role) && !"PROJECT_MANAGER".equals(role)) {
-            throw ApiException.forbidden("Only admins and project managers can export data");
+            throw ApiException.forbidden("Nur Administratoren und Projektmanager können Daten exportieren");
         }
 
         byte[] csv = exportService.exportStatisticsToCsv();
@@ -54,7 +54,7 @@ public class ExportResource {
     public Response exportStatisticsPdf(@Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role) && !"PROJECT_MANAGER".equals(role)) {
-            throw ApiException.forbidden("Only admins and project managers can export data");
+            throw ApiException.forbidden("Nur Administratoren und Projektmanager können Daten exportieren");
         }
 
         try {
@@ -63,7 +63,7 @@ public class ExportResource {
                     .header("Content-Disposition", "attachment; filename=\"statistics.pdf\"")
                     .build();
         } catch (IOException e) {
-            throw ApiException.serverError("Failed to generate PDF: " + e.getMessage());
+            throw ApiException.serverError("Fehler beim Generieren des PDF: " + e.getMessage());
         }
     }
 
@@ -73,7 +73,7 @@ public class ExportResource {
     public Response exportUsersCsv(@Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can export user data");
+            throw ApiException.forbidden("Nur Administratoren können Benutzerdaten exportieren");
         }
 
         byte[] csv = exportService.exportUsersToCsv();

@@ -10,7 +10,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request-Interceptor zum Hinzufügen von Auth-Token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('ideaboard_token');
@@ -22,13 +22,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling and token refresh
+// Response-Interceptor für Fehlerbehandlung und Token-Aktualisierung
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Handle 401 Unauthorized - try to refresh token
+    // 401 Unauthorized behandeln - versuchen Token zu aktualisieren
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -47,7 +47,7 @@ api.interceptors.response.use(
           }
           return api(originalRequest);
         } catch {
-          // Refresh failed, clear tokens and redirect to login
+          // Aktualisierung fehlgeschlagen, Token löschen und zur Anmeldung umleiten
           localStorage.removeItem('ideaboard_token');
           localStorage.removeItem('ideaboard_refresh_token');
           localStorage.removeItem('ideaboard_user');
@@ -56,10 +56,10 @@ api.interceptors.response.use(
       }
     }
 
-    // Transform error response
+    // Fehlerantwort transformieren
     const apiError: ApiError = {
       status: error.response?.status || 500,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: error.response?.data?.message || 'Ein unerwarteter Fehler ist aufgetreten',
       timestamp: new Date().toISOString(),
       path: error.config?.url,
       errors: error.response?.data?.errors,

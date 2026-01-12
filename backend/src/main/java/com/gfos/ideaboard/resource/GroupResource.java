@@ -24,7 +24,7 @@ public class GroupResource {
     private GroupService groupService;
 
     /**
-     * Get all groups the current user is a member of.
+     * Rufe alle Gruppen ab, deren Mitglied der aktuelle Benutzer ist
      */
     @GET
     public Response getUserGroups(@Context ContainerRequestContext requestContext) {
@@ -34,7 +34,7 @@ public class GroupResource {
     }
 
     /**
-     * Get a specific group by ID.
+     * Rufe eine bestimmte Gruppe nach ID ab
      */
     @GET
     @Path("/{id}")
@@ -45,7 +45,7 @@ public class GroupResource {
     }
 
     /**
-     * Get group by idea ID.
+     * Rufe eine Gruppe nach Ideen-ID ab
      */
     @GET
     @Path("/idea/{ideaId}")
@@ -56,7 +56,7 @@ public class GroupResource {
     }
 
     /**
-     * Join a group.
+     * Trete einer Gruppe bei
      */
     @POST
     @Path("/{id}/join")
@@ -67,7 +67,7 @@ public class GroupResource {
     }
 
     /**
-     * Join a group by idea ID.
+     * Trete einer Gruppe nach Ideen-ID bei
      */
     @POST
     @Path("/idea/{ideaId}/join")
@@ -78,18 +78,18 @@ public class GroupResource {
     }
 
     /**
-     * Leave a group.
+     * Verlasse eine Gruppe
      */
     @DELETE
     @Path("/{id}/leave")
     public Response leaveGroup(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         groupService.leaveGroup(id, userId);
-        return Response.ok(Map.of("message", "Left group successfully")).build();
+        return Response.ok(Map.of("message", "Gruppe erfolgreich verlassen")).build();
     }
 
     /**
-     * Get all messages in a group.
+     * Rufe alle Nachrichten in einer Gruppe ab
      */
     @GET
     @Path("/{id}/messages")
@@ -100,7 +100,7 @@ public class GroupResource {
     }
 
     /**
-     * Send a message to a group.
+     * Sende eine Nachricht an eine Gruppe
      */
     @POST
     @Path("/{id}/messages")
@@ -110,7 +110,7 @@ public class GroupResource {
         String content = body.get("content");
 
         if (content == null || content.trim().isEmpty()) {
-            throw ApiException.badRequest("Message content is required");
+            throw ApiException.badRequest("Nachrichteninhalt ist erforderlich");
         }
 
         GroupMessageDTO message = groupService.sendMessage(id, content, userId);
@@ -118,18 +118,18 @@ public class GroupResource {
     }
 
     /**
-     * Mark all messages in a group as read.
+     * Markiere alle Nachrichten in einer Gruppe als gelesen
      */
     @PUT
     @Path("/{id}/messages/read")
     public Response markAllAsRead(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         groupService.markAllMessagesAsRead(id, userId);
-        return Response.ok(Map.of("message", "All messages marked as read")).build();
+        return Response.ok(Map.of("message", "Alle Nachrichten als gelesen markiert")).build();
     }
 
     /**
-     * Check if user is a member of a group.
+     * Prüfe, ob der Benutzer ein Mitglied einer Gruppe ist
      */
     @GET
     @Path("/{id}/membership")
@@ -140,7 +140,7 @@ public class GroupResource {
     }
 
     /**
-     * Check if user is a member of a group by idea ID.
+     * Prüfe, ob der Benutzer ein Mitglied einer Gruppe nach Ideen-ID ist
      */
     @GET
     @Path("/idea/{ideaId}/membership")
@@ -156,7 +156,7 @@ public class GroupResource {
     }
 
     /**
-     * Get total unread count across all groups.
+     * Rufe die Gesamtzahl der ungelesenen Nachrichten über alle Gruppen ab
      */
     @GET
     @Path("/unread-count")

@@ -99,13 +99,13 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-material-3
                  border border-gray-100 dark:border-gray-700 overflow-hidden animate-scale-in"
     >
-      {/* Header */}
+      {/* Kopfzeile */}
       <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
         <h3 className="font-semibold text-gray-900 dark:text-white">
-          Notifications
+          Benachrichtigungen
           {unreadCount > 0 && (
             <span className="ml-2 text-xs bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded-full">
-              {unreadCount} new
+              {unreadCount} neu
             </span>
           )}
         </h3>
@@ -114,12 +114,12 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             onClick={handleMarkAllAsRead}
             className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
           >
-            Mark all as read
+            Alle als gelesen markieren
           </button>
         )}
       </div>
 
-      {/* Notifications list */}
+      {/* Benachrichtigungsliste */}
       <div className="max-h-96 overflow-y-auto">
         {loading ? (
           <div className="p-8 text-center">
@@ -127,7 +127,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           </div>
         ) : notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            No notifications yet
+            Noch keine Benachrichtigungen
           </div>
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -171,7 +171,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                           handleMarkAsRead(notification.id);
                         }}
                         className="flex-shrink-0 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
-                        title="Mark as read"
+                        title="Als gelesen markieren"
                       >
                         <CheckIcon className="w-4 h-4 text-gray-400" />
                       </button>
@@ -184,7 +184,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
         )}
       </div>
 
-      {/* Footer */}
+      {/* Fußzeile */}
       {notifications.length > 10 && (
         <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 text-center">
           <Link
@@ -192,7 +192,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             onClick={onClose}
             className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
           >
-            View all notifications
+            Alle Benachrichtigungen anzeigen
           </Link>
         </div>
       )}

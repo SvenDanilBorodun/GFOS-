@@ -25,7 +25,7 @@ public class MessageResource {
     private MessageService messageService;
 
     /**
-     * Send a new message to another user
+     * Sende eine neue Nachricht an einen anderen Benutzer
      */
     @POST
     public Response sendMessage(
@@ -42,7 +42,7 @@ public class MessageResource {
     }
 
     /**
-     * Get all conversations for the current user
+     * Rufe alle Konversationen des aktuellen Benutzers ab
      */
     @GET
     @Path("/conversations")
@@ -53,7 +53,7 @@ public class MessageResource {
     }
 
     /**
-     * Get messages in a conversation with another user
+     * Rufe Nachrichten in einer Konversation mit einem anderen Benutzer ab
      */
     @GET
     @Path("/conversations/{userId}")
@@ -68,7 +68,7 @@ public class MessageResource {
     }
 
     /**
-     * Get unread message count
+     * Rufe die Anzahl ungelesener Nachrichten ab
      */
     @GET
     @Path("/unread-count")
@@ -79,7 +79,7 @@ public class MessageResource {
     }
 
     /**
-     * Mark a single message as read
+     * Markiere eine einzelne Nachricht als gelesen
      */
     @PUT
     @Path("/{id}/read")
@@ -88,11 +88,11 @@ public class MessageResource {
             @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         messageService.markAsRead(messageId, userId);
-        return Response.ok(Map.of("message", "Marked as read")).build();
+        return Response.ok(Map.of("message", "Als gelesen markiert")).build();
     }
 
     /**
-     * Mark all messages in a conversation as read
+     * Markiere alle Nachrichten in einer Konversation als gelesen
      */
     @PUT
     @Path("/conversations/{userId}/read")
@@ -101,11 +101,11 @@ public class MessageResource {
             @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         messageService.markConversationAsRead(userId, otherUserId);
-        return Response.ok(Map.of("message", "Conversation marked as read")).build();
+        return Response.ok(Map.of("message", "Konversation als gelesen markiert")).build();
     }
 
     /**
-     * Get messages related to a specific idea
+     * Rufe Nachrichten zu einer bestimmten Idee ab
      */
     @GET
     @Path("/idea/{ideaId}")

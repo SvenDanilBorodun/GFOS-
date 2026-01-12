@@ -1,7 +1,7 @@
--- GFOS Digital Idea Board - Database Schema
+-- GFOS Digital Idea Board - Datenbankschema
 -- PostgreSQL 15+
 
--- Drop existing tables if they exist (for clean reinstall)
+-- Vorhandene Tabellen löschen, wenn sie existieren (für saubere Neuinstallation)
 DROP TABLE IF EXISTS group_message_reads CASCADE;
 DROP TABLE IF EXISTS group_messages CASCADE;
 DROP TABLE IF EXISTS group_members CASCADE;
@@ -23,11 +23,11 @@ DROP TABLE IF EXISTS idea_tags CASCADE;
 DROP TABLE IF EXISTS ideas CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
--- Note: Using VARCHAR instead of PostgreSQL enum types for JPA compatibility
--- The enum values are validated at the application level
+-- Hinweis: VARCHAR statt PostgreSQL Enum-Typen für JPA-Kompatibilität verwendet
+-- Die Enum-Werte werden auf Anwendungsebene validiert
 
 -- =====================================================
--- USERS TABLE
+-- BENUTZER-TABELLE
 -- =====================================================
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
@@ -51,7 +51,7 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
 
 -- =====================================================
--- IDEAS TABLE
+-- IDEEN-TABELLE
 -- =====================================================
 CREATE TABLE ideas (
     id BIGSERIAL PRIMARY KEY,
@@ -76,7 +76,7 @@ CREATE INDEX idx_ideas_created_at ON ideas(created_at DESC);
 CREATE INDEX idx_ideas_like_count ON ideas(like_count DESC);
 
 -- =====================================================
--- IDEA TAGS TABLE
+-- IDEEN-TAGS-TABELLE
 -- =====================================================
 CREATE TABLE idea_tags (
     id BIGSERIAL PRIMARY KEY,
@@ -89,7 +89,7 @@ CREATE INDEX idx_idea_tags_idea ON idea_tags(idea_id);
 CREATE INDEX idx_idea_tags_name ON idea_tags(tag_name);
 
 -- =====================================================
--- FILE ATTACHMENTS TABLE
+-- DATEIANHÄNGE-TABELLE
 -- =====================================================
 CREATE TABLE file_attachments (
     id BIGSERIAL PRIMARY KEY,
@@ -106,7 +106,7 @@ CREATE TABLE file_attachments (
 CREATE INDEX idx_file_attachments_idea ON file_attachments(idea_id);
 
 -- =====================================================
--- LIKES TABLE
+-- LIKES-TABELLE
 -- =====================================================
 CREATE TABLE likes (
     id BIGSERIAL PRIMARY KEY,
@@ -121,7 +121,7 @@ CREATE INDEX idx_likes_idea ON likes(idea_id);
 CREATE INDEX idx_likes_created_at ON likes(created_at);
 
 -- =====================================================
--- COMMENTS TABLE
+-- KOMMENTARE-TABELLE
 -- =====================================================
 CREATE TABLE comments (
     id BIGSERIAL PRIMARY KEY,
@@ -138,7 +138,7 @@ CREATE INDEX idx_comments_author ON comments(author_id);
 CREATE INDEX idx_comments_created_at ON comments(created_at DESC);
 
 -- =====================================================
--- CHECKLIST ITEMS TABLE
+-- CHECKLISTEN-ELEMENTE-TABELLE
 -- =====================================================
 CREATE TABLE checklist_items (
     id BIGSERIAL PRIMARY KEY,
@@ -154,7 +154,7 @@ CREATE INDEX idx_checklist_items_idea ON checklist_items(idea_id);
 CREATE INDEX idx_checklist_items_position ON checklist_items(idea_id, ordinal_position);
 
 -- =====================================================
--- COMMENT REACTIONS TABLE
+-- KOMMENTAR-REAKTIONEN-TABELLE
 -- =====================================================
 CREATE TABLE comment_reactions (
     id BIGSERIAL PRIMARY KEY,
@@ -169,7 +169,7 @@ CREATE INDEX idx_comment_reactions_comment ON comment_reactions(comment_id);
 CREATE INDEX idx_comment_reactions_user ON comment_reactions(user_id);
 
 -- =====================================================
--- SURVEYS TABLE
+-- UMFRAGEN-TABELLE
 -- =====================================================
 CREATE TABLE surveys (
     id BIGSERIAL PRIMARY KEY,
@@ -189,7 +189,7 @@ CREATE INDEX idx_surveys_active ON surveys(is_active);
 CREATE INDEX idx_surveys_created_at ON surveys(created_at DESC);
 
 -- =====================================================
--- SURVEY OPTIONS TABLE
+-- UMFRAGE-OPTIONEN-TABELLE
 -- =====================================================
 CREATE TABLE survey_options (
     id BIGSERIAL PRIMARY KEY,
@@ -202,7 +202,7 @@ CREATE TABLE survey_options (
 CREATE INDEX idx_survey_options_survey ON survey_options(survey_id);
 
 -- =====================================================
--- SURVEY VOTES TABLE
+-- UMFRAGE-ABSTIMMUNGEN-TABELLE
 -- =====================================================
 CREATE TABLE survey_votes (
     id BIGSERIAL PRIMARY KEY,
@@ -217,7 +217,7 @@ CREATE INDEX idx_survey_votes_survey ON survey_votes(survey_id);
 CREATE INDEX idx_survey_votes_user ON survey_votes(user_id);
 
 -- =====================================================
--- BADGES TABLE
+-- ABZEICHEN-TABELLE
 -- =====================================================
 CREATE TABLE badges (
     id BIGSERIAL PRIMARY KEY,
@@ -232,7 +232,7 @@ CREATE TABLE badges (
 );
 
 -- =====================================================
--- USER BADGES TABLE
+-- BENUTZER-ABZEICHEN-TABELLE
 -- =====================================================
 CREATE TABLE user_badges (
     id BIGSERIAL PRIMARY KEY,
@@ -246,7 +246,7 @@ CREATE INDEX idx_user_badges_user ON user_badges(user_id);
 CREATE INDEX idx_user_badges_badge ON user_badges(badge_id);
 
 -- =====================================================
--- AUDIT LOGS TABLE
+-- AUDIT-PROTOKOLLE-TABELLE
 -- =====================================================
 CREATE TABLE audit_logs (
     id BIGSERIAL PRIMARY KEY,
@@ -267,7 +267,7 @@ CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
 CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
 
 -- =====================================================
--- NOTIFICATIONS TABLE
+-- BENACHRICHTIGUNGEN-TABELLE
 -- =====================================================
 CREATE TABLE notifications (
     id BIGSERIAL PRIMARY KEY,
@@ -288,7 +288,7 @@ CREATE INDEX idx_notifications_unread ON notifications(user_id, is_read) WHERE i
 CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
 
 -- =====================================================
--- MESSAGES TABLE (User-to-User Messaging)
+-- NACHRICHTEN-TABELLE (Benutzer-zu-Benutzer-Nachrichten)
 -- =====================================================
 CREATE TABLE messages (
     id BIGSERIAL PRIMARY KEY,
@@ -309,7 +309,7 @@ CREATE INDEX idx_messages_unread ON messages(recipient_id, is_read) WHERE is_rea
 CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
 
 -- =====================================================
--- IDEA GROUPS TABLE (Auto-created when idea is created)
+-- IDEEN-GRUPPEN-TABELLE (Automatisch erstellt, wenn eine Idee erstellt wird)
 -- =====================================================
 CREATE TABLE idea_groups (
     id BIGSERIAL PRIMARY KEY,
@@ -325,7 +325,7 @@ CREATE INDEX idx_idea_groups_idea ON idea_groups(idea_id);
 CREATE INDEX idx_idea_groups_created_by ON idea_groups(created_by);
 
 -- =====================================================
--- GROUP MEMBERS TABLE (Junction table for group membership)
+-- GRUPPENMITGLIEDER-TABELLE (Verbindungstabelle für Gruppenmitgliedschaft)
 -- =====================================================
 CREATE TABLE group_members (
     id BIGSERIAL PRIMARY KEY,
@@ -340,7 +340,7 @@ CREATE INDEX idx_group_members_group ON group_members(group_id);
 CREATE INDEX idx_group_members_user ON group_members(user_id);
 
 -- =====================================================
--- GROUP MESSAGES TABLE (Messages within idea groups)
+-- GRUPPENNACHRICHTEN-TABELLE (Nachrichten innerhalb von Ideengruppen)
 -- =====================================================
 CREATE TABLE group_messages (
     id BIGSERIAL PRIMARY KEY,
@@ -355,7 +355,7 @@ CREATE INDEX idx_group_messages_sender ON group_messages(sender_id);
 CREATE INDEX idx_group_messages_created_at ON group_messages(created_at DESC);
 
 -- =====================================================
--- GROUP MESSAGE READ STATUS TABLE (Track who has read which messages)
+-- GRUPPENNACHRICHT-LESESTATUS-TABELLE (Verfolgung, wer welche Nachrichten gelesen hat)
 -- =====================================================
 CREATE TABLE group_message_reads (
     id BIGSERIAL PRIMARY KEY,
@@ -369,10 +369,10 @@ CREATE INDEX idx_group_message_reads_message ON group_message_reads(message_id);
 CREATE INDEX idx_group_message_reads_user ON group_message_reads(user_id);
 
 -- =====================================================
--- FUNCTIONS AND TRIGGERS
+-- FUNKTIONEN UND TRIGGER
 -- =====================================================
 
--- Function to update updated_at timestamp
+-- Funktion zum Aktualisieren des updated_at-Zeitstempels
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -381,7 +381,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers for updated_at
+-- Trigger für updated_at
 CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -402,7 +402,7 @@ CREATE TRIGGER update_idea_groups_updated_at
     BEFORE UPDATE ON idea_groups
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Function to update idea like count
+-- Funktion zum Aktualisieren der Ideen-Like-Zählung
 CREATE OR REPLACE FUNCTION update_idea_like_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -421,7 +421,7 @@ CREATE TRIGGER trigger_update_like_count
     AFTER INSERT OR DELETE ON likes
     FOR EACH ROW EXECUTE FUNCTION update_idea_like_count();
 
--- Function to update idea comment count
+-- Funktion zum Aktualisieren der Ideen-Kommentar-Zählung
 CREATE OR REPLACE FUNCTION update_idea_comment_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -440,7 +440,7 @@ CREATE TRIGGER trigger_update_comment_count
     AFTER INSERT OR DELETE ON comments
     FOR EACH ROW EXECUTE FUNCTION update_idea_comment_count();
 
--- Function to update comment reaction count
+-- Funktion zum Aktualisieren der Kommentar-Reaktions-Zählung
 CREATE OR REPLACE FUNCTION update_comment_reaction_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -459,7 +459,7 @@ CREATE TRIGGER trigger_update_reaction_count
     AFTER INSERT OR DELETE ON comment_reactions
     FOR EACH ROW EXECUTE FUNCTION update_comment_reaction_count();
 
--- Function to update survey vote count
+-- Funktion zum Aktualisieren der Umfrage-Abstimmungs-Zählung
 CREATE OR REPLACE FUNCTION update_survey_vote_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -481,43 +481,43 @@ CREATE TRIGGER trigger_update_vote_count
     FOR EACH ROW EXECUTE FUNCTION update_survey_vote_count();
 
 -- =====================================================
--- SEED DATA
+-- SEED-DATEN
 -- =====================================================
 
--- Insert default badges (name matches GamificationService badge criteria)
+-- Standardabzeichen einfügen (Name entspricht GamificationService-Abzeichen-Kriterien)
 INSERT INTO badges (name, display_name, description, icon, criteria, xp_reward) VALUES
-    ('first_idea', 'First Idea', 'Submitted your first innovation idea', 'lightbulb', 'Submit first idea', 25),
-    ('idea_machine', 'Idea Machine', 'Submitted 10 innovation ideas', 'rocket', 'Submit 10 ideas', 100),
-    ('popular', 'Popular', 'Received 10 likes on a single idea', 'star', 'Get 10 likes on one idea', 50),
-    ('trendsetter', 'Trendsetter', 'Received 50 likes total', 'trending_up', 'Get 50 total likes', 150),
-    ('commentator', 'Commentator', 'Left 50 comments on ideas', 'chat', 'Post 50 comments', 75),
-    ('supporter', 'Supporter', 'Used all likes 4 weeks in a row', 'favorite', 'Use all likes 4 consecutive weeks', 100),
-    ('contributor_month', 'Contributor of the Month', 'Most ideas submitted in a month', 'emoji_events', 'Top contributor monthly', 200),
-    ('team_player', 'Team Player', 'Commented on 20 different ideas', 'groups', 'Comment on 20 unique ideas', 50),
-    ('innovator', 'Innovator', 'Had an idea reach Completed status', 'check_circle', 'Idea reaches Completed', 150),
-    ('early_bird', 'Early Bird', 'One of the first 100 users', 'schedule', 'Register in first 100 users', 50);
+    ('first_idea', 'First Idea', 'Reichen Sie Ihre erste Innovationsidee ein', 'lightbulb', 'Submit first idea', 25),
+    ('idea_machine', 'Idea Machine', 'Zehn Innovationsideen eingereicht', 'rocket', 'Submit 10 ideas', 100),
+    ('popular', 'Popular', 'Zehn Likes auf einer einzelnen Idee erhalten', 'star', 'Get 10 likes on one idea', 50),
+    ('trendsetter', 'Trendsetter', 'Insgesamt 50 Likes erhalten', 'trending_up', 'Get 50 total likes', 150),
+    ('commentator', 'Commentator', '50 Kommentare zu Ideen hinterlassen', 'chat', 'Post 50 comments', 75),
+    ('supporter', 'Supporter', 'Alle Likes 4 Wochen hintereinander verwendet', 'favorite', 'Use all likes 4 consecutive weeks', 100),
+    ('contributor_month', 'Contributor of the Month', 'Die meisten Ideen in einem Monat eingereicht', 'emoji_events', 'Top contributor monthly', 200),
+    ('team_player', 'Team Player', 'Kommentierte 20 verschiedene Ideen', 'groups', 'Comment on 20 unique ideas', 50),
+    ('innovator', 'Innovator', 'Eine Idee in den Status Fertigstellung brachte', 'check_circle', 'Idea reaches Completed', 150),
+    ('early_bird', 'Early Bird', 'Einer der ersten 100 Benutzer', 'schedule', 'Register in first 100 users', 50);
 
--- Insert admin user (password: admin123)
--- Hash generated with BCrypt cost factor 12, verified to match PasswordUtil implementation
+-- Admin-Benutzer einfügen (Passwort: admin123)
+-- Hash mit BCrypt-Kosten faktor 12 generiert, verifiziert, um mit PasswordUtil-Implementierung übereinzustimmen
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, xp_points, level) VALUES
     ('admin', 'admin@gfos.com', '$2a$12$MMbkxZQfQePt3aApd8bCsuSv0U7pT54rR708XyXXNq9gcnfjrsTBy', 'System', 'Administrator', 'ADMIN', 0, 1);
 
--- Insert test users (password: password123)
--- Hash generated with BCrypt cost factor 12, verified to match PasswordUtil implementation
+-- Test-Benutzer einfügen (Passwort: password123)
+-- Hash mit BCrypt-Kosten faktor 12 generiert, verifiziert, um mit PasswordUtil-Implementierung übereinzustimmen
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, xp_points, level) VALUES
     ('jsmith', 'john.smith@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'John', 'Smith', 'EMPLOYEE', 150, 2),
     ('mwilson', 'mary.wilson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Mary', 'Wilson', 'PROJECT_MANAGER', 350, 3),
     ('tjohnson', 'tom.johnson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Tom', 'Johnson', 'EMPLOYEE', 75, 1);
 
--- Insert sample ideas
+-- Beispiel-Ideen einfügen
 INSERT INTO ideas (title, description, category, status, progress_percentage, author_id) VALUES
-    ('AI-Powered Customer Support', 'Implement an AI chatbot for 24/7 customer support to reduce response times and improve customer satisfaction. The bot would handle common queries and escalate complex issues to human agents.', 'Technology', 'IN_PROGRESS', 45, 2),
-    ('Green Office Initiative', 'Reduce paper usage by 80% through digital transformation. Implement digital signatures, cloud storage, and paperless meeting rooms.', 'Sustainability', 'CONCEPT', 0, 3),
-    ('Employee Wellness Program', 'Launch a comprehensive wellness program including gym memberships, mental health resources, and flexible working hours.', 'HR', 'COMPLETED', 100, 4),
-    ('Mobile App for Field Workers', 'Develop a mobile application for field workers to submit reports, track time, and communicate with the office in real-time.', 'Technology', 'CONCEPT', 0, 2),
-    ('Customer Feedback Loop', 'Create an automated system to collect, analyze, and act on customer feedback across all touchpoints.', 'Customer Experience', 'IN_PROGRESS', 30, 3);
+    ('AI-gestützte Kundenunterstützung', 'Implementieren Sie einen KI-Chatbot für 24/7-Kundenunterstützung, um Reaktionszeiten zu verkürzen und die Kundenzufriedenheit zu verbessern. Der Bot würde häufige Anfragen bearbeiten und komplexe Probleme an menschliche Agenten eskalieren.', 'Technology', 'IN_PROGRESS', 45, 2),
+    ('Grüne Büro-Initiative', 'Reduzieren Sie die Papiernutzung um 80% durch digitale Transformation. Implementieren Sie digitale Signaturen, Cloud-Speicher und papierlose Besprechungsräume.', 'Sustainability', 'CONCEPT', 0, 3),
+    ('Mitarbeiter-Wellnessprogram', 'Starten Sie ein umfassendes Wellness-Programm mit Fitnessstudio-Mitgliedschaften, psychischen Gesundheitsressourcen und flexiblen Arbeitszeiten.', 'HR', 'COMPLETED', 100, 4),
+    ('Mobile App für Außendienstmitarbeiter', 'Entwickeln Sie eine mobile Anwendung für Außendienstmitarbeiter zum Einreichen von Berichten, Zeitverfolgung und Echtzeitkommunikation mit dem Büro.', 'Technology', 'CONCEPT', 0, 2),
+    ('Kundenfeedback-Schleife', 'Erstellen Sie ein automatisiertes System zum Sammeln, Analysieren und Handeln auf Kundenfeedback über alle Touchpoints.', 'Customer Experience', 'IN_PROGRESS', 30, 3);
 
--- Insert sample tags
+-- Beispiel-Tags einfügen
 INSERT INTO idea_tags (idea_id, tag_name) VALUES
     (1, 'AI'), (1, 'automation'), (1, 'customer-service'),
     (2, 'sustainability'), (2, 'digital'), (2, 'cost-saving'),
@@ -525,78 +525,78 @@ INSERT INTO idea_tags (idea_id, tag_name) VALUES
     (4, 'mobile'), (4, 'field-service'), (4, 'productivity'),
     (5, 'feedback'), (5, 'analytics'), (5, 'customer-experience');
 
--- Insert sample likes
+-- Beispiel-Likes einfügen
 INSERT INTO likes (user_id, idea_id) VALUES
     (2, 3), (3, 1), (4, 1), (4, 2), (2, 5);
 
--- Insert sample comments
+-- Beispiel-Kommentare einfügen
 INSERT INTO comments (idea_id, author_id, content) VALUES
-    (1, 3, 'Great idea! This could significantly reduce our support costs.'),
-    (1, 4, 'I have experience with chatbot implementation. Happy to help!'),
-    (2, 2, 'We should start with the most paper-intensive departments.'),
-    (3, 2, 'The gym membership perk is fantastic!'),
-    (5, 4, 'Can we integrate this with our existing CRM?');
+    (1, 3, 'Großartige Idee! Dies könnte unsere Supportkosten erheblich senken.'),
+    (1, 4, 'Ich habe Erfahrung mit der Chatbot-Implementierung. Gerne helfe ich!'),
+    (2, 2, 'Wir sollten mit den papierintensivsten Abteilungen beginnen.'),
+    (3, 2, 'Die Fitnessstudio-Mitgliedschaft ist fantastisch!'),
+    (5, 4, 'Können wir dies mit unserem bestehenden CRM integrieren?');
 
--- Insert sample reactions
+-- Beispiel-Reaktionen einfügen
 INSERT INTO comment_reactions (comment_id, user_id, emoji) VALUES
     (1, 2, 'thumbs_up'), (1, 4, 'heart'),
     (2, 3, 'thumbs_up'),
     (4, 3, 'heart'), (4, 4, 'celebrate');
 
--- Insert sample survey
+-- Beispiel-Umfrage einfügen
 INSERT INTO surveys (creator_id, question, description, is_active) VALUES
-    (2, 'Which new feature should we prioritize?', 'Help us decide the next big feature for our platform.', true);
+    (2, 'Welche neue Funktion sollten wir priorisieren?', 'Helfen Sie uns, die nächste große Funktion für unsere Plattform zu entscheiden.', true);
 
 INSERT INTO survey_options (survey_id, option_text, display_order) VALUES
-    (1, 'Dark Mode', 1),
+    (1, 'Dunkler Modus', 1),
     (1, 'Mobile App', 2),
-    (1, 'API Integrations', 3),
-    (1, 'Advanced Analytics', 4);
+    (1, 'API-Integrationen', 3),
+    (1, 'Erweiterte Analytik', 4);
 
 INSERT INTO survey_votes (survey_id, option_id, user_id) VALUES
     (1, 1, 3), (1, 2, 4);
 
--- Grant first badges
+-- Erste Abzeichen vergeben
 INSERT INTO user_badges (user_id, badge_id) VALUES
     (2, 1), -- John: First Idea
     (3, 1), -- Mary: First Idea
     (4, 1); -- Tom: First Idea
 
--- Insert sample messages
+-- Beispiel-Nachrichten einfügen
 INSERT INTO messages (sender_id, recipient_id, idea_id, content, is_read) VALUES
-    (3, 2, 1, 'Hi John! I love your AI-Powered Customer Support idea. Do you have any specific chatbot frameworks in mind?', true),
-    (2, 3, 1, 'Thanks Mary! I was thinking of using either Rasa or Dialogflow. Both have good NLP capabilities.', true),
-    (3, 2, 1, 'Great choices! I have experience with Rasa from a previous project. Happy to share insights if you need.', false),
-    (4, 2, NULL, 'Hey John, I saw your idea about the mobile app for field workers. Would love to collaborate on that!', false),
-    (2, 4, 4, 'That would be awesome Tom! Let''s schedule a meeting to discuss the requirements.', true);
+    (3, 2, 1, 'Hallo John! Ich liebe deine Idee für AI-gestützte Kundenunterstützung. Hast du bestimmte Chatbot-Frameworks im Sinn?', true),
+    (2, 3, 1, 'Danke Mary! Ich dachte an Rasa oder Dialogflow. Beide haben gute NLP-Fähigkeiten.', true),
+    (3, 2, 1, 'Großartig! Ich habe Erfahrung mit Rasa aus einem früheren Projekt. Gerne teile ich Erkenntnisse.', false),
+    (4, 2, NULL, 'Hallo John, ich habe deine Idee über die Mobile App für Außendienstmitarbeiter gesehen. Ich würde gerne zusammenarbeiten!', false),
+    (2, 4, 4, 'Das wäre großartig Tom! Lass uns ein Meeting planen, um die Anforderungen zu besprechen.', true);
 
--- Insert idea groups (one group per idea)
+-- Ideengruppen einfügen (eine Gruppe pro Idee)
 INSERT INTO idea_groups (idea_id, name, description, created_by) VALUES
-    (1, 'Group: AI-Powered Customer Support', 'Discussion group for idea: AI-Powered Customer Support', 2),
-    (2, 'Group: Green Office Initiative', 'Discussion group for idea: Green Office Initiative', 3),
-    (3, 'Group: Employee Wellness Program', 'Discussion group for idea: Employee Wellness Program', 4),
-    (4, 'Group: Mobile App for Field Workers', 'Discussion group for idea: Mobile App for Field Workers', 2),
-    (5, 'Group: Customer Feedback Loop', 'Discussion group for idea: Customer Feedback Loop', 3);
+    (1, 'Gruppe: AI-gestützte Kundenunterstützung', 'Diskussionsgruppe für Idee: AI-gestützte Kundenunterstützung', 2),
+    (2, 'Gruppe: Grüne Büro-Initiative', 'Diskussionsgruppe für Idee: Grüne Büro-Initiative', 3),
+    (3, 'Gruppe: Mitarbeiter-Wellnessprogram', 'Diskussionsgruppe für Idee: Mitarbeiter-Wellnessprogram', 4),
+    (4, 'Gruppe: Mobile App für Außendienstmitarbeiter', 'Diskussionsgruppe für Idee: Mobile App für Außendienstmitarbeiter', 2),
+    (5, 'Gruppe: Kundenfeedback-Schleife', 'Diskussionsgruppe für Idee: Kundenfeedback-Schleife', 3);
 
--- Insert group members (idea creators are automatically members with CREATOR role)
+-- Gruppenmitglieder einfügen (Ideenschöpfer sind automatisch Mitglieder mit CREATOR-Rolle)
 INSERT INTO group_members (group_id, user_id, role) VALUES
-    (1, 2, 'CREATOR'),  -- John is creator of AI-Powered Customer Support group
-    (1, 3, 'MEMBER'),   -- Mary joined
-    (1, 4, 'MEMBER'),   -- Tom joined
-    (2, 3, 'CREATOR'),  -- Mary is creator of Green Office Initiative group
-    (2, 4, 'MEMBER'),   -- Tom joined
-    (3, 4, 'CREATOR'),  -- Tom is creator of Employee Wellness Program group
-    (3, 2, 'MEMBER'),   -- John joined
-    (4, 2, 'CREATOR'),  -- John is creator of Mobile App group
-    (5, 3, 'CREATOR'),  -- Mary is creator of Customer Feedback Loop group
-    (5, 4, 'MEMBER');   -- Tom joined
+    (1, 2, 'CREATOR'),  -- John ist Ersteller der AI-Kundenunterstützungsgruppe
+    (1, 3, 'MEMBER'),   -- Mary beigetreten
+    (1, 4, 'MEMBER'),   -- Tom beigetreten
+    (2, 3, 'CREATOR'),  -- Mary ist Ersteller der Grüne Büro-Initiative-Gruppe
+    (2, 4, 'MEMBER'),   -- Tom beigetreten
+    (3, 4, 'CREATOR'),  -- Tom ist Ersteller der Wellness-Programm-Gruppe
+    (3, 2, 'MEMBER'),   -- John beigetreten
+    (4, 2, 'CREATOR'),  -- John ist Ersteller der Mobile App-Gruppe
+    (5, 3, 'CREATOR'),  -- Mary ist Ersteller der Feedback-Loop-Gruppe
+    (5, 4, 'MEMBER');   -- Tom beigetreten
 
--- Insert sample group messages
+-- Beispiel-Gruppennachrichten einfügen
 INSERT INTO group_messages (group_id, sender_id, content) VALUES
-    (1, 2, 'Welcome to the AI-Powered Customer Support discussion group!'),
-    (1, 3, 'Great idea John! I think we should start with a pilot in the support department.'),
-    (1, 4, 'I can help with the technical implementation. I have experience with chatbots.'),
-    (2, 3, 'Let''s discuss how we can make this office greener!'),
-    (2, 4, 'I suggest we start with digital signatures for all internal documents.'),
-    (3, 4, 'The wellness program is now complete! Thanks everyone for the feedback.'),
-    (3, 2, 'This was a great initiative. Looking forward to using the gym membership!');
+    (1, 2, 'Willkommen in der Diskussionsgruppe für AI-gestützte Kundenunterstützung!'),
+    (1, 3, 'Großartig John! Ich denke, wir sollten mit einem Pilotprojekt in der Support-Abteilung beginnen.'),
+    (1, 4, 'Ich kann bei der technischen Implementierung helfen. Ich habe Erfahrung mit Chatbots.'),
+    (2, 3, 'Lass uns besprechen, wie wir dieses Büro grüner machen können!'),
+    (2, 4, 'Ich schlage vor, mit digitalen Signaturen für alle internen Dokumente zu beginnen.'),
+    (3, 4, 'Das Wellness-Programm ist jetzt abgeschlossen! Danke euch allen für das Feedback.'),
+    (3, 2, 'Das war eine großartige Initiative. Ich freue mich schon auf die Fitnessstudio-Mitgliedschaft!');

@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Database validation utility to ensure seed data is correct.
- * Run this after database initialization to verify everything is working.
+ * Datenbankvalidierungsprogramm, um sicherzustellen, dass Seed-Daten korrekt sind.
+ * Führen Sie dies nach der Datenbankinitialisierung aus, um zu überprüfen, dass alles funktioniert.
  */
 public class ValidateDatabase {
 
@@ -18,7 +18,7 @@ public class ValidateDatabase {
     private static final String DB_USER = "ideaboard_user";
     private static final String DB_PASSWORD = "ideaboard123";
 
-    // Expected test credentials
+    // Erwartete Test-Anmeldedaten
     private static final Map<String, String> TEST_CREDENTIALS = new HashMap<>() {{
         put("admin", "admin123");
         put("jsmith", "password123");
@@ -32,12 +32,12 @@ public class ValidateDatabase {
 
     public static void main(String[] args) {
         System.out.println("========================================");
-        System.out.println("  DATABASE VALIDATION");
+        System.out.println("  DATENBANKVALIDIERUNG");
         System.out.println("========================================\n");
 
         try {
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            System.out.println("✓ Database connection successful\n");
+            System.out.println("✓ Datenbankverbindung erfolgreich\n");
 
             validateUserPasswords(conn);
             validateTableCounts(conn);
@@ -46,31 +46,31 @@ public class ValidateDatabase {
             conn.close();
 
             System.out.println("\n========================================");
-            System.out.println("  VALIDATION SUMMARY");
+            System.out.println("  VALIDIERUNGSZUSAMMENFASSUNG");
             System.out.println("========================================");
-            System.out.println("Tests run:    " + testsRun);
-            System.out.println("Tests passed: " + testsPassed + " ✓");
-            System.out.println("Tests failed: " + testsFailed + " ✗");
+            System.out.println("Durchgeführte Tests:    " + testsRun);
+            System.out.println("Bestandene Tests:       " + testsPassed + " ✓");
+            System.out.println("Fehlgeschlagene Tests: " + testsFailed + " ✗");
 
             if (testsFailed == 0) {
-                System.out.println("\n✓ ALL VALIDATION CHECKS PASSED!");
-                System.out.println("  The database is ready for use.");
+                System.out.println("\n✓ ALLE VALIDIERUNGSPRÜFUNGEN BESTANDEN!");
+                System.out.println("  Die Datenbank ist einsatzbereit.");
                 System.exit(0);
             } else {
-                System.out.println("\n✗ VALIDATION FAILED!");
-                System.out.println("  Please review the errors above.");
+                System.out.println("\n✗ VALIDIERUNG FEHLGESCHLAGEN!");
+                System.out.println("  Bitte überprüfen Sie die obigen Fehler.");
                 System.exit(1);
             }
 
         } catch (Exception e) {
-            System.err.println("✗ FATAL ERROR: " + e.getMessage());
+            System.err.println("✗ FATALER FEHLER: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
     }
 
     private static void validateUserPasswords(Connection conn) throws Exception {
-        System.out.println("--- Testing User Authentication ---");
+        System.out.println("--- Benutzerauthentifizierung testen ---");
 
         String query = "SELECT username, password_hash, role FROM users WHERE username = ?";
         PreparedStatement stmt = conn.prepareStatement(query);
@@ -93,16 +93,16 @@ public class ValidateDatabase {
                 );
 
                 if (result.verified) {
-                    System.out.println("  ✓ " + username + " (" + role + "): password verified");
+                    System.out.println("  ✓ " + username + " (" + role + "): Passwort verifiziert");
                     testsPassed++;
                 } else {
-                    System.out.println("  ✗ " + username + " (" + role + "): password verification FAILED");
-                    System.out.println("    Expected: " + expectedPassword);
-                    System.out.println("    Hash does not match!");
+                    System.out.println("  ✗ " + username + " (" + role + "): Passwortverifikation FEHLGESCHLAGEN");
+                    System.out.println("    Erwartet: " + expectedPassword);
+                    System.out.println("    Hash stimmt nicht überein!");
                     testsFailed++;
                 }
             } else {
-                System.out.println("  ✗ " + username + ": user NOT FOUND in database");
+                System.out.println("  ✗ " + username + ": Benutzer NICHT in der Datenbank gefunden");
                 testsFailed++;
             }
             rs.close();
@@ -112,7 +112,7 @@ public class ValidateDatabase {
     }
 
     private static void validateTableCounts(Connection conn) throws Exception {
-        System.out.println("--- Checking Table Counts ---");
+        System.out.println("--- Überprüfung der Tabellenzahl ---");
 
         String[] tables = {
             "users", "ideas", "badges", "comments", "likes",
@@ -128,10 +128,10 @@ public class ValidateDatabase {
             if (rs.next()) {
                 int count = rs.getInt(1);
                 if (count > 0) {
-                    System.out.println("  ✓ " + table + ": " + count + " rows");
+                    System.out.println("  ✓ " + table + ": " + count + " Zeilen");
                     testsPassed++;
                 } else {
-                    System.out.println("  ✗ " + table + ": EMPTY (expected seed data)");
+                    System.out.println("  ✗ " + table + ": LEER (erwartet Seed-Daten)");
                     testsFailed++;
                 }
             }
@@ -142,49 +142,49 @@ public class ValidateDatabase {
     }
 
     private static void validateDataIntegrity(Connection conn) throws Exception {
-        System.out.println("--- Checking Data Integrity ---");
+        System.out.println("--- Überprüfung der Datenintegrität ---");
 
-        // Check admin user exists and is active
+        // Überprüfen Sie, ob der Admin-Benutzer existiert und aktiv ist
         testsRun++;
         PreparedStatement stmt = conn.prepareStatement(
             "SELECT is_active, role FROM users WHERE username = 'admin'"
         );
         ResultSet rs = stmt.executeQuery();
         if (rs.next() && rs.getBoolean("is_active") && "ADMIN".equals(rs.getString("role"))) {
-            System.out.println("  ✓ Admin user exists and is active");
+            System.out.println("  ✓ Admin-Benutzer existiert und ist aktiv");
             testsPassed++;
         } else {
-            System.out.println("  ✗ Admin user missing or inactive");
+            System.out.println("  ✗ Admin-Benutzer fehlt oder ist inaktiv");
             testsFailed++;
         }
         rs.close();
         stmt.close();
 
-        // Check ideas have valid authors
+        // Überprüfen Sie, ob Ideen gültige Autoren haben
         testsRun++;
         stmt = conn.prepareStatement(
             "SELECT COUNT(*) FROM ideas i LEFT JOIN users u ON i.author_id = u.id WHERE u.id IS NULL"
         );
         rs = stmt.executeQuery();
         if (rs.next() && rs.getInt(1) == 0) {
-            System.out.println("  ✓ All ideas have valid authors");
+            System.out.println("  ✓ Alle Ideen haben gültige Autoren");
             testsPassed++;
         } else {
-            System.out.println("  ✗ Some ideas have invalid author references");
+            System.out.println("  ✗ Einige Ideen haben ungültige Autorverweise");
             testsFailed++;
         }
         rs.close();
         stmt.close();
 
-        // Check badges are defined
+        // Überprüfen Sie, ob Abzeichen definiert sind
         testsRun++;
         stmt = conn.prepareStatement("SELECT COUNT(*) FROM badges WHERE is_active = true");
         rs = stmt.executeQuery();
         if (rs.next() && rs.getInt(1) >= 10) {
-            System.out.println("  ✓ Badge system configured (" + rs.getInt(1) + " badges)");
+            System.out.println("  ✓ Abzeichensystem konfiguriert (" + rs.getInt(1) + " Abzeichen)");
             testsPassed++;
         } else {
-            System.out.println("  ✗ Insufficient badges configured");
+            System.out.println("  ✗ Unzureichende Abzeichen konfiguriert");
             testsFailed++;
         }
         rs.close();

@@ -42,20 +42,20 @@ public class CommentService {
     @Transactional
     public CommentDTO createComment(Long ideaId, String content, Long authorId) {
         if (content == null || content.trim().isEmpty()) {
-            throw ApiException.badRequest("Comment content is required");
+            throw ApiException.badRequest("Kommentarinhalt ist erforderlich");
         }
         if (content.length() > MAX_COMMENT_LENGTH) {
-            throw ApiException.badRequest("Comment must be " + MAX_COMMENT_LENGTH + " characters or less");
+            throw ApiException.badRequest("Kommentar muss " + MAX_COMMENT_LENGTH + " Zeichen oder weniger sein");
         }
 
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
         User author = em.find(User.class, authorId);
         if (author == null) {
-            throw ApiException.notFound("User not found");
+            throw ApiException.notFound("Benutzer nicht gefunden");
         }
 
         Comment comment = new Comment();
@@ -64,13 +64,13 @@ public class CommentService {
         comment.setContent(content.trim());
         em.persist(comment);
 
-        // Note: comment_count is automatically updated by database trigger
-        // Do NOT manually increment here to avoid double counting
+        // Hinweis: comment_count wird automatisch durch Datenbank-Trigger aktualisiert
+        // NICHT manuell inkrementieren, um Doppelzählung zu vermeiden
 
-        // Award XP and check badges
+        // XP vergeben und Abzeichen prüfen
         gamificationService.awardXpForComment(authorId);
 
-        // Notify idea author (if not commenting on own idea)
+        // Ideenschöpfer benachrichtigen (falls nicht auf eigener Idee kommentiert)
         if (!idea.getAuthor().getId().equals(authorId)) {
             notificationService.notifyComment(idea, author, content);
         }
@@ -82,18 +82,18 @@ public class CommentService {
     public void deleteComment(Long commentId, Long currentUserId) {
         Comment comment = em.find(Comment.class, commentId);
         if (comment == null) {
-            throw ApiException.notFound("Comment not found");
+            throw ApiException.notFound("Kommentar nicht gefunden");
         }
 
-        // Check permission
+        // Berechtigung prüfen
         User currentUser = em.find(User.class, currentUserId);
         if (!comment.getAuthor().getId().equals(currentUserId) &&
             currentUser.getRole() != UserRole.ADMIN) {
-            throw ApiException.forbidden("Not authorized to delete this comment");
+            throw ApiException.forbidden("Nicht berechtigt, diesen Kommentar zu löschen");
         }
 
-        // Note: comment_count is automatically updated by database trigger
-        // Do NOT manually decrement here to avoid double counting
+        // Hinweis: comment_count wird automatisch durch Datenbank-Trigger aktualisiert
+        // NICHT manuell dekrementieren, um Doppelzählung zu vermeiden
 
         em.remove(comment);
     }
@@ -102,18 +102,18 @@ public class CommentService {
     public void addReaction(Long commentId, String emoji, Long userId) {
         Comment comment = em.find(Comment.class, commentId);
         if (comment == null) {
-            throw ApiException.notFound("Comment not found");
+            throw ApiException.notFound("Kommentar nicht gefunden");
         }
 
         User user = em.find(User.class, userId);
         if (user == null) {
-            throw ApiException.notFound("User not found");
+            throw ApiException.notFound("Benutzer nicht gefunden");
         }
 
-        // Check if already reacted with this emoji
+        // Prüfe, ob bereits mit diesem Emoji reagiert
         CommentReaction existing = findReaction(commentId, userId, emoji);
         if (existing != null) {
-            throw ApiException.conflict("Already reacted with this emoji");
+            throw ApiException.conflict("Bereits mit diesem Emoji reagiert");
         }
 
         CommentReaction reaction = new CommentReaction();
@@ -122,10 +122,10 @@ public class CommentService {
         reaction.setEmoji(emoji);
         em.persist(reaction);
 
-        // Note: reaction_count is automatically updated by database trigger
-        // Do NOT manually increment here to avoid double counting
+        // Hinweis: reaction_count wird automatisch durch Datenbank-Trigger aktualisiert
+        // NICHT manuell inkrementieren, um Doppelzählung zu vermeiden
 
-        // Notify comment author
+        // Kommentarautor benachrichtigen
         if (!comment.getAuthor().getId().equals(userId)) {
             notificationService.notifyReaction(comment, user, emoji);
         }
@@ -135,11 +135,11 @@ public class CommentService {
     public void removeReaction(Long commentId, String emoji, Long userId) {
         CommentReaction reaction = findReaction(commentId, userId, emoji);
         if (reaction == null) {
-            throw ApiException.notFound("Reaction not found");
+            throw ApiException.notFound("Reaktion nicht gefunden");
         }
 
-        // Note: reaction_count is automatically updated by database trigger
-        // Do NOT manually decrement here to avoid double counting
+        // Hinweis: reaction_count wird automatisch durch Datenbank-Trigger aktualisiert
+        // NICHT manuell dekrementieren, um Doppelzählung zu vermeiden
 
         em.remove(reaction);
     }

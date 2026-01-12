@@ -7,7 +7,7 @@
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <jta-data-source>jdbc/ideaboard</jta-data-source>
 
-        <!-- Entity Classes -->
+        <!-- Entitätsklassen -->
         <class>com.gfos.ideaboard.entity.User</class>
         <class>com.gfos.ideaboard.entity.Idea</class>
         <class>com.gfos.ideaboard.entity.Like</class>
@@ -31,7 +31,7 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
-            <!-- EclipseLink Properties -->
+            <!-- EclipseLink-Eigenschaften -->
             <property name="eclipselink.target-database" value="PostgreSQL"/>
             <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
             <property name="eclipselink.ddl-generation.output-mode" value="database"/>
@@ -39,11 +39,11 @@
             <property name="eclipselink.logging.level.sql" value="FINE"/>
             <property name="eclipselink.logging.parameters" value="true"/>
 
-            <!-- Connection Pool Settings -->
+            <!-- Verbindungspool-Einstellungen -->
             <property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
             <property name="eclipselink.jdbc.batch-writing.size" value="100"/>
 
-            <!-- Cache Settings - set to false for development to avoid stale data issues -->
+            <!-- Cache-Einstellungen - auf false für Entwicklung setzen, um veraltete Datenproblemen zu vermeiden -->
             <property name="eclipselink.cache.shared.default" value="false"/>
             <property name="eclipselink.cache.size.default" value="500"/>
         </properties>

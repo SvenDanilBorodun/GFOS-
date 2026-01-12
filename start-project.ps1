@@ -1,5 +1,5 @@
-# GFOS Digital Idea Board - Complete Startup Script
-# This script checks all dependencies and starts the entire project stack
+# GFOS Digital Ideen-Board - Vollständiges Startskript
+# Dieses Skript überprüft alle Abhängigkeiten und startet den gesamten Projekt-Stack
 
 param(
     [switch]$SkipChecks,
@@ -9,25 +9,25 @@ param(
     [switch]$Help
 )
 
-# Configuration - ADJUST THESE PATHS FOR YOUR SYSTEM
+# Konfiguration - PASSEN SIE DIESE PFADE FÜR IHR SYSTEM AN
 $CONFIG = @{
-    # Paths (modify these for your installation)
+    # Pfade (ändern Sie diese für Ihre Installation)
     JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot"
     MAVEN_HOME = "C:\apache-maven-3.9.12"
     GLASSFISH_HOME = "C:\glassfish-7.1.0\glassfish7"
     POSTGRES_BIN = "C:\Program Files\PostgreSQL\18\bin"
-    NODE_PATH = $null  # Will auto-detect if null
+    NODE_PATH = $null  # Wird automatisch erkannt, wenn null
 
-    # Database Configuration
+    # Datenbankkonfiguration
     DB_NAME = "ideaboard"
     DB_USER = "ideaboard_user"
     DB_PASSWORD = "ideaboard123"
     DB_HOST = "localhost"
     DB_PORT = "5432"
     POSTGRES_ADMIN_USER = "postgres"
-    POSTGRES_ADMIN_PASSWORD = "17918270"  # Change this!
+    POSTGRES_ADMIN_PASSWORD = "17918270"  # Ändern Sie dies!
 
-    # Project Paths
+    # Projektpfade
     PROJECT_ROOT = "C:\GGFF\GFOS-"
     BACKEND_PATH = "C:\GGFF\GFOS-\backend"
     FRONTEND_PATH = "C:\GGFF\GFOS-\frontend"
@@ -74,32 +74,32 @@ function Write-Info($text) {
 function Show-Help {
     Write-Host @"
 
-GFOS Digital Idea Board - Startup Script
+GFOS Digital Ideen-Board - Startskript
 =========================================
 
-Usage: .\start-project.ps1 [options]
+Verwendung: .\start-project.ps1 [Optionen]
 
-Options:
-  -SkipChecks     Skip dependency checks (faster startup)
-  -SkipBuild      Skip Maven build (use existing WAR)
-  -FrontendOnly   Start only the frontend dev server
-  -BackendOnly    Start only PostgreSQL and GlassFish
-  -Help           Show this help message
+Optionen:
+  -SkipChecks     Überspringe Abhängigkeitsprüfungen (schnellerer Start)
+  -SkipBuild      Überspringe Maven Build (verwende bestehendes WAR)
+  -FrontendOnly   Starten Sie nur den Frontend Dev Server
+  -BackendOnly    Starten Sie nur PostgreSQL und GlassFish
+  -Help           Diese Hilfemeldung anzeigen
 
-Requirements:
+Anforderungen:
   - Java 17 (JDK)
   - Apache Maven 3.8+
-  - Node.js 18+ with npm
+  - Node.js 18+ mit npm
   - PostgreSQL 15+
   - GlassFish 7
 
-Configuration:
-  Edit the `$CONFIG` section at the top of this script to match your installation paths.
+Konfiguration:
+  Bearbeiten Sie den `$CONFIG` Abschnitt oben in diesem Skript um Ihre Installationspfade zu matchen.
 
-Examples:
-  .\start-project.ps1                    # Full startup with all checks
-  .\start-project.ps1 -SkipChecks        # Skip dependency verification
-  .\start-project.ps1 -FrontendOnly      # Start only frontend
+Beispiele:
+  .\start-project.ps1                    # Vollständiger Start mit allen Überprüfungen
+  .\start-project.ps1 -SkipChecks        # Überspringe Abhängigkeitsverifikation
+  .\start-project.ps1 -FrontendOnly      # Starten Sie nur Frontend
 
 "@
 }
@@ -126,37 +126,37 @@ function Test-PortInUse($port) {
 # ============================================
 
 function Test-JavaInstallation {
-    Write-Info "Checking Java installation..."
+    Write-Info "Überprüfe Java-Installation..."
 
-    # Check configured JAVA_HOME
+    # Überprüfe konfigurierte JAVA_HOME
     if (Test-Path "$($CONFIG.JAVA_HOME)\bin\java.exe") {
         $javaVersion = & "$($CONFIG.JAVA_HOME)\bin\java.exe" -version 2>&1 | Select-Object -First 1
         if ($javaVersion -match "17") {
-            Write-Success "Java 17 found at: $($CONFIG.JAVA_HOME)"
+            Write-Success "Java 17 gefunden unter: $($CONFIG.JAVA_HOME)"
             $env:JAVA_HOME = $CONFIG.JAVA_HOME
             return $true
         }
     }
 
-    # Try system Java
+    # Versuche System Java
     if (Test-CommandExists "java") {
         $javaVersion = & java -version 2>&1 | Select-Object -First 1
         if ($javaVersion -match "17") {
-            Write-Success "Java 17 found in PATH"
+            Write-Success "Java 17 in PATH gefunden"
             return $true
         }
-        Write-Warning "Java found but not version 17: $javaVersion"
+        Write-Warning "Java gefunden, aber nicht Version 17: $javaVersion"
     }
 
-    Write-Error "Java 17 NOT FOUND!"
+    Write-Error "Java 17 NICHT GEFUNDEN!"
     Write-Host @"
 
-    Please install Java 17 (JDK):
-    1. Download Eclipse Temurin JDK 17 from: https://adoptium.net/
-    2. Run the installer
-    3. Update JAVA_HOME in this script to point to your installation
+    Bitte installieren Sie Java 17 (JDK):
+    1. Laden Sie Eclipse Temurin JDK 17 herunter: https://adoptium.net/
+    2. Führen Sie das Installationsprogramm aus
+    3. Aktualisieren Sie JAVA_HOME in diesem Skript um auf Ihre Installation zu zeigen
 
-    Current configured path: $($CONFIG.JAVA_HOME)
+    Aktuell konfigurierter Pfad: $($CONFIG.JAVA_HOME)
 
 "@ -ForegroundColor Yellow
     return $false
@@ -590,7 +590,7 @@ function Start-Project {
     Write-Host "| |_| |  _|| |_| |___) |  | | (_| |  __/ (_| | |_) | (_) | (_| | | | (_| |" -ForegroundColor Magenta
     Write-Host " \____|_|   \___/|____/  |___\__,_|\___|\__,_|____/ \___/ \__,_|_|  \__,_|" -ForegroundColor Magenta
     Write-Host ""
-    Write-Host "                    Digital Innovation Platform" -ForegroundColor White
+    Write-Host "                    Digitale Innovationsplattform" -ForegroundColor White
     Write-Host ""
 
     if ($Help) {
@@ -598,17 +598,17 @@ function Start-Project {
         return
     }
 
-    # Dependency Checks
+    # Abhängigkeitsprüfungen
     if (-not $SkipChecks) {
         if (-not (Test-AllDependencies)) {
             Write-Host ""
-            Write-Error "Please install missing dependencies and try again."
-            Write-Host "Run with -SkipChecks to bypass dependency verification." -ForegroundColor Yellow
+            Write-Error "Bitte installieren Sie die fehlenden Abhängigkeiten und versuchen Sie es erneut."
+            Write-Host "Führen Sie mit -SkipChecks aus, um die Abhängigkeitsverifikation zu überspringen." -ForegroundColor Yellow
             return
         }
     }
     else {
-        Write-Info "Skipping dependency checks..."
+        Write-Info "Überspringe Abhängigkeitsprüfungen..."
     }
 
     # Backend only mode
@@ -646,23 +646,23 @@ function Start-Project {
 
     Start-Frontend
 
-    Write-Header "All Services Started!"
+    Write-Header "Alle Services gestartet!"
     Write-Host ""
-    Write-Host "  Application URLs:" -ForegroundColor White
+    Write-Host "  Anwendungs-URLs:" -ForegroundColor White
     Write-Host "  -----------------" -ForegroundColor White
     Write-Success "Frontend:    http://localhost:$($CONFIG.FRONTEND_PORT)"
     Write-Success "Backend API: http://localhost:$($CONFIG.GLASSFISH_PORT)/ideaboard/api"
-    Write-Success "GlassFish:   http://localhost:4848 (Admin Console)"
+    Write-Success "GlassFish:   http://localhost:4848 (Admin Konsole)"
     Write-Host ""
-    Write-Host "  Default Login Credentials:" -ForegroundColor White
+    Write-Host "  Standard Anmeldedaten:" -ForegroundColor White
     Write-Host "  --------------------------" -ForegroundColor White
     Write-Host "  Admin:    admin / admin123" -ForegroundColor Cyan
     Write-Host "  Employee: john.doe / password123" -ForegroundColor Cyan
     Write-Host "  Manager:  jane.smith / password123" -ForegroundColor Cyan
     Write-Host ""
-    Write-Info "Press Ctrl+C to stop the frontend server"
+    Write-Info "Drücken Sie Strg+C um den Frontend-Server zu stoppen"
     Write-Host ""
 }
 
-# Run the script
+# Führen Sie das Skript aus
 Start-Project

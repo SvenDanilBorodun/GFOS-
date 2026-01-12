@@ -67,7 +67,7 @@ public class SurveyResource {
         Boolean allowMultipleVotes = (Boolean) body.get("allowMultipleVotes");
 
         if (question == null || question.trim().isEmpty()) {
-            throw ApiException.badRequest("Question is required");
+            throw ApiException.badRequest("Frage ist erforderlich");
         }
 
         SurveyDTO survey = surveyService.createSurvey(question, description, options,
@@ -84,7 +84,7 @@ public class SurveyResource {
         @SuppressWarnings("unchecked")
         List<Number> optionIdsRaw = (List<Number>) body.get("optionIds");
         if (optionIdsRaw == null || optionIdsRaw.isEmpty()) {
-            throw ApiException.badRequest("At least one option must be selected");
+            throw ApiException.badRequest("Mindestens eine Option muss ausgewählt werden");
         }
 
         List<Long> optionIds = optionIdsRaw.stream()

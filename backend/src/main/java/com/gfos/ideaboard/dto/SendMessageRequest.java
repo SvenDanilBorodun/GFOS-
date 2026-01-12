@@ -6,11 +6,11 @@ import jakarta.validation.constraints.Size;
 
 public class SendMessageRequest {
 
-    @NotNull(message = "Recipient ID is required")
+    @NotNull(message = "Empfänger-ID ist erforderlich")
     private Long recipientId;
 
-    @NotBlank(message = "Message content is required")
-    @Size(min = 1, max = 2000, message = "Message must be between 1 and 2000 characters")
+    @NotBlank(message = "Nachrichteninhalt ist erforderlich")
+    @Size(min = 1, max = 2000, message = "Nachricht muss zwischen 1 und 2000 Zeichen lang sein")
     private String content;
 
     private Long ideaId;

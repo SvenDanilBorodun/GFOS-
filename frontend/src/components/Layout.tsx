@@ -19,11 +19,11 @@ import {
 import NotificationDropdown from './NotificationDropdown';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Ideas', href: '/ideas', icon: LightBulbIcon },
-  { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
-  { name: 'Surveys', href: '/surveys', icon: ChartBarIcon },
-  { name: 'Profile', href: '/profile', icon: UserCircleIcon },
+  { name: 'Übersicht', href: '/dashboard', icon: HomeIcon },
+  { name: 'Ideen', href: '/ideas', icon: LightBulbIcon },
+  { name: 'Nachrichten', href: '/messages', icon: ChatBubbleLeftRightIcon },
+  { name: 'Umfragen', href: '/surveys', icon: ChartBarIcon },
+  { name: 'Profil', href: '/profile', icon: UserCircleIcon },
 ];
 
 const adminNavigation = [
@@ -78,6 +78,7 @@ export default function Layout() {
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden btn-icon"
+              title="Schließen"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
@@ -127,7 +128,7 @@ export default function Layout() {
             )}
           </nav>
 
-          {/* User section */}
+          {/* Benutzer-Bereich */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3 mb-3">
               <div className="avatar-md">
@@ -138,7 +139,7 @@ export default function Layout() {
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className={`text-xs font-medium ${getLevelColor(user?.level || 1)}`}>
-                  Level {user?.level} • {user?.xpPoints} XP
+                  Stufe {user?.level} • {user?.xpPoints} XP
                 </p>
               </div>
             </div>
@@ -148,18 +149,18 @@ export default function Layout() {
                          hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5" />
-              Sign out
+              Abmelden
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
+      {/* Hauptinhalt */}
       <div className="lg:pl-64">
-        {/* Top header */}
+        {/* Obere Kopfzeile */}
         <header className="sticky top-0 z-30 h-16 bg-white dark:bg-gray-800 shadow-material-1">
           <div className="h-full flex items-center justify-between px-4">
-            {/* Mobile menu button */}
+            {/* Mobile Menü-Schaltfläche */}
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden btn-icon"
@@ -167,16 +168,16 @@ export default function Layout() {
               <Bars3Icon className="w-6 h-6" />
             </button>
 
-            {/* Spacer */}
+            {/* Abstandshalter */}
             <div className="flex-1" />
 
-            {/* Right actions */}
+            {/* Rechte Aktionen */}
             <div className="flex items-center gap-2">
-              {/* Theme toggle */}
+              {/* Design-Umschaltung */}
               <button
                 onClick={toggleTheme}
                 className="btn-icon"
-                title={`Switch to ${effectiveTheme === 'light' ? 'dark' : 'light'} mode`}
+                title={`Wechsel zu ${effectiveTheme === 'light' ? 'dunklem' : 'hellem'} Modus`}
               >
                 {effectiveTheme === 'light' ? (
                   <MoonIcon className="w-5 h-5" />
@@ -185,23 +186,23 @@ export default function Layout() {
                 )}
               </button>
 
-              {/* Notifications */}
+              {/* Benachrichtigungen */}
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="btn-icon relative"
                 >
                   <BellIcon className="w-5 h-5" />
-                  {/* Notification badge - will be dynamic */}
+                  {/* Benachrichtigungsabzeichen - wird dynamisch */}
                 </button>
                 {showNotifications && (
                   <NotificationDropdown onClose={() => setShowNotifications(false)} />
                 )}
               </div>
 
-              {/* Create idea button */}
+              {/* Neue Ideen-Schaltfläche */}
               <NavLink to="/ideas/new" className="btn-primary hidden sm:flex">
-                New Idea
+                Neue Idee
               </NavLink>
             </div>
           </div>

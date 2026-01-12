@@ -1,14 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Diese Datei enthält Richtlinien für Claude Code (claude.ai/code) bei der Arbeit mit Code in diesem Repository.
 
-## Project Overview
+## Projektübersicht
 
-GFOS Digital Idea Board is an innovation management platform built for the GFOS Innovation Award 2026. It's a full-stack web application with a Jakarta EE backend and React TypeScript frontend, implementing gamification, surveys, and comprehensive idea management features.
+GFOS Digital Ideen-Board ist eine Innovationsmanagemntplattform, die für den GFOS Innovation Award 2026 entwickelt wurde. Es ist eine vollständige Web-Anwendung mit Jakarta EE Backend und React TypeScript Frontend, die Gamifikation, Umfragen und umfassende Ideenverwaltung implementiert.
 
-## Architecture
+## Architektur
 
-### Technology Stack
+### Technologie-Stack
 
 **Backend (Jakarta EE)**
 - Framework: Jakarta EE 10 on GlassFish 7
@@ -26,246 +26,246 @@ GFOS Digital Idea Board is an innovation management platform built for the GFOS 
 - HTTP: Axios with automatic token refresh interceptor
 - State: React Context API (AuthContext, ThemeContext)
 
-### Key Architectural Patterns
+### Wichtigste Architektur-Muster
 
-**Backend Structure** (`backend/src/main/java/com/gfos/ideaboard/`)
-- `resource/` - JAX-RS REST endpoints (e.g., IdeaResource, AuthResource)
-- `service/` - Business logic layer (e.g., IdeaService, AuthService)
-- `entity/` - JPA entities (User, Idea, Comment, etc.)
-- `dto/` - Data Transfer Objects for API responses
-- `security/` - JWT handling (JwtFilter, JwtUtil, @Secured annotation)
-- `config/` - Application configuration, CORS filter, Jackson config
-- `exception/` - Global exception handling
+**Backend-Struktur** (`backend/src/main/java/com/gfos/ideaboard/`)
+- `resource/` - JAX-RS REST Endpunkte (z.B. IdeaResource, AuthResource)
+- `service/` - Geschäftslogik-Schicht (z.B. IdeaService, AuthService)
+- `entity/` - JPA Entities (User, Idea, Comment, etc.)
+- `dto/` - Datenübertragungsobjekte für API-Antworten
+- `security/` - JWT Verwaltung (JwtFilter, JwtUtil, @Secured Annotation)
+- `config/` - Anwendungskonfiguration, CORS Filter, Jackson Konfiguration
+- `exception/` - Globale Exception-Behandlung
 
-**Frontend Structure** (`frontend/src/`)
-- `pages/` - Page-level components (DashboardPage, IdeasPage, etc.)
-- `components/` - Reusable UI components (Layout, NotificationDropdown)
-- `services/` - API client services (ideaService, authService, etc.)
-- `context/` - React contexts for global state (AuthContext, ThemeContext)
-- `types/` - TypeScript type definitions (shared across frontend)
+**Frontend-Struktur** (`frontend/src/`)
+- `pages/` - Komponenten auf Seitenebene (DashboardPage, IdeasPage, etc.)
+- `components/` - Wiederverwendbare UI-Komponenten (Layout, NotificationDropdown)
+- `services/` - API-Client-Services (ideaService, authService, etc.)
+- `context/` - React Kontexte für globalen Zustand (AuthContext, ThemeContext)
+- `types/` - TypeScript Typ-Definitionen (geteilt über das Frontend)
 
-**Authentication Flow**
-1. Login returns both access token (1 day expiry) and refresh token (7 days)
-2. Frontend stores tokens in localStorage (`ideaboard_token`, `ideaboard_refresh_token`)
-3. Axios interceptor adds `Authorization: Bearer <token>` to all requests
-4. On 401 response, interceptor automatically calls `/api/auth/refresh` with refresh token
-5. Backend uses `@Secured` annotation + `JwtFilter` to protect endpoints
-6. JwtFilter extracts userId, username, role from token and stores in request context
-7. Resources use `@Context ContainerRequestContext` to access authenticated user info
+**Authentifizierungsablauf**
+1. Login gibt sowohl Access Token (1 Tag Gültigkeit) als auch Refresh Token (7 Tage) zurück
+2. Frontend speichert Tokens in localStorage (`ideaboard_token`, `ideaboard_refresh_token`)
+3. Axios Interceptor fügt `Authorization: Bearer <token>` zu allen Anfragen hinzu
+4. Bei 401 Antwort ruft Interceptor automatisch `/api/auth/refresh` mit Refresh Token auf
+5. Backend verwendet `@Secured` Annotation + `JwtFilter` zum Schutz der Endpunkte
+6. JwtFilter extrahiert userId, username, role aus Token und speichert in Request Context
+7. Resources verwenden `@Context ContainerRequestContext` für Zugriff auf authentifizierte Benutzerinformationen
 
-**Database Access Pattern**
-- JPA persistence unit named "IdeaBoardPU" configured in `persistence.xml`
-- JDBC resource: `jdbc/ideaboard` (must be configured in GlassFish)
-- Services use `@PersistenceContext` for EntityManager injection
-- EclipseLink performs automatic schema management with "create-or-extend-tables"
+**Datenbankzugriffsmuster**
+- JPA Persistenzeinheit mit dem Namen "IdeaBoardPU" konfiguriert in `persistence.xml`
+- JDBC Ressource: `jdbc/ideaboard` (muss in GlassFish konfiguriert werden)
+- Services verwenden `@PersistenceContext` für EntityManager Injection
+- EclipseLink führt automatische Schema-Verwaltung mit "create-or-extend-tables" durch
 
 **API Design**
-- Base URL: `/api` (mapped in ApplicationConfig and web.xml)
-- RESTful endpoints follow pattern: `/api/{resource}/{id}?{filters}`
-- All responses/requests use JSON (Jersey + Jackson)
-- CORS enabled for all origins via CorsFilter with @PreMatching priority
+- Basis-URL: `/api` (in ApplicationConfig und web.xml zugeordnet)
+- RESTful Endpunkte folgen dem Muster: `/api/{resource}/{id}?{filters}`
+- Alle Antworten/Anfragen verwenden JSON (Jersey + Jackson)
+- CORS für alle Ursprünge aktiviert über CorsFilter mit @PreMatching Priorität
 
-## Development Commands
+## Entwicklungsbefehle
 
-### Backend Development
+### Backend-Entwicklung
 
 ```bash
-# Build and package
+# Erstellen und verpacken
 cd backend
-mvn clean package              # Creates ideaboard.war in target/
+mvn clean package              # Erstellt ideaboard.war in target/
 
-# Compile only (faster for checking compilation)
+# Nur kompilieren (schneller zum Überprüfen der Kompilierung)
 mvn clean compile
 
-# Skip tests during build
+# Tests während des Builds auslassen
 mvn clean package -DskipTests
 
-# Deploy to GlassFish (requires JDBC connection pool setup)
+# Bereitstellung in GlassFish (erfordert JDBC Verbindungspool Setup)
 asadmin deploy target/ideaboard.war
 
-# Redeploy after code changes
+# Erneute Bereitstellung nach Code-Änderungen
 asadmin redeploy --force --name ideaboard target/ideaboard.war
 
-# OR use provided batch script (Windows)
-C:\GGFF\redeploy.bat           # Sets JAVA_HOME and redeploys
+# ODER verwende bereitgestellte Batch-Datei (Windows)
+C:\GGFF\redeploy.bat           # Setzt JAVA_HOME und stellt erneut bereit
 
-# Start GlassFish
-asadmin start-domain           # Default domain1 on port 8080
-# OR use batch script
-C:\GGFF\start-backend.bat      # Sets JAVA_HOME and starts domain
+# GlassFish starten
+asadmin start-domain           # Standard domain1 auf Port 8080
+# ODER verwende Batch-Skript
+C:\GGFF\start-backend.bat      # Setzt JAVA_HOME und startet domain
 
-# Check deployment
+# Bereitstellung überprüfen
 asadmin list-applications
 
-# View logs
+# Logs anzeigen
 tail -f C:\glassfish-7.1.0\glassfish7\glassfish\domains\domain1\logs\server.log
 ```
 
-### Frontend Development
+### Frontend-Entwicklung
 
 ```bash
 cd frontend
 
-# Install dependencies
+# Abhängigkeiten installieren
 npm install
 
-# Start dev server (http://localhost:3000)
+# Dev-Server starten (http://localhost:3000)
 npm run dev
 
-# Build for production
-npm run build                  # Output to dist/
+# Für die Produktion erstellen
+npm run build                  # Ausgabe zu dist/
 
-# Preview production build
+# Production Build Vorschau
 npm run preview
 
-# Lint TypeScript
+# TypeScript linting
 npm run lint
 
-# Type check without emitting files (fast)
+# Type Check ohne Datei-Emission (schnell)
 npx tsc --noEmit
 ```
 
-### Database Setup
+### Datenbank-Setup
 
 ```bash
-# Create database and user
+# Datenbank und Benutzer erstellen
 psql -U postgres -c "CREATE DATABASE ideaboard;"
 psql -U postgres -c "CREATE USER ideaboard_user WITH ENCRYPTED PASSWORD 'your_password';"
 psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE ideaboard TO ideaboard_user;"
 
-# Initialize schema and seed data
+# Schema und Seed-Daten initialisieren
 psql -U postgres -d ideaboard -f database/init.sql
 
-# Access database
+# Auf Datenbank zugreifen
 PGPASSWORD=your_password psql -U ideaboard_user -d ideaboard
 ```
 
-### GlassFish JDBC Configuration
+### GlassFish JDBC Konfiguration
 
 ```bash
-# Create connection pool
+# Verbindungspool erstellen
 asadmin create-jdbc-connection-pool \
   --restype javax.sql.DataSource \
   --datasourceclassname org.postgresql.ds.PGSimpleDataSource \
   --property user=ideaboard_user:password=your_password:serverName=localhost:portNumber=5432:databaseName=ideaboard \
   IdeaBoardPool
 
-# Create JDBC resource (must match persistence.xml jta-data-source)
+# JDBC Ressource erstellen (muss mit persistence.xml jta-data-source übereinstimmen)
 asadmin create-jdbc-resource --connectionpoolid IdeaBoardPool jdbc/ideaboard
 
-# Test connection
+# Verbindung testen
 asadmin ping-connection-pool IdeaBoardPool
 ```
 
-## Important Implementation Details
+## Wichtige Implementierungsdetails
 
-### JWT Token Handling
-- Access tokens are NOT accepted as refresh tokens (checked in JwtFilter)
-- Refresh tokens are ONLY accepted at `/api/auth/refresh` endpoint
-- Token validation happens in JwtFilter for all `@Secured` endpoints
-- User context stored in request properties: `userId`, `username`, `role`
+### JWT Token Verwaltung
+- Access Tokens werden NICHT als Refresh Tokens akzeptiert (überprüft in JwtFilter)
+- Refresh Tokens werden NUR am `/api/auth/refresh` Endpunkt akzeptiert
+- Token Validierung erfolgt in JwtFilter für alle `@Secured` Endpunkte
+- Benutzerkontext in Request Properties gespeichert: `userId`, `username`, `role`
 
-### Role-Based Access Control
-- Three roles: `EMPLOYEE`, `PROJECT_MANAGER`, `ADMIN`
-- Resources check roles via `ContainerRequestContext.getSecurityContext().isUserInRole()`
-- Admin-only endpoints: audit logs, user management, idea deletion
-- PM + Admin: export functionality
+### Rollenbasierte Zugriffskontrolle
+- Drei Rollen: `EMPLOYEE`, `PROJECT_MANAGER`, `ADMIN`
+- Resources überprüfen Rollen über `ContainerRequestContext.getSecurityContext().isUserInRole()`
+- Nur Admin Endpunkte: Audit Logs, Benutzerverwaltung, Ideen-Löschung
+- PM + Admin: Export Funktionalität
 
-### Weekly Like System
-- Users get 3 likes per week (resets Sunday 00:00)
-- Tracked in `Like` entity with `createdAt` timestamp
-- LikeService calculates remaining likes based on current week
-- Unlike decrements weekly count (allows re-allocation)
+### Wöchentliches Like-System
+- Benutzer erhalten 3 Likes pro Woche (setzt sich Sonntag 00:00 Uhr zurück)
+- Nachverfolgung in `Like` Entity mit `createdAt` Zeitstempel
+- LikeService berechnet verbleibende Likes basierend auf aktueller Woche
+- Unlike verringert wöchentliche Zählung (erlaubt Neuverteilung)
 
-### Gamification System
-- XP rewards: Submit idea (+50), Receive like (+10), Comment (+5), Completed idea (+100)
-- Level thresholds: 0, 100, 300, 600, 1000, 1500 XP
-- GamificationService handles XP awarding and badge assignment
-- Badge criteria evaluated in GamificationService
+### Gamifikationssystem
+- XP Belohnungen: Idee einreichen (+50), Like erhalten (+10), Kommentar (+5), Idee abgeschlossen (+100)
+- Levelschwellen: 0, 100, 300, 600, 1000, 1500 XP
+- GamificationService verwaltet XP Vergabe und Abzeichen-Zuweisung
+- Abzeichen Kriterien werden in GamificationService evaluiert
 
-### File Upload Constraints
-- Max file size: 10MB
-- Supported types: images (PNG, JPG, JPEG, GIF), PDFs, documents (DOC, DOCX)
-- Files stored in FileAttachment entity with metadata
-- FileService handles validation and storage
+### Datei-Upload Beschränkungen
+- Max Dateigröße: 10MB
+- Unterstützte Typen: Bilder (PNG, JPG, JPEG, GIF), PDFs, Dokumente (DOC, DOCX)
+- Dateien in FileAttachment Entity mit Metadaten gespeichert
+- FileService verwaltet Validierung und Speicherung
 
-### Demo Mode Support
-- Frontend has demo mode at `/demo-mode.html`
-- Sets `ideaboard_demo_mode=true` in localStorage
-- AuthContext skips API token verification in demo mode
-- Allows UI testing without backend
+### Demo-Modus Unterstützung
+- Frontend hat Demo-Modus unter `/demo-mode.html`
+- Setzt `ideaboard_demo_mode=true` in localStorage
+- AuthContext überspringt API Token Verifikation im Demo-Modus
+- Ermöglicht UI-Tests ohne Backend
 
-## Common Workflows
+## Häufige Workflows
 
-### Adding a New API Endpoint
+### Einen neuen API Endpunkt hinzufügen
 
-1. Create method in appropriate Service class (business logic)
-2. Add endpoint in corresponding Resource class with `@Path`, `@GET/@POST/@PUT/@DELETE`
-3. Add `@Secured` annotation if authentication required
-4. Use `@Context ContainerRequestContext` to access user info
-5. Return DTO objects (not entities directly)
-6. Add corresponding method in frontend service file (e.g., `ideaService.ts`)
-7. Update TypeScript types in `frontend/src/types/index.ts` if needed
+1. Erstelle Methode in der entsprechenden Service Klasse (Geschäftslogik)
+2. Füge Endpunkt in der entsprechenden Resource Klasse mit `@Path`, `@GET/@POST/@PUT/@DELETE` hinzu
+3. Füge `@Secured` Annotation hinzu, wenn Authentifizierung erforderlich ist
+4. Verwende `@Context ContainerRequestContext` für Zugriff auf Benutzerinformationen
+5. Gebe DTO Objekte zurück (nicht Entities direkt)
+6. Füge entsprechende Methode in Frontend-Service Datei hinzu (z.B. `ideaService.ts`)
+7. Aktualisiere TypeScript Typen in `frontend/src/types/index.ts` falls nötig
 
-### Modifying Database Schema
+### Änderung des Datenbankschemas
 
-1. Update JPA entity in `backend/src/main/java/com/gfos/ideaboard/entity/`
-2. Add entity class to `persistence.xml` if new entity
-3. Update `database/init.sql` for clean installations
-4. EclipseLink will auto-update schema on next deploy (create-or-extend-tables mode)
-5. For manual schema changes, update database directly or via init.sql
+1. Aktualisiere JPA Entity in `backend/src/main/java/com/gfos/ideaboard/entity/`
+2. Füge Entity Klasse zu `persistence.xml` hinzu, wenn neue Entity
+3. Aktualisiere `database/init.sql` für saubere Installationen
+4. EclipseLink wird Schema bei nächster Bereitstellung automatisch aktualisieren (create-or-extend-tables Modus)
+5. Für manuelle Schema Änderungen, Datenbank direkt oder via init.sql aktualisieren
 
-### Adding a New Page/Route
+### Eine neue Seite/Route hinzufügen
 
-1. Create page component in `frontend/src/pages/`
-2. Add route in `frontend/src/App.tsx`
-3. Add navigation link in `frontend/src/components/Layout.tsx` if needed
-4. Create corresponding service methods in `frontend/src/services/` for API calls
-5. Use `useAuth()` hook for current user context
-6. Protected routes should check `user.role` and conditionally render
+1. Erstelle Page Komponente in `frontend/src/pages/`
+2. Füge Route in `frontend/src/App.tsx` hinzu
+3. Füge Navigationslink in `frontend/src/components/Layout.tsx` hinzu, falls nötig
+4. Erstelle entsprechende Service Methoden in `frontend/src/services/` für API Aufrufe
+5. Verwende `useAuth()` Hook für aktuellen Benutzerkontext
+6. Geschützte Routes sollten `user.role` überprüfen und bedingt rendern
 
-## Debugging Tips
+## Debugging Tipps
 
-**Backend Errors**
-- Check GlassFish logs: `glassfish7/glassfish/domains/domain1/logs/server.log`
-- Enable SQL logging: Set `eclipselink.logging.level.sql` to `FINE` in persistence.xml
-- JWT errors: Token may be expired or malformed (check expiry in JwtUtil)
-- 401 errors: Check if endpoint has `@Secured` and token is valid
+**Backend Fehler**
+- GlassFish Logs überprüfen: `glassfish7/glassfish/domains/domain1/logs/server.log`
+- SQL Logging aktivieren: Setze `eclipselink.logging.level.sql` zu `FINE` in persistence.xml
+- JWT Fehler: Token könnte abgelaufen oder malformed sein (Gültigkeit in JwtUtil überprüfen)
+- 401 Fehler: Überprüfe, ob Endpunkt `@Secured` hat und Token gültig ist
 
-**Frontend Errors**
-- Check browser console and Network tab for API responses
-- Token refresh failures: Clear localStorage and re-login
-- CORS errors: Verify CorsFilter configuration in backend
-- TypeScript errors: Run `npx tsc --noEmit` for detailed type checking
+**Frontend Fehler**
+- Browser Konsole und Network Tab für API Antworten überprüfen
+- Token Refresh Fehler: localStorage löschen und erneut anmelden
+- CORS Fehler: CorsFilter Konfiguration im Backend überprüfen
+- TypeScript Fehler: `npx tsc --noEmit` für detaillierte Typ-Überprüfung ausführen
 
-**Database Connection Issues**
-- Verify PostgreSQL is running: `pg_isready`
-- Test JDBC pool: `asadmin ping-connection-pool IdeaBoardPool`
-- Check credentials match persistence.xml configuration
-- Ensure database `ideaboard` exists and user has permissions
+**Datenbankverbindungsprobleme**
+- Überprüfe, dass PostgreSQL läuft: `pg_isready`
+- JDBC Pool testen: `asadmin ping-connection-pool IdeaBoardPool`
+- Überprüfe, dass Anmeldeinformationen mit persistence.xml Konfiguration übereinstimmen
+- Stelle sicher, dass Datenbank `ideaboard` existiert und Benutzer Berechtigungen hat
 
-## Default Test Credentials
+## Standard Test Anmeldeinformationen
 
-After running `database/init.sql`:
+Nach Ausführung von `database/init.sql`:
 - Admin: `admin` / `admin123`
 - Employee: `john.doe` / `password123`
 - Project Manager: `jane.smith` / `password123`
 
-## Security Considerations
+## Sicherheitsaspekte
 
-- Passwords hashed with BCrypt (12 rounds) via `PasswordUtil.hashPassword()`
-- JWT secret key stored in `JwtUtil` (should be externalized in production)
-- Refresh tokens stored in database for revocation capability
-- SQL injection prevented via JPA parameterized queries
-- XSS mitigated via React's automatic escaping
-- CSRF not needed (stateless JWT authentication)
+- Passwörter mit BCrypt (12 Runden) gehashed via `PasswordUtil.hashPassword()`
+- JWT Secret Key in `JwtUtil` gespeichert (sollte in Produktion externalisiert werden)
+- Refresh Tokens in Datenbank gespeichert für Revokation
+- SQL Injection verhindert via JPA parametrisierte Abfragen
+- XSS gemindert durch automatisches Escaping von React
+- CSRF nicht benötigt (zustandslose JWT Authentifizierung)
 
-## Configuration Files
+## Konfigurationsdateien
 
-- `backend/pom.xml` - Maven dependencies and build config
-- `backend/src/main/resources/META-INF/persistence.xml` - JPA configuration
-- `backend/src/main/webapp/WEB-INF/web.xml` - Servlet mapping, error pages
-- `frontend/package.json` - npm scripts and dependencies
-- `frontend/vite.config.ts` - Vite dev server (port 3000, proxies /api to backend)
-- `frontend/tailwind.config.js` - Tailwind CSS customization
-- `frontend/tsconfig.json` - TypeScript compiler options
+- `backend/pom.xml` - Maven Abhängigkeiten und Build Konfiguration
+- `backend/src/main/resources/META-INF/persistence.xml` - JPA Konfiguration
+- `backend/src/main/webapp/WEB-INF/web.xml` - Servlet Zuordnung, Fehlerseiten
+- `frontend/package.json` - npm Skripte und Abhängigkeiten
+- `frontend/vite.config.ts` - Vite Dev Server (Port 3000, Proxies /api zum Backend)
+- `frontend/tailwind.config.js` - Tailwind CSS Anpassung
+- `frontend/tsconfig.json` - TypeScript Compiler Optionen

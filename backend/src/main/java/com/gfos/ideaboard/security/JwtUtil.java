@@ -14,10 +14,10 @@ import java.util.Map;
 @ApplicationScoped
 public class JwtUtil {
 
-    // In production, this should be loaded from environment variable or secure config
+    // In der Produktion sollte dies aus einer Umgebungsvariablen oder sicheren Konfiguration geladen werden
     private static final String SECRET_KEY = "gfos-ideaboard-jwt-secret-key-2026-must-be-at-least-256-bits-long-for-hs256";
-    private static final long ACCESS_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 24 hours
-    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+    private static final long ACCESS_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 24 Stunden
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000; // 7 Tage
 
     private final SecretKey key;
 

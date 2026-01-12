@@ -23,8 +23,8 @@ export default function SurveysPage() {
       const response = await surveyService.getSurveys({ size: 50 });
       setSurveys(response.content);
     } catch (error) {
-      console.error('Failed to fetch surveys:', error);
-      toast.error('Failed to load surveys');
+      console.error('Fehler beim Abrufen von Umfragen:', error);
+      toast.error('Fehler beim Laden von Umfragen');
     } finally {
       setLoading(false);
     }
@@ -36,21 +36,21 @@ export default function SurveysPage() {
       setSurveys((prev) =>
         prev.map((s) => (s.id === surveyId ? updated : s))
       );
-      toast.success('Vote recorded!');
+      toast.success('Stimme erfasst!');
     } catch (error) {
-      toast.error('Failed to record vote');
+      toast.error('Fehler beim Erfassen der Stimme');
     }
   };
 
   const handleDelete = async (surveyId: number) => {
-    if (!confirm('Delete this survey?')) return;
+    if (!confirm('Diese Umfrage löschen?')) return;
 
     try {
       await surveyService.deleteSurvey(surveyId);
       setSurveys((prev) => prev.filter((s) => s.id !== surveyId));
-      toast.success('Survey deleted');
+      toast.success('Umfrage gelöscht');
     } catch (error) {
-      toast.error('Failed to delete survey');
+      toast.error('Fehler beim Löschen der Umfrage');
     }
   };
 
@@ -65,9 +65,9 @@ export default function SurveysPage() {
       });
       setSurveys((prev) => [survey, ...prev]);
       setShowCreateModal(false);
-      toast.success('Survey created!');
+      toast.success('Umfrage erstellt!');
     } catch (error) {
-      toast.error('Failed to create survey');
+      toast.error('Fehler beim Erstellen der Umfrage');
     }
   };
 
@@ -81,12 +81,12 @@ export default function SurveysPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Kopfzeile */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Surveys</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Umfragen</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Create and participate in team polls
+            Erstellen Sie Team-Umfragen und nehmen Sie an diesen teil
           </p>
         </div>
         <button
@@ -94,25 +94,25 @@ export default function SurveysPage() {
           className="btn-primary inline-flex items-center gap-2"
         >
           <PlusIcon className="w-5 h-5" />
-          Create Survey
+          Umfrage erstellen
         </button>
       </div>
 
-      {/* Surveys list */}
+      {/* Umfragenliste */}
       {surveys.length === 0 ? (
         <div className="card p-12 text-center">
           <ChartBarIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No surveys yet
+            Noch keine Umfragen
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Create the first survey to gather team feedback
+            Erstellen Sie die erste Umfrage, um Feedback des Teams zu sammeln
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
             className="btn-primary"
           >
-            Create Survey
+            Umfrage erstellen
           </button>
         </div>
       ) : (

@@ -42,15 +42,15 @@ public class DashboardResource {
     public Response getStatistics() {
         Map<String, Object> stats = new HashMap<>();
 
-        // Total ideas
+        // Gesamtzahl der Ideen
         Long totalIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i", Long.class).getSingleResult();
         stats.put("totalIdeas", totalIdeas);
 
-        // Total users
+        // Gesamtzahl der Benutzer
         Long totalUsers = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.isActive = true", Long.class).getSingleResult();
         stats.put("totalUsers", totalUsers);
 
-        // Ideas this week - get the previous or same Sunday
+        // Ideen diese Woche - Sonntag derselben oder vorherigen Woche abrufen
         LocalDateTime weekStartTime = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
         Long ideasThisWeek = em.createQuery(
                 "SELECT COUNT(i) FROM Idea i WHERE i.createdAt >= :weekStart", Long.class)
@@ -58,7 +58,7 @@ public class DashboardResource {
                 .getSingleResult();
         stats.put("ideasThisWeek", ideasThisWeek);
 
-        // Status counts - use enum parameters instead of string literals
+        // Statuszahlen - Enum-Parameter statt String-Literale verwenden
         Long conceptIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
                 .setParameter("status", IdeaStatus.CONCEPT).getSingleResult();
         Long inProgressIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
@@ -69,25 +69,25 @@ public class DashboardResource {
         stats.put("inProgressIdeas", inProgressIdeas);
         stats.put("completedIdeas", completedIdeas);
 
-        // Total likes
+        // Gesamtzahl der Likes
         Long totalLikes = em.createQuery("SELECT COUNT(l) FROM Like l", Long.class).getSingleResult();
         stats.put("totalLikes", totalLikes);
 
-        // Total comments
+        // Gesamtzahl der Kommentare
         Long totalComments = em.createQuery("SELECT COUNT(c) FROM Comment c", Long.class).getSingleResult();
         stats.put("totalComments", totalComments);
 
-        // Active surveys
+        // Aktive Umfragen
         Long activeSurveys = em.createQuery("SELECT COUNT(s) FROM Survey s WHERE s.isActive = true", Long.class).getSingleResult();
         stats.put("activeSurveys", activeSurveys);
 
-        // Most popular category
+        // Beliebteste Kategorie
         List<Object[]> categoryResults = em.createQuery(
                 "SELECT i.category, COUNT(i) as cnt FROM Idea i GROUP BY i.category ORDER BY cnt DESC", Object[].class)
                 .getResultList();
         stats.put("popularCategory", categoryResults.isEmpty() ? "N/A" : categoryResults.get(0)[0]);
 
-        // Category breakdown for charts
+        // Kategorieaufschlüsselung für Diagramme
         List<Map<String, Object>> categoryBreakdown = categoryResults.stream()
                 .map(row -> {
                     Map<String, Object> item = new HashMap<>();
@@ -98,8 +98,8 @@ public class DashboardResource {
                 .collect(Collectors.toList());
         stats.put("categoryBreakdown", categoryBreakdown);
 
-        // Weekly activity (ideas created per day this week) - use native query for PostgreSQL date truncation
-        // Reuse weekStartTime from above
+        // Wöchentliche Aktivität (Ideen pro Tag diese Woche) - Native Abfrage für PostgreSQL-Datumstrunkierung verwenden
+        // weekStartTime von oben wiederverwenden
         java.sql.Timestamp weekStartTs = java.sql.Timestamp.valueOf(weekStartTime);
         @SuppressWarnings("unchecked")
         List<Object[]> weeklyActivity = em.createNativeQuery(

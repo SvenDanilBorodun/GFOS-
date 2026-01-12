@@ -43,7 +43,7 @@ public class NotificationResource {
     public Response markAsRead(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         notificationService.markAsRead(id, userId);
-        return Response.ok(Map.of("message", "Marked as read")).build();
+        return Response.ok(Map.of("message", "Als gelesen markiert")).build();
     }
 
     @PUT
@@ -51,6 +51,6 @@ public class NotificationResource {
     public Response markAllAsRead(@Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         notificationService.markAllAsRead(userId);
-        return Response.ok(Map.of("message", "All marked as read")).build();
+        return Response.ok(Map.of("message", "Alle als gelesen markiert")).build();
     }
 }

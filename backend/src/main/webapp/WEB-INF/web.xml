@@ -4,10 +4,10 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-    <display-name>GFOS Digital Idea Board</display-name>
-    <description>Innovation management platform for GFOS Innovation Award 2026</description>
+    <display-name>GFOS Digital Ideenbrett</display-name>
+    <description>Innovationsmanagementioplattform für GFOS Innovation Award 2026</description>
 
-    <!-- Jersey Servlet Configuration -->
+    <!-- Jersey Servlet Konfiguration -->
     <servlet>
         <servlet-name>JerseyServlet</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
@@ -23,12 +23,12 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
-    <!-- Welcome File -->
+    <!-- Willkommensdatei -->
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
-    <!-- Session Configuration -->
+    <!-- Sitzungskonfiguration -->
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>
@@ -37,7 +37,7 @@
         </cookie-config>
     </session-config>
 
-    <!-- Error Pages -->
+    <!-- Fehlerseiten -->
     <error-page>
         <error-code>404</error-code>
         <location>/error/404.html</location>
@@ -47,15 +47,15 @@
         <location>/error/500.html</location>
     </error-page>
 
-    <!-- Security Constraints (for static resources) -->
+    <!-- Sicherheitsbeschränkungen (für statische Ressourcen) -->
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>API Resources</web-resource-name>
+            <web-resource-name>API-Ressourcen</web-resource-name>
             <url-pattern>/api/*</url-pattern>
         </web-resource-collection>
     </security-constraint>
 
-    <!-- MIME Mappings -->
+    <!-- MIME-Mappings -->
     <mime-mapping>
         <extension>json</extension>
         <mime-type>application/json</mime-type>

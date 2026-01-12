@@ -48,10 +48,10 @@ public class IdeaService {
     public IdeaDTO getIdeaById(Long id, Long currentUserId) {
         Idea idea = findById(id);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Increment view count
+        // Aufrufe erhöhen
         incrementViewCount(id);
 
         boolean isLiked = isLikedByUser(id, currentUserId);
@@ -140,7 +140,7 @@ public class IdeaService {
                               List<String> tags, Long authorId) {
         User author = em.find(User.class, authorId);
         if (author == null) {
-            throw ApiException.notFound("Author not found");
+            throw ApiException.notFound("Autor nicht gefunden");
         }
 
         Idea idea = new Idea();
@@ -154,13 +154,13 @@ public class IdeaService {
 
         em.persist(idea);
 
-        // Create a group for this idea automatically
+        // Erstelle automatisch eine Gruppe für diese Idee
         groupService.createGroupForIdea(idea, author);
 
-        // Award XP and check badges
+        // Vergebe XP und prüfe Abzeichen
         gamificationService.awardXpForIdea(authorId);
 
-        // Audit log
+        // Audit-Protokoll
         auditService.log(authorId, AuditAction.CREATE, "Idea", idea.getId(), null, null);
 
         return IdeaDTO.fromEntity(idea);
@@ -171,14 +171,14 @@ public class IdeaService {
                               List<String> tags, Long currentUserId) {
         Idea idea = findById(id);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Check ownership (only author or admin can update)
+        // Prüfe Eigentumsrecht (nur Autor oder Admin können aktualisieren)
         if (!idea.getAuthor().getId().equals(currentUserId)) {
             User currentUser = em.find(User.class, currentUserId);
             if (currentUser == null || currentUser.getRole() != UserRole.ADMIN) {
-                throw ApiException.forbidden("Not authorized to update this idea");
+                throw ApiException.forbidden("Nicht berechtigt, diese Idee zu aktualisieren");
             }
         }
 
@@ -198,34 +198,34 @@ public class IdeaService {
     public IdeaDTO updateStatus(Long id, IdeaStatus status, Integer progressPercentage, Long currentUserId) {
         Idea idea = findById(id);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Check permission (only PM or Admin can change status)
+        // Prüfe Berechtigung (nur PM oder Admin können Status ändern)
         User currentUser = em.find(User.class, currentUserId);
         if (currentUser == null ||
             (currentUser.getRole() != UserRole.PROJECT_MANAGER && currentUser.getRole() != UserRole.ADMIN)) {
-            throw ApiException.forbidden("Not authorized to change status");
+            throw ApiException.forbidden("Nicht berechtigt, Status zu ändern");
         }
 
         IdeaStatus oldStatus = idea.getStatus();
         idea.setStatus(status);
 
-        // Progress can only be set by the idea creator via checklist
-        // PM/Admin can only change status; progress updates automatically from checklist
-        // Exception: When status changes to COMPLETED or CONCEPT, auto-set progress
+        // Fortschritt kann nur vom Ideenschöpfer über die Checkliste gesetzt werden
+        // PM/Admin können nur Status ändern; Fortschritt wird automatisch aus der Checkliste aktualisiert
+        // Ausnahme: Wenn Status zu COMPLETED oder CONCEPT wechselt, Fortschritt automatisch setzen
         if (status == IdeaStatus.COMPLETED) {
             idea.setProgressPercentage(100);
-            // Award XP to author for completion
+            // Vergebe XP an den Autor für Abschluss
             gamificationService.awardXpForIdeaCompleted(idea.getAuthor().getId());
         } else if (status == IdeaStatus.CONCEPT) {
             idea.setProgressPercentage(0);
         }
-        // Note: For IN_PROGRESS, progress is managed by the checklist system only
+        // Hinweis: Für IN_PROGRESS wird der Fortschritt nur vom Checklisten-System verwaltet
 
         em.merge(idea);
 
-        // Notify author of status change
+        // Benachrichtige den Autor über die Statusänderung
         if (oldStatus != status) {
             notificationService.notifyStatusChange(idea, oldStatus, status, currentUser);
             auditService.log(currentUserId, AuditAction.STATUS_CHANGE, "Idea", id,
@@ -240,13 +240,13 @@ public class IdeaService {
     public void deleteIdea(Long id, Long currentUserId) {
         Idea idea = findById(id);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Only admin can delete
+        // Nur Admin kann löschen
         User currentUser = em.find(User.class, currentUserId);
         if (currentUser == null || currentUser.getRole() != UserRole.ADMIN) {
-            throw ApiException.forbidden("Only admins can delete ideas");
+            throw ApiException.forbidden("Nur Administratoren können Ideen löschen");
         }
 
         auditService.log(currentUserId, AuditAction.DELETE, "Idea", id, null, null);
@@ -261,7 +261,7 @@ public class IdeaService {
     }
 
     public List<IdeaDTO> getTopIdeasThisWeek(int limit, Long currentUserId) {
-        // Get ideas with most likes (simplified - ordering by total likes)
+        // Abrufen von Ideen mit den meisten Likes (vereinfacht - sortiert nach Gesamtlikes)
         List<Idea> ideas = em.createQuery(
                 "SELECT i FROM Idea i ORDER BY i.likeCount DESC, i.createdAt DESC", Idea.class)
                 .setMaxResults(limit)

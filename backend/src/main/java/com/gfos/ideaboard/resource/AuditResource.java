@@ -27,7 +27,7 @@ public class AuditResource {
             @Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can view audit logs");
+            throw ApiException.forbidden("Nur Administratoren können Audit-Protokolle anzeigen");
         }
 
         List<AuditLogDTO> logs = auditService.getRecentLogs(limit);
@@ -42,7 +42,7 @@ public class AuditResource {
             @Context ContainerRequestContext requestContext) {
         String role = (String) requestContext.getProperty("role");
         if (!"ADMIN".equals(role)) {
-            throw ApiException.forbidden("Only admins can view audit logs");
+            throw ApiException.forbidden("Nur Administratoren können Audit-Protokolle anzeigen");
         }
 
         List<AuditLogDTO> logs = auditService.getLogsByEntity(entityType, entityId);

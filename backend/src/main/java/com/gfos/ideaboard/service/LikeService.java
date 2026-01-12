@@ -53,43 +53,43 @@ public class LikeService {
 
     @Transactional
     public void likeIdea(Long ideaId, Long userId) {
-        // Check remaining likes
+        // Verbleibende Likes prüfen
         int remaining = getRemainingLikes(userId);
         if (remaining <= 0) {
-            throw ApiException.badRequest("No likes remaining this week. Resets every Sunday at midnight.");
+            throw ApiException.badRequest("Keine Likes verbleibend diese Woche. Setzt sich jeden Sonntag um Mitternacht zurück.");
         }
 
-        // Check if already liked
+        // Prüfe, ob bereits geliked
         Like existingLike = findLike(userId, ideaId);
         if (existingLike != null) {
-            throw ApiException.conflict("You already liked this idea");
+            throw ApiException.conflict("Du magst diese Idee bereits");
         }
 
         User user = em.find(User.class, userId);
         Idea idea = em.find(Idea.class, ideaId);
 
         if (user == null || idea == null) {
-            throw ApiException.notFound("User or Idea not found");
+            throw ApiException.notFound("Benutzer oder Idee nicht gefunden");
         }
 
-        // Cannot like own idea
+        // Kann eigene Idee nicht liken
         if (idea.getAuthor().getId().equals(userId)) {
-            throw ApiException.badRequest("Cannot like your own idea");
+            throw ApiException.badRequest("Du kannst deine eigene Idee nicht liken");
         }
 
-        // Create like
+        // Like erstellen
         Like like = new Like();
         like.setUser(user);
         like.setIdea(idea);
         em.persist(like);
 
-        // Note: like_count is automatically updated by database trigger
-        // Do NOT manually increment here to avoid double counting
+        // Hinweis: like_count wird automatisch durch Datenbank-Trigger aktualisiert
+        // NICHT manuell inkrementieren, um Doppelzählung zu vermeiden
 
-        // Award XP to idea author and check badges
+        // XP an Ideenschöpfer vergeben und Abzeichen prüfen
         gamificationService.awardXpForLikeReceived(idea.getAuthor().getId());
 
-        // Notify idea author
+        // Ideenschöpfer benachrichtigen
         notificationService.notifyLike(idea, user);
     }
 
@@ -97,11 +97,11 @@ public class LikeService {
     public void unlikeIdea(Long ideaId, Long userId) {
         Like like = findLike(userId, ideaId);
         if (like == null) {
-            throw ApiException.notFound("Like not found");
+            throw ApiException.notFound("Like nicht gefunden");
         }
 
-        // Note: like_count is automatically updated by database trigger
-        // Do NOT manually decrement here to avoid double counting
+        // Hinweis: like_count wird automatisch durch Datenbank-Trigger aktualisiert
+        // NICHT manuell dekrementieren, um Doppelzählung zu vermeiden
 
         em.remove(like);
     }

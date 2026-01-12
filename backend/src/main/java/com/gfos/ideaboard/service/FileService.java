@@ -40,45 +40,45 @@ public class FileService {
                                          byte[] fileData, Long uploaderId) {
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
-            throw ApiException.notFound("Idea not found");
+            throw ApiException.notFound("Idee nicht gefunden");
         }
 
         User uploader = em.find(User.class, uploaderId);
         if (uploader == null) {
-            throw ApiException.notFound("User not found");
+            throw ApiException.notFound("Benutzer nicht gefunden");
         }
 
-        // Validate file size
+        // Dateigröße validieren
         if (fileData.length > MAX_FILE_SIZE) {
-            throw ApiException.badRequest("File size exceeds maximum allowed (10MB)");
+            throw ApiException.badRequest("Dateigröße übersteigt Maximum (10MB)");
         }
 
-        // Validate file type
+        // Dateityp validieren
         if (!ALLOWED_TYPES.contains(mimeType)) {
-            throw ApiException.badRequest("File type not allowed: " + mimeType);
+            throw ApiException.badRequest("Dateityp nicht erlaubt: " + mimeType);
         }
 
-        // Generate unique filename
+        // Eindeutigen Dateinamen generieren
         String extension = getFileExtension(originalFilename);
         String storedFilename = UUID.randomUUID().toString() + extension;
 
-        // Create directory structure
+        // Verzeichnisstruktur erstellen
         Path ideaUploadDir = Paths.get(UPLOAD_DIR, ideaId.toString());
         try {
             Files.createDirectories(ideaUploadDir);
         } catch (IOException e) {
-            throw ApiException.serverError("Failed to create upload directory");
+            throw ApiException.serverError("Fehler beim Erstellen des Upload-Verzeichnisses");
         }
 
-        // Save file
+        // Datei speichern
         Path filePath = ideaUploadDir.resolve(storedFilename);
         try {
             Files.write(filePath, fileData);
         } catch (IOException e) {
-            throw ApiException.serverError("Failed to save file");
+            throw ApiException.serverError("Fehler beim Speichern der Datei");
         }
 
-        // Create database record
+        // Datenbank-Datensatz erstellen
         FileAttachment attachment = new FileAttachment();
         attachment.setIdea(idea);
         attachment.setFilename(storedFilename);
@@ -96,21 +96,21 @@ public class FileService {
     public byte[] getFile(Long ideaId, Long fileId) {
         FileAttachment attachment = em.find(FileAttachment.class, fileId);
         if (attachment == null || !attachment.getIdea().getId().equals(ideaId)) {
-            throw ApiException.notFound("File not found");
+            throw ApiException.notFound("Datei nicht gefunden");
         }
 
         Path filePath = Paths.get(UPLOAD_DIR, ideaId.toString(), attachment.getFilename());
         try {
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            throw ApiException.notFound("File not found on disk");
+            throw ApiException.notFound("Datei nicht auf der Festplatte gefunden");
         }
     }
 
     public FileAttachment getFileAttachment(Long fileId) {
         FileAttachment attachment = em.find(FileAttachment.class, fileId);
         if (attachment == null) {
-            throw ApiException.notFound("File not found");
+            throw ApiException.notFound("Datei nicht gefunden");
         }
         return attachment;
     }
@@ -119,24 +119,24 @@ public class FileService {
     public void deleteFile(Long ideaId, Long fileId, Long userId) {
         FileAttachment attachment = em.find(FileAttachment.class, fileId);
         if (attachment == null || !attachment.getIdea().getId().equals(ideaId)) {
-            throw ApiException.notFound("File not found");
+            throw ApiException.notFound("Datei nicht gefunden");
         }
 
         Idea idea = attachment.getIdea();
-        // Only author or admin can delete files
+        // Nur Autor oder Admin können Dateien löschen
         if (!idea.getAuthor().getId().equals(userId)) {
-            throw ApiException.forbidden("Not authorized to delete this file");
+            throw ApiException.forbidden("Nicht berechtigt, diese Datei zu löschen");
         }
 
-        // Delete from filesystem
+        // Aus Dateisystem löschen
         Path filePath = Paths.get(UPLOAD_DIR, ideaId.toString(), attachment.getFilename());
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            // Log but continue - database record should still be deleted
+            // Protokollieren aber fortfahren - Datenbank-Datensatz sollte immer noch gelöscht werden
         }
 
-        // Delete from database
+        // Aus Datenbank löschen
         em.remove(attachment);
     }
 

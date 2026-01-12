@@ -1,4 +1,4 @@
-# GFOS Digital Idea B
+# GFOS Digital Ideen-Board
 
 
-For issues or questions, contact the development team.
+Bei Fragen oder Problemen wenden Sie sich bitte an das Entwicklungsteam.

@@ -1,5 +1,5 @@
-# GFOS Digital Idea Board - System Verification Script
-# Run this script to verify all systems are functioning correctly
+# GFOS Digital Ideen-Board - System Verifikationsskript
+# Führen Sie dieses Skript aus, um zu überprüfen, dass alle Systeme funktionieren
 
 param(
     [switch]$Quick,
@@ -28,29 +28,29 @@ function Write-Info($text) {
 function Show-Help {
     Write-Host @"
 
-GFOS Digital Idea Board - System Verification
+GFOS Digital Ideen-Board - System Verifikation
 ==============================================
 
-This script verifies that all components are working correctly.
+Dieses Skript überprüft, dass alle Komponenten korrekt funktionieren.
 
-Usage: .\verify-system.ps1 [options]
+Verwendung: .\verify-system.ps1 [Optionen]
 
-Options:
-  -Quick    Run quick checks only (skip full tests)
-  -Help     Show this help message
+Optionen:
+  -Quick    Führe nur schnelle Überprüfungen aus (überspringe vollständige Tests)
+  -Help     Diese Hilfemeldung anzeigen
 
-What this script checks:
-  ✓ PostgreSQL database connectivity
-  ✓ User authentication and password hashes
-  ✓ Database schema and seed data integrity
-  ✓ GlassFish server status
-  ✓ Backend API accessibility
-  ✓ Frontend connectivity
-  ✓ Integration tests
+Was dieses Skript überprüft:
+  ✓ PostgreSQL Datenbankverbindung
+  ✓ Benutzer-Authentifizierung und Passwort-Hashes
+  ✓ Datenbank-Schema und Seed-Datenintegrität
+  ✓ GlassFish Server Status
+  ✓ Backend API Erreichbarkeit
+  ✓ Frontend Konnektivität
+  ✓ Integrationstests
 
-Examples:
-  .\verify-system.ps1           # Full verification
-  .\verify-system.ps1 -Quick    # Quick checks only
+Beispiele:
+  .\verify-system.ps1           # Vollständige Verifikation
+  .\verify-system.ps1 -Quick    # Nur schnelle Überprüfungen
 
 "@
 }
@@ -78,43 +78,43 @@ Write-Host " \__ \ || \__ \ | _||  _|   / /  /    | | | _|\__ \ | |  " -Foregrou
 Write-Host " |___/\_, |___/ |___|_| |_|_\ /_|     |_| |___|___/ |_|  " -ForegroundColor Magenta
 Write-Host "      |__/                                                " -ForegroundColor Magenta
 Write-Host ""
-Write-Host "                System Verification Tool" -ForegroundColor White
+Write-Host "                System Verifikationswerkzeug" -ForegroundColor White
 Write-Host ""
 
-# Check 1: PostgreSQL
-Write-Header "1. PostgreSQL Database"
+# Überprüfung 1: PostgreSQL
+Write-Header "1. PostgreSQL Datenbank"
 $psqlPath = "C:\Program Files\PostgreSQL\18\bin\psql.exe"
 $env:PGPASSWORD = "ideaboard123"
 
 try {
     $result = & $psqlPath -U ideaboard_user -h localhost -p $CONFIG.DB_PORT -d ideaboard -c "SELECT COUNT(*) FROM users;" 2>&1
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "Database connection successful"
+        Write-Success "Datenbankverbindung erfolgreich"
         $userCount = ($result | Select-String -Pattern "\d+" | Select-Object -First 1).Matches[0].Value
-        Write-Info "Found $userCount users in database"
+        Write-Info "Gefunden $userCount Benutzer in Datenbank"
     } else {
-        Write-Error "Database connection failed"
+        Write-Error "Datenbankverbindung fehlgeschlagen"
         $allPassed = $false
     }
 } catch {
-    Write-Error "PostgreSQL error: $_"
+    Write-Error "PostgreSQL Fehler: $_"
     $allPassed = $false
 }
 
-# Check 2: GlassFish Server
+# Überprüfung 2: GlassFish Server
 Write-Header "2. GlassFish Server"
 $glassFishRunning = Get-NetTCPConnection -LocalPort $CONFIG.GLASSFISH_PORT -ErrorAction SilentlyContinue
 if ($glassFishRunning) {
-    Write-Success "GlassFish is running on port $($CONFIG.GLASSFISH_PORT)"
+    Write-Success "GlassFish läuft auf Port $($CONFIG.GLASSFISH_PORT)"
 } else {
-    Write-Error "GlassFish is NOT running on port $($CONFIG.GLASSFISH_PORT)"
+    Write-Error "GlassFish läuft NICHT auf Port $($CONFIG.GLASSFISH_PORT)"
     $allPassed = $false
 }
 
-# Check 3: Backend API
+# Überprüfung 3: Backend API
 Write-Header "3. Backend API"
 try {
-    # Test with a login attempt which is a public endpoint
+    # Teste mit Anmeldeversuchen, was ein öffentlicher Endpunkt ist
     $testBody = @{
         username = "admin"
         password = "admin123"
@@ -128,23 +128,23 @@ try {
         -ErrorAction Stop
 
     if ($response.token) {
-        Write-Success "Backend API is accessible and responding"
+        Write-Success "Backend API ist erreichbar und antwortet"
     } else {
-        Write-Error "Backend API returned unexpected response"
+        Write-Error "Backend API gab unerwartete Antwort zurück"
         $allPassed = $false
     }
 } catch {
-    Write-Error "Backend API is not accessible: $_"
+    Write-Error "Backend API ist nicht erreichbar: $_"
     $allPassed = $false
 }
 
-# Check 4: Frontend
+# Überprüfung 4: Frontend
 Write-Header "4. Frontend Server"
 $frontendRunning = Get-NetTCPConnection -LocalPort $CONFIG.FRONTEND_PORT -ErrorAction SilentlyContinue
 if ($frontendRunning) {
-    Write-Success "Frontend is running on port $($CONFIG.FRONTEND_PORT)"
+    Write-Success "Frontend läuft auf Port $($CONFIG.FRONTEND_PORT)"
 } else {
-    Write-Error "Frontend is NOT running on port $($CONFIG.FRONTEND_PORT)"
+    Write-Error "Frontend läuft NICHT auf Port $($CONFIG.FRONTEND_PORT)"
     $allPassed = $false
 }
 
@@ -233,28 +233,28 @@ if (-not $Quick) {
     }
 }
 
-# Summary
-Write-Header "VERIFICATION SUMMARY"
+# Zusammenfassung
+Write-Header "VERIFIKATIONS-ZUSAMMENFASSUNG"
 
 if ($allPassed) {
     Write-Host ""
-    Write-Success "ALL CHECKS PASSED!"
+    Write-Success "ALLE ÜBERPRÜFUNGEN BESTANDEN!"
     Write-Host ""
-    Write-Host "  Your system is ready to use:" -ForegroundColor White
+    Write-Host "  Ihr System ist einsatzbereit:" -ForegroundColor White
     Write-Host "  - Frontend:    http://localhost:$($CONFIG.FRONTEND_PORT)" -ForegroundColor Cyan
     Write-Host "  - Backend API: http://localhost:$($CONFIG.GLASSFISH_PORT)/ideaboard/api" -ForegroundColor Cyan
-    Write-Host "  - Admin Login: admin / admin123" -ForegroundColor Cyan
+    Write-Host "  - Admin-Anmeldung: admin / admin123" -ForegroundColor Cyan
     Write-Host ""
     exit 0
 } else {
     Write-Host ""
-    Write-Error "SOME CHECKS FAILED!"
+    Write-Error "EINIGE ÜBERPRÜFUNGEN FEHLGESCHLAGEN!"
     Write-Host ""
-    Write-Host "  Please review the errors above and:" -ForegroundColor Yellow
-    Write-Host "  1. Check that all services are running" -ForegroundColor Yellow
-    Write-Host "  2. Run .\start-project.ps1 to start missing services" -ForegroundColor Yellow
-    Write-Host "  3. Review DEVELOPMENT-GUIDE.md for troubleshooting" -ForegroundColor Yellow
-    Write-Host "  4. Run .\verify-system.ps1 again after fixing issues" -ForegroundColor Yellow
+    Write-Host "  Bitte überprüfen Sie die obigen Fehler und:" -ForegroundColor Yellow
+    Write-Host "  1. Überprüfen Sie, dass alle Services laufen" -ForegroundColor Yellow
+    Write-Host "  2. Führen Sie .\start-project.ps1 aus, um fehlende Services zu starten" -ForegroundColor Yellow
+    Write-Host "  3. Überprüfen Sie DEVELOPMENT-GUIDE.md für Fehlerbehebung" -ForegroundColor Yellow
+    Write-Host "  4. Führen Sie .\verify-system.ps1 erneut aus, nachdem Sie Probleme behoben haben" -ForegroundColor Yellow
     Write-Host ""
     exit 1
 }

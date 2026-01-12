@@ -6,6 +6,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Markiert eine Ressource oder Methode als gesichert und erfordert JWT-Authentifizierung.
+ * Der JwtFilter wird diese Annotation respektieren und Token validieren.
+ */
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})

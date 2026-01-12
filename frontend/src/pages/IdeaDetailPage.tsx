@@ -115,9 +115,9 @@ export default function IdeaDetailPage() {
   const handleLike = async () => {
     if (!idea) return;
 
-    // Prevent users from liking their own ideas
+    // Verhindern Sie, dass Benutzer ihre eigenen Ideen liken
     if (isAuthor) {
-      toast.error('You cannot like your own idea');
+      toast.error('Sie können Ihre eigene Idee nicht liken');
       return;
     }
 
@@ -158,16 +158,16 @@ export default function IdeaDetailPage() {
       setIdea((prev) =>
         prev ? { ...prev, commentCount: prev.commentCount + 1 } : null
       );
-      toast.success('Comment added');
+      toast.success('Kommentar hinzugefügt');
     } catch (error) {
-      toast.error('Failed to add comment');
+      toast.error('Fehler beim Hinzufügen eines Kommentars');
     } finally {
       setSubmittingComment(false);
     }
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    if (!confirm('Delete this comment?')) return;
+    if (!confirm('Diesen Kommentar löschen?')) return;
 
     try {
       await ideaService.deleteComment(commentId);
@@ -175,9 +175,9 @@ export default function IdeaDetailPage() {
       setIdea((prev) =>
         prev ? { ...prev, commentCount: prev.commentCount - 1 } : null
       );
-      toast.success('Comment deleted');
+      toast.success('Kommentar gelöscht');
     } catch (error) {
-      toast.error('Failed to delete comment');
+      toast.error('Fehler beim Löschen des Kommentars');
     }
   };
 
@@ -209,23 +209,23 @@ export default function IdeaDetailPage() {
       const updated = await ideaService.updateStatus(Number(id), status, progress);
       setIdea(updated);
       setShowStatusModal(false);
-      toast.success('Status updated');
+      toast.success('Status aktualisiert');
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error('Fehler beim Aktualisieren des Status');
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this idea? This action cannot be undone.')) {
+    if (!confirm('Sind Sie sicher, dass Sie diese Idee löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.')) {
       return;
     }
 
     try {
       await ideaService.deleteIdea(Number(id));
-      toast.success('Idea deleted');
+      toast.success('Idee gelöscht');
       navigate('/ideas');
     } catch (error) {
-      toast.error('Failed to delete idea');
+      toast.error('Fehler beim Löschen der Idee');
     }
   };
 
@@ -239,11 +239,11 @@ export default function IdeaDetailPage() {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error('Failed to download file');
+      toast.error('Fehler beim Herunterladen der Datei');
     }
   };
 
-  // Checklist handlers
+  // Checklisten-Handler
   const handleAddChecklistItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newChecklistItem.trim() || newChecklistItem.length > 200) return;
@@ -253,12 +253,12 @@ export default function IdeaDetailPage() {
       const item = await ideaService.createChecklistItem(Number(id), newChecklistItem.trim());
       setChecklistItems((prev) => [...prev, item]);
       setNewChecklistItem('');
-      // Update progress in idea
+      // Fortschritt in der Idee aktualisieren
       const updatedIdea = await ideaService.getIdea(Number(id));
       setIdea(updatedIdea);
-      toast.success('Checklist item added');
+      toast.success('Checklisten-Element hinzugefügt');
     } catch (error) {
-      toast.error('Failed to add checklist item');
+      toast.error('Fehler beim Hinzufügen des Checklisten-Elements');
     } finally {
       setAddingChecklistItem(false);
     }
@@ -270,26 +270,26 @@ export default function IdeaDetailPage() {
       setChecklistItems((prev) =>
         prev.map((item) => (item.id === itemId ? updatedItem : item))
       );
-      // Update progress in idea
+      // Fortschritt in der Idee aktualisieren
       const updatedIdea = await ideaService.getIdea(Number(id));
       setIdea(updatedIdea);
     } catch (error) {
-      toast.error('Failed to update checklist item');
+      toast.error('Fehler beim Aktualisieren des Checklisten-Elements');
     }
   };
 
   const handleDeleteChecklistItem = async (itemId: number) => {
-    if (!confirm('Delete this checklist item?')) return;
+    if (!confirm('Dieses Checklisten-Element löschen?')) return;
 
     try {
       await ideaService.deleteChecklistItem(Number(id), itemId);
       setChecklistItems((prev) => prev.filter((item) => item.id !== itemId));
-      // Update progress in idea
+      // Fortschritt in der Idee aktualisieren
       const updatedIdea = await ideaService.getIdea(Number(id));
       setIdea(updatedIdea);
-      toast.success('Checklist item deleted');
+      toast.success('Checklisten-Element gelöscht');
     } catch (error) {
-      toast.error('Failed to delete checklist item');
+      toast.error('Fehler beim Löschen des Checklisten-Elements');
     }
   };
 
@@ -309,9 +309,9 @@ export default function IdeaDetailPage() {
   if (!idea) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Idea not found</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Idee nicht gefunden</h2>
         <Link to="/ideas" className="link mt-4 inline-block">
-          Back to Ideas
+          Zurück zu Ideen
         </Link>
       </div>
     );
@@ -330,13 +330,13 @@ export default function IdeaDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Back button */}
+      {/* Zurück-Schaltfläche */}
       <Link
         to="/ideas"
         className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
       >
         <ArrowLeftIcon className="w-4 h-4" />
-        Back to Ideas
+        Zurück zu Ideen
       </Link>
 
       {/* Main content card */}

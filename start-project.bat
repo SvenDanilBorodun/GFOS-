@@ -2,16 +2,16 @@
 setlocal EnableDelayedExpansion
 
 :: ============================================
-:: GFOS Digital Idea Board - Startup Script
+:: GFOS Digital Ideen-Board - Startskript
 :: ============================================
 
-:: Configuration - ADJUST THESE PATHS FOR YOUR SYSTEM
+:: Konfiguration - PASSEN SIE DIESE PFADE FÜR IHR SYSTEM AN
 set "JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot"
 set "MAVEN_HOME=C:\apache-maven-3.9.12"
 set "GLASSFISH_HOME=C:\glassfish-7.1.0\glassfish7"
 set "POSTGRES_BIN=C:\Program Files\PostgreSQL\18\bin"
 
-:: Database Configuration
+:: Datenbankkonfiguration
 set "DB_NAME=ideaboard"
 set "DB_USER=ideaboard_user"
 set "DB_PASSWORD=ideaboard123"
@@ -20,7 +20,7 @@ set "DB_PORT=5432"
 set "PG_ADMIN_USER=postgres"
 set "PG_ADMIN_PASSWORD=17918270"
 
-:: Project Paths
+:: Projektpfade
 set "PROJECT_ROOT=C:\GGFF\GFOS-"
 set "BACKEND_PATH=%PROJECT_ROOT%\backend"
 set "FRONTEND_PATH=%PROJECT_ROOT%\frontend"
@@ -30,7 +30,7 @@ set "DATABASE_PATH=%PROJECT_ROOT%\database"
 set "GLASSFISH_PORT=8080"
 set "FRONTEND_PORT=3000"
 
-:: Colors
+:: Farben
 set "RED=[91m"
 set "GREEN=[92m"
 set "YELLOW=[93m"
@@ -38,7 +38,7 @@ set "CYAN=[96m"
 set "WHITE=[97m"
 set "RESET=[0m"
 
-:: Parse arguments
+:: Argumente analysieren
 set "SKIP_CHECKS=0"
 set "SKIP_BUILD=0"
 set "FRONTEND_ONLY=0"
@@ -73,12 +73,12 @@ echo.
 if "%FRONTEND_ONLY%"=="1" goto :frontend_only
 if "%BACKEND_ONLY%"=="1" goto :backend_only
 
-:: Full startup
+:: Vollständiger Start
 if "%SKIP_CHECKS%"=="0" call :check_all_dependencies
 if %ERRORLEVEL% neq 0 (
     echo.
-    echo %RED%[ERROR] Missing dependencies. Please install them and try again.%RESET%
-    echo %YELLOW%Run with --skip-checks to bypass verification.%RESET%
+    echo %RED%[ERROR] Fehlende Abhängigkeiten. Bitte installieren Sie diese und versuchen Sie es erneut.%RESET%
+    echo %YELLOW%Führen Sie --skip-checks aus, um die Verifikation zu überspringen.%RESET%
     pause
     exit /b 1
 )
@@ -113,7 +113,7 @@ if "%SKIP_BUILD%"=="0" call :build_backend
 call :deploy_backend
 echo.
 echo %GREEN%========================================%RESET%
-echo %GREEN% Backend Ready!%RESET%
+echo %GREEN% Backend bereit!%RESET%
 echo %GREEN%========================================%RESET%
 echo.
 echo %GREEN%[OK]%RESET% Backend API: http://localhost:%GLASSFISH_PORT%/ideaboard/api
@@ -124,170 +124,170 @@ call :start_frontend
 goto :eof
 
 :: ============================================
-:: DEPENDENCY CHECKS
+:: ABHÄNGIGKEITSPRÜFUNGEN
 :: ============================================
 
 :check_all_dependencies
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Checking Dependencies%RESET%
+echo %CYAN% Überprüfe Abhängigkeiten%RESET%
 echo %CYAN%========================================%RESET%
 
 set "ALL_OK=1"
 
-:: Check Java
-echo %WHITE%[INFO]%RESET% Checking Java installation...
+:: Java überprüfen
+echo %WHITE%[INFO]%RESET% Überprüfe Java-Installation...
 if exist "%JAVA_HOME%\bin\java.exe" (
     "%JAVA_HOME%\bin\java.exe" -version 2>&1 | findstr /C:"17" >nul
     if !ERRORLEVEL! equ 0 (
-        echo %GREEN%[OK]%RESET% Java 17 found at: %JAVA_HOME%
+        echo %GREEN%[OK]%RESET% Java 17 gefunden unter: %JAVA_HOME%
     ) else (
-        echo %RED%[ERROR]%RESET% Java found but not version 17
+        echo %RED%[ERROR]%RESET% Java gefunden, aber nicht Version 17
         set "ALL_OK=0"
     )
 ) else (
-    echo %RED%[ERROR]%RESET% Java 17 NOT FOUND!
+    echo %RED%[ERROR]%RESET% Java 17 NICHT GEFUNDEN!
     echo.
-    echo %YELLOW%    Please install Java 17 ^(JDK^):%RESET%
-    echo     1. Download Eclipse Temurin JDK 17 from: https://adoptium.net/
-    echo     2. Run the installer
-    echo     3. Update JAVA_HOME in this script
+    echo %YELLOW%    Bitte installieren Sie Java 17 ^(JDK^):%RESET%
+    echo     1. Laden Sie Eclipse Temurin JDK 17 herunter: https://adoptium.net/
+    echo     2. Führen Sie das Installationsprogramm aus
+    echo     3. Aktualisieren Sie JAVA_HOME in diesem Skript
     echo.
     set "ALL_OK=0"
 )
 
-:: Check Maven
-echo %WHITE%[INFO]%RESET% Checking Maven installation...
+:: Maven überprüfen
+echo %WHITE%[INFO]%RESET% Überprüfe Maven-Installation...
 if exist "%MAVEN_HOME%\bin\mvn.cmd" (
-    echo %GREEN%[OK]%RESET% Maven found at: %MAVEN_HOME%
+    echo %GREEN%[OK]%RESET% Maven gefunden unter: %MAVEN_HOME%
 ) else (
     where mvn >nul 2>&1
     if !ERRORLEVEL! equ 0 (
-        echo %GREEN%[OK]%RESET% Maven found in PATH
+        echo %GREEN%[OK]%RESET% Maven in PATH gefunden
     ) else (
-        echo %RED%[ERROR]%RESET% Maven NOT FOUND!
+        echo %RED%[ERROR]%RESET% Maven NICHT GEFUNDEN!
         echo.
-        echo %YELLOW%    Please install Apache Maven 3.8+:%RESET%
-        echo     1. Download from: https://maven.apache.org/download.cgi
-        echo     2. Extract to C:\apache-maven-3.9.x
-        echo     3. Update MAVEN_HOME in this script
+        echo %YELLOW%    Bitte installieren Sie Apache Maven 3.8+:%RESET%
+        echo     1. Herunterladen von: https://maven.apache.org/download.cgi
+        echo     2. Extrahieren nach C:\apache-maven-3.9.x
+        echo     3. Aktualisieren Sie MAVEN_HOME in diesem Skript
         echo.
         set "ALL_OK=0"
     )
 )
 
-:: Check Node.js
-echo %WHITE%[INFO]%RESET% Checking Node.js installation...
+:: Node.js überprüfen
+echo %WHITE%[INFO]%RESET% Überprüfe Node.js-Installation...
 where node >nul 2>&1
 if %ERRORLEVEL% equ 0 (
     for /f "tokens=*" %%i in ('node -v') do set "NODE_VER=%%i"
-    echo %GREEN%[OK]%RESET% Node.js !NODE_VER! found
+    echo %GREEN%[OK]%RESET% Node.js !NODE_VER! gefunden
 ) else (
-    echo %RED%[ERROR]%RESET% Node.js NOT FOUND!
+    echo %RED%[ERROR]%RESET% Node.js NICHT GEFUNDEN!
     echo.
-    echo %YELLOW%    Please install Node.js 18+:%RESET%
-    echo     1. Download from: https://nodejs.org/
-    echo     2. Run the installer ^(LTS version recommended^)
-    echo     3. Restart this terminal
+    echo %YELLOW%    Bitte installieren Sie Node.js 18+:%RESET%
+    echo     1. Herunterladen von: https://nodejs.org/
+    echo     2. Führen Sie das Installationsprogramm aus ^(LTS-Version empfohlen^)
+    echo     3. Starten Sie dieses Terminal neu
     echo.
     set "ALL_OK=0"
 )
 
-:: Check PostgreSQL
-echo %WHITE%[INFO]%RESET% Checking PostgreSQL installation...
+:: PostgreSQL überprüfen
+echo %WHITE%[INFO]%RESET% Überprüfe PostgreSQL-Installation...
 if exist "%POSTGRES_BIN%\psql.exe" (
-    echo %GREEN%[OK]%RESET% PostgreSQL found at: %POSTGRES_BIN%
+    echo %GREEN%[OK]%RESET% PostgreSQL gefunden unter: %POSTGRES_BIN%
 ) else (
     where psql >nul 2>&1
     if !ERRORLEVEL! equ 0 (
-        echo %GREEN%[OK]%RESET% PostgreSQL found in PATH
+        echo %GREEN%[OK]%RESET% PostgreSQL in PATH gefunden
     ) else (
-        echo %RED%[ERROR]%RESET% PostgreSQL NOT FOUND!
+        echo %RED%[ERROR]%RESET% PostgreSQL NICHT GEFUNDEN!
         echo.
-        echo %YELLOW%    Please install PostgreSQL 15+:%RESET%
-        echo     1. Download from: https://www.postgresql.org/download/windows/
-        echo     2. Run the installer
-        echo     3. Update POSTGRES_BIN in this script
+        echo %YELLOW%    Bitte installieren Sie PostgreSQL 15+:%RESET%
+        echo     1. Herunterladen von: https://www.postgresql.org/download/windows/
+        echo     2. Führen Sie das Installationsprogramm aus
+        echo     3. Aktualisieren Sie POSTGRES_BIN in diesem Skript
         echo.
         set "ALL_OK=0"
     )
 )
 
-:: Check GlassFish
-echo %WHITE%[INFO]%RESET% Checking GlassFish installation...
+:: GlassFish überprüfen
+echo %WHITE%[INFO]%RESET% Überprüfe GlassFish-Installation...
 if exist "%GLASSFISH_HOME%\bin\asadmin.bat" (
-    echo %GREEN%[OK]%RESET% GlassFish found at: %GLASSFISH_HOME%
+    echo %GREEN%[OK]%RESET% GlassFish gefunden unter: %GLASSFISH_HOME%
 ) else (
-    echo %RED%[ERROR]%RESET% GlassFish 7 NOT FOUND!
+    echo %RED%[ERROR]%RESET% GlassFish 7 NICHT GEFUNDEN!
     echo.
-    echo %YELLOW%    Please install GlassFish 7:%RESET%
-    echo     1. Download from: https://glassfish.org/download
-    echo     2. Extract to C:\glassfish-7.1.0
-    echo     3. Update GLASSFISH_HOME in this script
+    echo %YELLOW%    Bitte installieren Sie GlassFish 7:%RESET%
+    echo     1. Herunterladen von: https://glassfish.org/download
+    echo     2. Extrahieren nach C:\glassfish-7.1.0
+    echo     3. Aktualisieren Sie GLASSFISH_HOME in diesem Skript
     echo.
     set "ALL_OK=0"
 )
 
 if "%ALL_OK%"=="1" (
     echo.
-    echo %GREEN%[OK]%RESET% All dependencies are installed!
+    echo %GREEN%[OK]%RESET% Alle Abhängigkeiten sind installiert!
     exit /b 0
 ) else (
     exit /b 1
 )
 
 :: ============================================
-:: DATABASE SETUP
+:: DATENBANKEINRICHTUNG
 :: ============================================
 
 :setup_database
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Setting Up Database%RESET%
+echo %CYAN% Richte Datenbank ein%RESET%
 echo %CYAN%========================================%RESET%
 
 set "PGPASSWORD=%PG_ADMIN_PASSWORD%"
 
-:: Check if PostgreSQL is running
-echo %WHITE%[INFO]%RESET% Checking if PostgreSQL is running...
+:: Überprüfen Sie, ob PostgreSQL läuft
+echo %WHITE%[INFO]%RESET% Überprüfe, ob PostgreSQL läuft...
 "%POSTGRES_BIN%\psql.exe" -U %PG_ADMIN_USER% -h %DB_HOST% -p %DB_PORT% -c "SELECT 1" >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo %RED%[ERROR]%RESET% PostgreSQL is not running or credentials are incorrect!
-    echo %YELLOW%Please start PostgreSQL service and check credentials.%RESET%
+    echo %RED%[ERROR]%RESET% PostgreSQL läuft nicht oder Anmeldedaten sind falsch!
+    echo %YELLOW%Bitte starten Sie den PostgreSQL-Dienst und überprüfen Sie die Anmeldedaten.%RESET%
     exit /b 1
 )
-echo %GREEN%[OK]%RESET% PostgreSQL is running
+echo %GREEN%[OK]%RESET% PostgreSQL läuft
 
-:: Check if database exists
-echo %WHITE%[INFO]%RESET% Checking if database '%DB_NAME%' exists...
+:: Überprüfen Sie, ob die Datenbank existiert
+echo %WHITE%[INFO]%RESET% Überprüfe, ob die Datenbank '%DB_NAME%' existiert...
 for /f "tokens=*" %%i in ('"%POSTGRES_BIN%\psql.exe" -U %PG_ADMIN_USER% -h %DB_HOST% -p %DB_PORT% -t -c "SELECT 1 FROM pg_database WHERE datname='%DB_NAME%'" 2^>nul') do set "DB_EXISTS=%%i"
 
 if "!DB_EXISTS!"=="         1" (
-    echo %GREEN%[OK]%RESET% Database '%DB_NAME%' exists
+    echo %GREEN%[OK]%RESET% Datenbank '%DB_NAME%' existiert
 ) else (
-    echo %WHITE%[INFO]%RESET% Creating database '%DB_NAME%'...
+    echo %WHITE%[INFO]%RESET% Erstelle Datenbank '%DB_NAME%'...
 
-    :: Create user
+    :: Benutzer erstellen
     "%POSTGRES_BIN%\psql.exe" -U %PG_ADMIN_USER% -h %DB_HOST% -p %DB_PORT% -c "DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '%DB_USER%') THEN CREATE USER %DB_USER% WITH ENCRYPTED PASSWORD '%DB_PASSWORD%'; END IF; END $$;" >nul 2>&1
 
-    :: Create database
+    :: Datenbank erstellen
     "%POSTGRES_BIN%\psql.exe" -U %PG_ADMIN_USER% -h %DB_HOST% -p %DB_PORT% -c "CREATE DATABASE %DB_NAME% OWNER %DB_USER%;" >nul 2>&1
 
     if !ERRORLEVEL! equ 0 (
-        echo %GREEN%[OK]%RESET% Database created successfully
+        echo %GREEN%[OK]%RESET% Datenbank erfolgreich erstellt
 
-        :: Grant privileges
+        :: Berechtigungen gewähren
         "%POSTGRES_BIN%\psql.exe" -U %PG_ADMIN_USER% -h %DB_HOST% -p %DB_PORT% -c "GRANT ALL PRIVILEGES ON DATABASE %DB_NAME% TO %DB_USER%;" >nul 2>&1
 
-        :: Initialize with seed data
+        :: Mit Seed-Daten initialisieren
         if exist "%DATABASE_PATH%\init.sql" (
-            echo %WHITE%[INFO]%RESET% Running database initialization script...
+            echo %WHITE%[INFO]%RESET% Führe Datenbank-Initialisierungsskript aus...
             set "PGPASSWORD=%DB_PASSWORD%"
             "%POSTGRES_BIN%\psql.exe" -U %DB_USER% -h %DB_HOST% -p %DB_PORT% -d %DB_NAME% -f "%DATABASE_PATH%\init.sql" >nul 2>&1
-            echo %GREEN%[OK]%RESET% Database initialized with seed data
+            echo %GREEN%[OK]%RESET% Datenbank mit Seed-Daten initialisiert
         )
     ) else (
-        echo %RED%[ERROR]%RESET% Failed to create database
+        echo %RED%[ERROR]%RESET% Fehler beim Erstellen der Datenbank
         exit /b 1
     )
 )
@@ -301,20 +301,20 @@ exit /b 0
 :start_glassfish
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Starting GlassFish Server%RESET%
+echo %CYAN% Starte GlassFish Server%RESET%
 echo %CYAN%========================================%RESET%
 
-:: Check if already running
+:: Überprüfe, ob bereits läuft
 netstat -an | findstr ":%GLASSFISH_PORT% " | findstr "LISTENING" >nul 2>&1
 if %ERRORLEVEL% equ 0 (
-    echo %GREEN%[OK]%RESET% GlassFish is already running on port %GLASSFISH_PORT%
+    echo %GREEN%[OK]%RESET% GlassFish läuft bereits auf Port %GLASSFISH_PORT%
     exit /b 0
 )
 
-echo %WHITE%[INFO]%RESET% Starting GlassFish domain...
+echo %WHITE%[INFO]%RESET% Starte GlassFish Domain...
 "%GLASSFISH_HOME%\bin\asadmin.bat" start-domain >nul 2>&1
 
-:: Wait for startup
+:: Warten auf Start
 set "ATTEMPTS=0"
 :wait_glassfish
 if %ATTEMPTS% geq 30 goto :glassfish_timeout
@@ -326,61 +326,61 @@ if %ERRORLEVEL% neq 0 (
     goto :wait_glassfish
 )
 echo.
-echo %GREEN%[OK]%RESET% GlassFish started successfully on port %GLASSFISH_PORT%
+echo %GREEN%[OK]%RESET% GlassFish erfolgreich auf Port %GLASSFISH_PORT% gestartet
 exit /b 0
 
 :glassfish_timeout
 echo.
-echo %RED%[ERROR]%RESET% GlassFish failed to start within timeout
+echo %RED%[ERROR]%RESET% GlassFish konnte nicht innerhalb des Timeouts gestartet werden
 exit /b 1
 
 :setup_jdbc
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Configuring JDBC Connection Pool%RESET%
+echo %CYAN% Konfiguriere JDBC Verbindungspool%RESET%
 echo %CYAN%========================================%RESET%
 
-:: Check if pool exists
-echo %WHITE%[INFO]%RESET% Checking JDBC connection pool...
+:: Überprüfe, ob Pool existiert
+echo %WHITE%[INFO]%RESET% Überprüfe JDBC Verbindungspool...
 "%GLASSFISH_HOME%\bin\asadmin.bat" list-jdbc-connection-pools 2>nul | findstr "IdeaBoardPool" >nul
 if %ERRORLEVEL% equ 0 (
-    echo %GREEN%[OK]%RESET% JDBC pool 'IdeaBoardPool' already exists
+    echo %GREEN%[OK]%RESET% JDBC Pool 'IdeaBoardPool' existiert bereits
 ) else (
-    echo %WHITE%[INFO]%RESET% Creating JDBC connection pool...
+    echo %WHITE%[INFO]%RESET% Erstelle JDBC Verbindungspool...
     "%GLASSFISH_HOME%\bin\asadmin.bat" create-jdbc-connection-pool --restype javax.sql.DataSource --datasourceclassname org.postgresql.ds.PGSimpleDataSource --property user=%DB_USER%:password=%DB_PASSWORD%:serverName=%DB_HOST%:portNumber=%DB_PORT%:databaseName=%DB_NAME% IdeaBoardPool >nul 2>&1
-    echo %GREEN%[OK]%RESET% JDBC pool created
+    echo %GREEN%[OK]%RESET% JDBC Pool erstellt
 )
 
-:: Check if resource exists
-echo %WHITE%[INFO]%RESET% Checking JDBC resource...
+:: Überprüfe, ob Ressource existiert
+echo %WHITE%[INFO]%RESET% Überprüfe JDBC Ressource...
 "%GLASSFISH_HOME%\bin\asadmin.bat" list-jdbc-resources 2>nul | findstr "jdbc/ideaboard" >nul
 if %ERRORLEVEL% equ 0 (
-    echo %GREEN%[OK]%RESET% JDBC resource 'jdbc/ideaboard' already exists
+    echo %GREEN%[OK]%RESET% JDBC Ressource 'jdbc/ideaboard' existiert bereits
 ) else (
-    echo %WHITE%[INFO]%RESET% Creating JDBC resource...
+    echo %WHITE%[INFO]%RESET% Erstelle JDBC Ressource...
     "%GLASSFISH_HOME%\bin\asadmin.bat" create-jdbc-resource --connectionpoolid IdeaBoardPool jdbc/ideaboard >nul 2>&1
-    echo %GREEN%[OK]%RESET% JDBC resource created
+    echo %GREEN%[OK]%RESET% JDBC Ressource erstellt
 )
 
-:: Test connection
-echo %WHITE%[INFO]%RESET% Testing database connection...
+:: Teste Verbindung
+echo %WHITE%[INFO]%RESET% Teste Datenbankverbindung...
 "%GLASSFISH_HOME%\bin\asadmin.bat" ping-connection-pool IdeaBoardPool 2>&1 | findstr "successfully" >nul
 if %ERRORLEVEL% equ 0 (
-    echo %GREEN%[OK]%RESET% Database connection test passed
+    echo %GREEN%[OK]%RESET% Datenbankverbindungstest bestanden
 ) else (
-    echo %YELLOW%[WARNING]%RESET% Database connection test failed - check configuration
+    echo %YELLOW%[WARNING]%RESET% Datenbankverbindungstest fehlgeschlagen - überprüfen Sie die Konfiguration
 )
 
 exit /b 0
 
 :: ============================================
-:: BUILD AND DEPLOY
+:: ERSTELLEN UND BEREITSTELLUNG
 :: ============================================
 
 :build_backend
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Building Backend%RESET%
+echo %CYAN% Backend erstellen%RESET%
 echo %CYAN%========================================%RESET%
 
 if exist "%MAVEN_HOME%\bin\mvn.cmd" (
@@ -389,7 +389,7 @@ if exist "%MAVEN_HOME%\bin\mvn.cmd" (
     set "MVN=mvn"
 )
 
-echo %WHITE%[INFO]%RESET% Building WAR file with Maven...
+echo %WHITE%[INFO]%RESET% Erstelle WAR-Datei mit Maven...
 pushd "%BACKEND_PATH%"
 "%MVN%" clean package -DskipTests -q
 set "BUILD_RESULT=%ERRORLEVEL%"
@@ -397,29 +397,29 @@ popd
 
 if %BUILD_RESULT% equ 0 (
     if exist "%BACKEND_PATH%\target\ideaboard.war" (
-        echo %GREEN%[OK]%RESET% Backend built successfully: target\ideaboard.war
+        echo %GREEN%[OK]%RESET% Backend erfolgreich erstellt: target\ideaboard.war
         exit /b 0
     )
 )
-echo %RED%[ERROR]%RESET% Backend build failed!
+echo %RED%[ERROR]%RESET% Backend-Build fehlgeschlagen!
 exit /b 1
 
 :deploy_backend
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Deploying Backend to GlassFish%RESET%
+echo %CYAN% Stellen Sie Backend in GlassFish bereit%RESET%
 echo %CYAN%========================================%RESET%
 
 if not exist "%BACKEND_PATH%\target\ideaboard.war" (
-    echo %RED%[ERROR]%RESET% WAR file not found!
+    echo %RED%[ERROR]%RESET% WAR-Datei nicht gefunden!
     exit /b 1
 )
 
-echo %WHITE%[INFO]%RESET% Deploying application...
+echo %WHITE%[INFO]%RESET% Stelle Anwendung bereit...
 "%GLASSFISH_HOME%\bin\asadmin.bat" redeploy --force --name ideaboard "%BACKEND_PATH%\target\ideaboard.war" >nul 2>&1
 
-echo %GREEN%[OK]%RESET% Backend deployed!
-echo %WHITE%[INFO]%RESET% API available at: http://localhost:%GLASSFISH_PORT%/ideaboard/api
+echo %GREEN%[OK]%RESET% Backend bereitgestellt!
+echo %WHITE%[INFO]%RESET% API verfügbar unter: http://localhost:%GLASSFISH_PORT%/ideaboard/api
 exit /b 0
 
 :: ============================================
@@ -429,91 +429,91 @@ exit /b 0
 :start_frontend
 echo.
 echo %CYAN%========================================%RESET%
-echo %CYAN% Starting Frontend Dev Server%RESET%
+echo %CYAN% Starten Sie Frontend Dev Server%RESET%
 echo %CYAN%========================================%RESET%
 
-:: Check/install dependencies
+:: Überprüfen/Abhängigkeiten installieren
 if not exist "%FRONTEND_PATH%\node_modules" (
-    echo %WHITE%[INFO]%RESET% Installing npm dependencies...
+    echo %WHITE%[INFO]%RESET% Installiere npm Abhängigkeiten...
     pushd "%FRONTEND_PATH%"
     npm install >nul 2>&1
     popd
-    echo %GREEN%[OK]%RESET% Dependencies installed
+    echo %GREEN%[OK]%RESET% Abhängigkeiten installiert
 ) else (
-    echo %GREEN%[OK]%RESET% Frontend dependencies already installed
+    echo %GREEN%[OK]%RESET% Frontend Abhängigkeiten bereits installiert
 )
 
-echo %WHITE%[INFO]%RESET% Starting Vite dev server on port %FRONTEND_PORT%...
+echo %WHITE%[INFO]%RESET% Starten Sie Vite Dev Server auf Port %FRONTEND_PORT%...
 start "GFOS Frontend" cmd /k "cd /d %FRONTEND_PATH% && npm run dev"
 
 timeout /t 3 /nobreak >nul
-echo %GREEN%[OK]%RESET% Frontend starting in new window...
-echo %WHITE%[INFO]%RESET% Frontend will be available at: http://localhost:%FRONTEND_PORT%
+echo %GREEN%[OK]%RESET% Frontend startet in neuem Fenster...
+echo %WHITE%[INFO]%RESET% Frontend ist verfügbar unter: http://localhost:%FRONTEND_PORT%
 
 exit /b 0
 
 :: ============================================
-:: FINAL INFO
+:: ABSCHLIESSINFORMATIONEN
 :: ============================================
 
 :show_final_info
 echo.
 echo %GREEN%========================================%RESET%
-echo %GREEN% All Services Started!%RESET%
+echo %GREEN% Alle Dienste gestartet!%RESET%
 echo %GREEN%========================================%RESET%
 echo.
-echo   %WHITE%Application URLs:%RESET%
+echo   %WHITE%Anwendungs-URLs:%RESET%
 echo   -----------------
 echo   %GREEN%[OK]%RESET% Frontend:    http://localhost:%FRONTEND_PORT%
 echo   %GREEN%[OK]%RESET% Backend API: http://localhost:%GLASSFISH_PORT%/ideaboard/api
-echo   %GREEN%[OK]%RESET% GlassFish:   http://localhost:4848 (Admin Console)
+echo   %GREEN%[OK]%RESET% GlassFish:   http://localhost:4848 (Admin Konsole)
 echo.
-echo   %WHITE%Default Login Credentials:%RESET%
+echo   %WHITE%Standard Anmeldedaten:%RESET%
 echo   --------------------------
 echo   %CYAN%Admin:    admin / admin123%RESET%
 echo   %CYAN%Employee: john.doe / password123%RESET%
 echo   %CYAN%Manager:  jane.smith / password123%RESET%
 echo.
-echo %WHITE%[INFO]%RESET% Press Ctrl+C to stop the frontend server
+echo %WHITE%[INFO]%RESET% Drücken Sie Strg+C, um den Frontend-Server zu stoppen
 echo.
 pause
 goto :eof
 
 :error_exit
 echo.
-echo %RED%[ERROR] Startup failed. Check the errors above.%RESET%
+echo %RED%[ERROR] Startup fehlgeschlagen. Überprüfen Sie die obigen Fehler.%RESET%
 pause
 exit /b 1
 
 :show_help
 echo.
-echo GFOS Digital Idea Board - Startup Script
+echo GFOS Digital Ideen-Board - Startskript
 echo =========================================
 echo.
-echo Usage: start-project.bat [options]
+echo Verwendung: start-project.bat [Optionen]
 echo.
-echo Options:
-echo   --skip-checks, -s    Skip dependency checks (faster startup)
-echo   --skip-build, -b     Skip Maven build (use existing WAR)
-echo   --frontend, -f       Start only the frontend dev server
-echo   --backend            Start only PostgreSQL and GlassFish
-echo   --help, -h           Show this help message
+echo Optionen:
+echo   --skip-checks, -s    Überspringe Abhängigkeitsprüfungen (schnellerer Start)
+echo   --skip-build, -b     Überspringe Maven Build (verwende bestehendes WAR)
+echo   --frontend, -f       Starten Sie nur den Frontend Dev Server
+echo   --backend            Starten Sie nur PostgreSQL und GlassFish
+echo   --help, -h           Diese Hilfemeldung anzeigen
 echo.
-echo Requirements:
+echo Anforderungen:
 echo   - Java 17 (JDK)
 echo   - Apache Maven 3.8+
-echo   - Node.js 18+ with npm
+echo   - Node.js 18+ mit npm
 echo   - PostgreSQL 15+
 echo   - GlassFish 7
 echo.
-echo Configuration:
-echo   Edit the configuration section at the top of this script
-echo   to match your installation paths.
+echo Konfiguration:
+echo   Bearbeiten Sie den Konfigurationsabschnitt oben in diesem Skript
+echo   um Ihre Installationspfade zu matchen.
 echo.
-echo Examples:
-echo   start-project.bat                  Full startup with all checks
-echo   start-project.bat --skip-checks    Skip dependency verification
-echo   start-project.bat --frontend       Start only frontend
+echo Beispiele:
+echo   start-project.bat                  Vollständiger Start mit allen Überprüfungen
+echo   start-project.bat --skip-checks    Überspringe Abhängigkeitsverifikation
+echo   start-project.bat --frontend       Starten Sie nur Frontend
 echo.
 pause
 goto :eof

@@ -27,12 +27,12 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
                     .build();
         }
 
-        // Log unexpected exceptions
+        // Unerwartete Ausnahmen protokollieren
         exception.printStackTrace();
 
         errorResponse.put("status", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        errorResponse.put("error", "Internal Server Error");
-        errorResponse.put("message", "An unexpected error occurred");
+        errorResponse.put("error", "Interner Serverfehler");
+        errorResponse.put("message", "Ein unerwarteter Fehler ist aufgetreten");
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(errorResponse)

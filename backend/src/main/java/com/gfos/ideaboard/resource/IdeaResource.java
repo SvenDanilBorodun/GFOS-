@@ -94,13 +94,13 @@ public class IdeaResource {
         List<String> tags = (List<String>) body.get("tags");
 
         if (title == null || title.trim().isEmpty()) {
-            throw ApiException.badRequest("Title is required");
+            throw ApiException.badRequest("Titel ist erforderlich");
         }
         if (description == null || description.trim().isEmpty()) {
-            throw ApiException.badRequest("Description is required");
+            throw ApiException.badRequest("Beschreibung ist erforderlich");
         }
         if (category == null || category.trim().isEmpty()) {
-            throw ApiException.badRequest("Category is required");
+            throw ApiException.badRequest("Kategorie ist erforderlich");
         }
 
         IdeaDTO idea = ideaService.createIdea(title, description, category, tags, userId);
@@ -135,7 +135,7 @@ public class IdeaResource {
                 : null;
 
         if (statusStr == null) {
-            throw ApiException.badRequest("Status is required");
+            throw ApiException.badRequest("Status ist erforderlich");
         }
 
         IdeaStatus status = IdeaStatus.valueOf(statusStr);
@@ -151,13 +151,13 @@ public class IdeaResource {
         return Response.noContent().build();
     }
 
-    // Likes
+    // Favoriten (Likes/Favorites)
     @POST
     @Path("/{id}/like")
     public Response likeIdea(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         likeService.likeIdea(id, userId);
-        return Response.ok(Map.of("message", "Liked")).build();
+        return Response.ok(Map.of("message", "Favorisiert")).build();
     }
 
     @DELETE
@@ -165,10 +165,10 @@ public class IdeaResource {
     public Response unlikeIdea(@PathParam("id") Long id, @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
         likeService.unlikeIdea(id, userId);
-        return Response.ok(Map.of("message", "Unliked")).build();
+        return Response.ok(Map.of("message", "Nicht mehr favorisiert")).build();
     }
 
-    // Comments
+    // Kommentare (Comments)
     @GET
     @Path("/{id}/comments")
     public Response getComments(@PathParam("id") Long id) {
@@ -186,7 +186,7 @@ public class IdeaResource {
         return Response.status(Response.Status.CREATED).entity(comment).build();
     }
 
-    // Categories and tags
+    // Kategorien und Tags (Categories and Tags)
     @GET
     @Path("/categories")
     public Response getCategories() {
@@ -201,7 +201,7 @@ public class IdeaResource {
         return Response.ok(tags).build();
     }
 
-    // File attachments
+    // Dateianhänge (File Attachments)
     @POST
     @Path("/{id}/files")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -220,7 +220,7 @@ public class IdeaResource {
                     id, fileDetail.getFileName(), mimeType, fileData, userId);
             return Response.status(Response.Status.CREATED).entity(attachment).build();
         } catch (Exception e) {
-            throw ApiException.serverError("Failed to upload file: " + e.getMessage());
+            throw ApiException.serverError("Fehler beim Hochladen der Datei: " + e.getMessage());
         }
     }
 
@@ -250,7 +250,7 @@ public class IdeaResource {
         return Response.noContent().build();
     }
 
-    // Checklist endpoints
+    // Checklisten-Endpunkte (Checklist Endpoints)
     @GET
     @Path("/{id}/checklist")
     public Response getChecklist(@PathParam("id") Long id) {
@@ -266,7 +266,7 @@ public class IdeaResource {
         String title = body.get("title");
 
         if (title == null || title.trim().isEmpty()) {
-            throw ApiException.badRequest("Title is required");
+            throw ApiException.badRequest("Titel ist erforderlich");
         }
 
         ChecklistItemDTO item = checklistService.createChecklistItem(id, title, userId);

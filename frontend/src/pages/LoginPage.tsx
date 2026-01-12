@@ -18,10 +18,10 @@ export default function LoginPage() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = 'Benutzername ist erforderlich';
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Passwort ist erforderlich';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -34,9 +34,9 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(formData);
-      toast.success('Welcome back!');
+      toast.success('Willkommen zurück!');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed';
+      const message = error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen';
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Branding */}
+      {/* Linke Seite - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-12 flex-col justify-between">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -64,23 +64,23 @@ export default function LoginPage() {
 
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">
-            Transform Ideas into Innovation
+            Verwandeln Sie Ideen in Innovation
           </h1>
           <p className="text-lg text-primary-100">
-            Join your team in sharing, developing, and implementing the ideas that will shape our future.
+            Treten Sie Ihrem Team bei, teilen Sie, entwickeln Sie und implementieren Sie die Ideen, die unsere Zukunft prägen werden.
           </p>
           <div className="flex gap-8">
             <div>
               <p className="text-3xl font-bold text-white">500+</p>
-              <p className="text-sm text-primary-200">Ideas Submitted</p>
+              <p className="text-sm text-primary-200">Eingereichte Ideen</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white">120</p>
-              <p className="text-sm text-primary-200">Completed Projects</p>
+              <p className="text-sm text-primary-200">Abgeschlossene Projekte</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white">50+</p>
-              <p className="text-sm text-primary-200">Active Contributors</p>
+              <p className="text-sm text-primary-200">Aktive Mitwirkende</p>
             </div>
           </div>
         </div>
@@ -90,9 +90,9 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Right side - Login form */}
+      {/* Rechte Seite - Anmeldeformular */}
       <div className="flex-1 flex flex-col justify-center px-8 py-12 lg:px-16 bg-white dark:bg-gray-900">
-        {/* Theme toggle */}
+        {/* Design-Umschalter */}
         <div className="absolute top-4 right-4">
           <button onClick={toggleTheme} className="btn-icon">
             {effectiveTheme === 'light' ? (
@@ -104,7 +104,7 @@ export default function LoginPage() {
         </div>
 
         <div className="max-w-md w-full mx-auto">
-          {/* Mobile logo */}
+          {/* Mobile-Logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
               <LightBulbIcon className="w-6 h-6 text-white" />
@@ -113,16 +113,16 @@ export default function LoginPage() {
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome back
+            Willkommen zurück
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Sign in to continue to your dashboard
+            Melden Sie sich an, um zu Ihrem Dashboard zu gelangen
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="form-group">
               <label htmlFor="username" className="label">
-                Username
+                Benutzername
               </label>
               <input
                 type="text"
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 value={formData.username}
                 onChange={handleChange}
                 className={errors.username ? 'input-error' : 'input'}
-                placeholder="Enter your username"
+                placeholder="Geben Sie Ihren Benutzernamen ein"
                 autoComplete="username"
               />
               {errors.username && <p className="form-error">{errors.username}</p>}
@@ -139,7 +139,7 @@ export default function LoginPage() {
 
             <div className="form-group">
               <label htmlFor="password" className="label">
-                Password
+                Passwort
               </label>
               <input
                 type="password"
@@ -148,7 +148,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 className={errors.password ? 'input-error' : 'input'}
-                placeholder="Enter your password"
+                placeholder="Geben Sie Ihr Passwort ein"
                 autoComplete="current-password"
               />
               {errors.password && <p className="form-error">{errors.password}</p>}
@@ -162,26 +162,26 @@ export default function LoginPage() {
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white" />
               ) : (
-                'Sign in'
+                'Anmelden'
               )}
             </button>
           </form>
 
           <p className="mt-6 text-center text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
+            Haben Sie noch kein Konto?{' '}
             <Link to="/register" className="link font-medium">
-              Create one
+              Erstelle eines
             </Link>
           </p>
 
-          {/* Demo credentials */}
+          {/* Demo-Anmeldedaten */}
           <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Demo Accounts:
+              Demo-Konten:
             </p>
             <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
               <p><span className="font-medium">Admin:</span> admin / admin123</p>
-              <p><span className="font-medium">Employee:</span> jsmith / password123</p>
+              <p><span className="font-medium">Mitarbeiter:</span> jsmith / password123</p>
               <p><span className="font-medium">PM:</span> mwilson / password123</p>
             </div>
           </div>

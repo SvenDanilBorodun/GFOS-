@@ -15,21 +15,21 @@ import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = [
-  'All',
-  'Technology',
-  'Sustainability',
-  'HR',
-  'Customer Experience',
-  'Operations',
+  'Alle',
+  'Technologie',
+  'Nachhaltigkeit',
+  'Personalwesen',
+  'Kundenerfahrung',
+  'Betrieb',
   'Marketing',
-  'Finance',
+  'Finanzen',
 ];
 
 const STATUSES: { label: string; value: IdeaStatus | '' }[] = [
-  { label: 'All Status', value: '' },
-  { label: 'Concept', value: 'CONCEPT' },
-  { label: 'In Progress', value: 'IN_PROGRESS' },
-  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'Alle Status', value: '' },
+  { label: 'Konzept', value: 'CONCEPT' },
+  { label: 'In Bearbeitung', value: 'IN_PROGRESS' },
+  { label: 'Abgeschlossen', value: 'COMPLETED' },
 ];
 
 export default function IdeasPage() {
