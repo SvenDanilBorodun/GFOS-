@@ -171,11 +171,17 @@ public class NotificationService {
 
     @Transactional
     public void notifyGroupMessage(IdeaGroup group, User sender, String content) {
+        // Query members directly to avoid lazy loading issues
+        List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroup", GroupMember.class)
+                .setParameter("groupId", group.getId())
+                .getResultList();
+
         // Notify all group members except the sender
-        for (GroupMember member : group.getMembers()) {
-            if (!member.getUser().getId().equals(sender.getId())) {
+        for (GroupMember member : members) {
+            User memberUser = em.find(User.class, member.getUser().getId());
+            if (memberUser != null && !memberUser.getId().equals(sender.getId())) {
                 Notification notification = new Notification();
-                notification.setUser(member.getUser());
+                notification.setUser(memberUser);
                 notification.setType(NotificationType.MESSAGE);
                 notification.setTitle("New Group Message");
                 notification.setMessage(sender.getFirstName() + " in \"" + truncate(group.getName(), 20) + "\": " + truncate(content, 50));

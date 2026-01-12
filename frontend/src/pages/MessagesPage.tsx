@@ -76,12 +76,14 @@ export default function MessagesPage() {
   const loadConversationFromUrl = async (userId: number) => {
     try {
       const users = await userService.getAllUsers();
-      const targetUser = users.find(u => u.id === userId);
+      // Use Number() conversion to ensure type consistency
+      const targetUser = users.find(u => Number(u.id) === Number(userId));
       if (targetUser) {
         setSelectedUser(targetUser);
         setSelectedGroup(null);
         setShowMobileList(false);
-        await fetchMessages(userId);
+        setActiveTab('direct');
+        await fetchMessages(targetUser.id);
       }
     } catch (error) {
       console.error('Failed to load conversation from URL:', error);
