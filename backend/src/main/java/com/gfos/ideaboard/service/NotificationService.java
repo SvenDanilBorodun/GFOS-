@@ -171,20 +171,24 @@ public class NotificationService {
 
     @Transactional
     public void notifyGroupMessage(IdeaGroup group, User sender, String content) {
-        // Query members directly to avoid lazy loading issues
-        List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroup", GroupMember.class)
+        // Query members with users eagerly fetched to avoid lazy loading issues
+        List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
                 .setParameter("groupId", group.getId())
                 .getResultList();
 
+        // Get sender name safely
+        String senderName = sender.getFirstName() != null ? sender.getFirstName() : sender.getUsername();
+        String groupName = group.getName() != null ? group.getName() : "Group";
+
         // Notify all group members except the sender
         for (GroupMember member : members) {
-            User memberUser = em.find(User.class, member.getUser().getId());
+            User memberUser = member.getUser();
             if (memberUser != null && !memberUser.getId().equals(sender.getId())) {
                 Notification notification = new Notification();
                 notification.setUser(memberUser);
                 notification.setType(NotificationType.MESSAGE);
                 notification.setTitle("New Group Message");
-                notification.setMessage(sender.getFirstName() + " in \"" + truncate(group.getName(), 20) + "\": " + truncate(content, 50));
+                notification.setMessage(senderName + " in \"" + truncate(groupName, 20) + "\": " + truncate(content, 50));
                 notification.setLink("/messages?group=" + group.getId());
                 notification.setSender(sender);
                 notification.setRelatedEntityType("IdeaGroup");

@@ -11,9 +11,9 @@ import java.util.List;
 @Table(name = "idea_groups")
 @NamedQueries({
     @NamedQuery(name = "IdeaGroup.findByIdea",
-                query = "SELECT g FROM IdeaGroup g WHERE g.idea.id = :ideaId"),
+                query = "SELECT g FROM IdeaGroup g LEFT JOIN FETCH g.idea LEFT JOIN FETCH g.createdBy WHERE g.idea.id = :ideaId"),
     @NamedQuery(name = "IdeaGroup.findByUser",
-                query = "SELECT g FROM IdeaGroup g JOIN g.members m WHERE m.user.id = :userId ORDER BY g.updatedAt DESC")
+                query = "SELECT DISTINCT g FROM IdeaGroup g LEFT JOIN FETCH g.idea LEFT JOIN FETCH g.createdBy JOIN g.members m WHERE m.user.id = :userId ORDER BY g.updatedAt DESC")
 })
 public class IdeaGroup {
 

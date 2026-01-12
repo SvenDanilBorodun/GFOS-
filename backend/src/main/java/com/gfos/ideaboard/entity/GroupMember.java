@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
     @NamedQuery(name = "GroupMember.findByGroupAndUser",
                 query = "SELECT gm FROM GroupMember gm WHERE gm.group.id = :groupId AND gm.user.id = :userId"),
     @NamedQuery(name = "GroupMember.findByGroup",
-                query = "SELECT gm FROM GroupMember gm WHERE gm.group.id = :groupId ORDER BY gm.joinedAt ASC"),
+                query = "SELECT gm FROM GroupMember gm LEFT JOIN FETCH gm.user WHERE gm.group.id = :groupId ORDER BY gm.joinedAt ASC"),
+    @NamedQuery(name = "GroupMember.findByGroupWithUser",
+                query = "SELECT gm FROM GroupMember gm LEFT JOIN FETCH gm.user WHERE gm.group.id = :groupId ORDER BY gm.joinedAt ASC"),
     @NamedQuery(name = "GroupMember.countByGroup",
                 query = "SELECT COUNT(gm) FROM GroupMember gm WHERE gm.group.id = :groupId")
 })

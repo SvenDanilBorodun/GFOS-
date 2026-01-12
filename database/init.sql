@@ -569,3 +569,34 @@ INSERT INTO messages (sender_id, recipient_id, idea_id, content, is_read) VALUES
     (3, 2, 1, 'Great choices! I have experience with Rasa from a previous project. Happy to share insights if you need.', false),
     (4, 2, NULL, 'Hey John, I saw your idea about the mobile app for field workers. Would love to collaborate on that!', false),
     (2, 4, 4, 'That would be awesome Tom! Let''s schedule a meeting to discuss the requirements.', true);
+
+-- Insert idea groups (one group per idea)
+INSERT INTO idea_groups (idea_id, name, description, created_by) VALUES
+    (1, 'Group: AI-Powered Customer Support', 'Discussion group for idea: AI-Powered Customer Support', 2),
+    (2, 'Group: Green Office Initiative', 'Discussion group for idea: Green Office Initiative', 3),
+    (3, 'Group: Employee Wellness Program', 'Discussion group for idea: Employee Wellness Program', 4),
+    (4, 'Group: Mobile App for Field Workers', 'Discussion group for idea: Mobile App for Field Workers', 2),
+    (5, 'Group: Customer Feedback Loop', 'Discussion group for idea: Customer Feedback Loop', 3);
+
+-- Insert group members (idea creators are automatically members with CREATOR role)
+INSERT INTO group_members (group_id, user_id, role) VALUES
+    (1, 2, 'CREATOR'),  -- John is creator of AI-Powered Customer Support group
+    (1, 3, 'MEMBER'),   -- Mary joined
+    (1, 4, 'MEMBER'),   -- Tom joined
+    (2, 3, 'CREATOR'),  -- Mary is creator of Green Office Initiative group
+    (2, 4, 'MEMBER'),   -- Tom joined
+    (3, 4, 'CREATOR'),  -- Tom is creator of Employee Wellness Program group
+    (3, 2, 'MEMBER'),   -- John joined
+    (4, 2, 'CREATOR'),  -- John is creator of Mobile App group
+    (5, 3, 'CREATOR'),  -- Mary is creator of Customer Feedback Loop group
+    (5, 4, 'MEMBER');   -- Tom joined
+
+-- Insert sample group messages
+INSERT INTO group_messages (group_id, sender_id, content) VALUES
+    (1, 2, 'Welcome to the AI-Powered Customer Support discussion group!'),
+    (1, 3, 'Great idea John! I think we should start with a pilot in the support department.'),
+    (1, 4, 'I can help with the technical implementation. I have experience with chatbots.'),
+    (2, 3, 'Let''s discuss how we can make this office greener!'),
+    (2, 4, 'I suggest we start with digital signatures for all internal documents.'),
+    (3, 4, 'The wellness program is now complete! Thanks everyone for the feedback.'),
+    (3, 2, 'This was a great initiative. Looking forward to using the gym membership!');

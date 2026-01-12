@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,9 +58,13 @@ public class GroupService {
 
         return groups.stream()
                 .map(group -> {
+                    // Fetch members eagerly for DTO conversion
+                    List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
+                            .setParameter("groupId", group.getId())
+                            .getResultList();
                     int unreadCount = getUnreadMessageCount(group.getId(), userId);
                     GroupMessageDTO lastMessage = getLastMessage(group.getId());
-                    return IdeaGroupDTO.fromEntity(group, unreadCount, lastMessage);
+                    return IdeaGroupDTO.fromEntity(group, members, unreadCount, lastMessage);
                 })
                 .collect(Collectors.toList());
     }
@@ -68,19 +73,31 @@ public class GroupService {
      * Gets a group by its ID.
      */
     public IdeaGroupDTO getGroup(Long groupId, Long userId) {
-        IdeaGroup group = em.find(IdeaGroup.class, groupId);
-        if (group == null) {
+        // Use JPQL with JOIN FETCH to eagerly load related entities
+        List<IdeaGroup> groups = em.createQuery(
+                "SELECT g FROM IdeaGroup g LEFT JOIN FETCH g.idea LEFT JOIN FETCH g.createdBy WHERE g.id = :groupId",
+                IdeaGroup.class)
+                .setParameter("groupId", groupId)
+                .getResultList();
+
+        if (groups.isEmpty()) {
             throw ApiException.notFound("Group not found");
         }
+        IdeaGroup group = groups.get(0);
 
         // Check if user is a member
         if (!isMember(groupId, userId)) {
             throw ApiException.forbidden("You are not a member of this group");
         }
 
+        // Fetch members eagerly for DTO conversion
+        List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
+                .setParameter("groupId", groupId)
+                .getResultList();
+
         int unreadCount = getUnreadMessageCount(groupId, userId);
         GroupMessageDTO lastMessage = getLastMessage(groupId);
-        return IdeaGroupDTO.fromEntity(group, unreadCount, lastMessage);
+        return IdeaGroupDTO.fromEntity(group, members, unreadCount, lastMessage);
     }
 
     /**
@@ -98,11 +115,15 @@ public class GroupService {
         IdeaGroup group = groups.get(0);
         boolean userIsMember = isMember(group.getId(), userId);
 
+        // Fetch members eagerly for DTO conversion
+        List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
+                .setParameter("groupId", group.getId())
+                .getResultList();
+
         int unreadCount = userIsMember ? getUnreadMessageCount(group.getId(), userId) : 0;
         GroupMessageDTO lastMessage = getLastMessage(group.getId());
 
-        IdeaGroupDTO dto = IdeaGroupDTO.fromEntity(group, unreadCount, lastMessage);
-        return dto;
+        return IdeaGroupDTO.fromEntity(group, members, unreadCount, lastMessage);
     }
 
     /**
@@ -110,10 +131,17 @@ public class GroupService {
      */
     @Transactional
     public IdeaGroupDTO joinGroup(Long groupId, Long userId) {
-        IdeaGroup group = em.find(IdeaGroup.class, groupId);
-        if (group == null) {
+        // Use JPQL with JOIN FETCH to eagerly load related entities
+        List<IdeaGroup> groups = em.createQuery(
+                "SELECT g FROM IdeaGroup g LEFT JOIN FETCH g.idea LEFT JOIN FETCH g.createdBy WHERE g.id = :groupId",
+                IdeaGroup.class)
+                .setParameter("groupId", groupId)
+                .getResultList();
+
+        if (groups.isEmpty()) {
             throw ApiException.notFound("Group not found");
         }
+        IdeaGroup group = groups.get(0);
 
         // Check if already a member
         if (isMember(groupId, userId)) {
@@ -131,11 +159,17 @@ public class GroupService {
         member.setRole(GroupMemberRole.MEMBER);
 
         em.persist(member);
+        em.flush(); // Ensure the member is persisted before fetching
 
         // Notify group creator that someone joined
         notificationService.notifyGroupJoin(group, user);
 
-        return IdeaGroupDTO.fromEntity(group);
+        // Fetch all members including the new one for DTO conversion
+        List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
+                .setParameter("groupId", groupId)
+                .getResultList();
+
+        return IdeaGroupDTO.fromEntity(group, members, 0, null);
     }
 
     /**
@@ -233,13 +267,17 @@ public class GroupService {
         message.setContent(content.trim());
 
         em.persist(message);
+        em.flush(); // Flush to ensure ID is generated and @PrePersist has run
 
-        // Update group's updatedAt
-        group.setUpdatedAt(message.getCreatedAt());
+        // Update group's updatedAt - use current time if createdAt is somehow null
+        LocalDateTime updateTime = message.getCreatedAt() != null ? message.getCreatedAt() : LocalDateTime.now();
+        group.setUpdatedAt(updateTime);
         em.merge(group);
 
-        // Mark as read by sender
-        markMessageAsRead(message.getId(), senderId);
+        // Mark as read by sender (only if message has an ID)
+        if (message.getId() != null) {
+            markMessageAsRead(message.getId(), senderId);
+        }
 
         // Notify other group members
         notificationService.notifyGroupMessage(group, sender, content);

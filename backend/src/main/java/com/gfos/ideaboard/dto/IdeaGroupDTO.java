@@ -1,5 +1,6 @@
 package com.gfos.ideaboard.dto;
 
+import com.gfos.ideaboard.entity.GroupMember;
 import com.gfos.ideaboard.entity.IdeaGroup;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,21 +24,25 @@ public class IdeaGroupDTO {
     public IdeaGroupDTO() {}
 
     public static IdeaGroupDTO fromEntity(IdeaGroup group) {
-        return fromEntity(group, 0, null);
+        return fromEntity(group, group.getMembers(), 0, null);
     }
 
     public static IdeaGroupDTO fromEntity(IdeaGroup group, int unreadCount, GroupMessageDTO lastMessage) {
+        return fromEntity(group, group.getMembers(), unreadCount, lastMessage);
+    }
+
+    public static IdeaGroupDTO fromEntity(IdeaGroup group, List<GroupMember> members, int unreadCount, GroupMessageDTO lastMessage) {
         IdeaGroupDTO dto = new IdeaGroupDTO();
         dto.setId(group.getId());
-        dto.setIdeaId(group.getIdea().getId());
-        dto.setIdeaTitle(group.getIdea().getTitle());
+        dto.setIdeaId(group.getIdea() != null ? group.getIdea().getId() : null);
+        dto.setIdeaTitle(group.getIdea() != null ? group.getIdea().getTitle() : null);
         dto.setName(group.getName());
         dto.setDescription(group.getDescription());
-        dto.setCreatedBy(UserDTO.fromEntity(group.getCreatedBy()));
-        dto.setMembers(group.getMembers().stream()
+        dto.setCreatedBy(group.getCreatedBy() != null ? UserDTO.fromEntity(group.getCreatedBy()) : null);
+        dto.setMembers(members != null ? members.stream()
                 .map(GroupMemberDTO::fromEntity)
-                .collect(Collectors.toList()));
-        dto.setMemberCount(group.getMembers().size());
+                .collect(Collectors.toList()) : List.of());
+        dto.setMemberCount(members != null ? members.size() : 0);
         dto.setUnreadCount(unreadCount);
         dto.setLastMessage(lastMessage);
         dto.setCreatedAt(group.getCreatedAt());

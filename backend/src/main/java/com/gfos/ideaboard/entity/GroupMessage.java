@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 @Table(name = "group_messages")
 @NamedQueries({
     @NamedQuery(name = "GroupMessage.findByGroup",
-                query = "SELECT gm FROM GroupMessage gm WHERE gm.group.id = :groupId ORDER BY gm.createdAt ASC"),
+                query = "SELECT gm FROM GroupMessage gm LEFT JOIN FETCH gm.sender WHERE gm.group.id = :groupId ORDER BY gm.createdAt ASC"),
     @NamedQuery(name = "GroupMessage.findRecentByGroup",
-                query = "SELECT gm FROM GroupMessage gm WHERE gm.group.id = :groupId ORDER BY gm.createdAt DESC"),
+                query = "SELECT gm FROM GroupMessage gm LEFT JOIN FETCH gm.sender WHERE gm.group.id = :groupId ORDER BY gm.createdAt DESC"),
     @NamedQuery(name = "GroupMessage.countUnreadByUser",
                 query = "SELECT COUNT(gm) FROM GroupMessage gm WHERE gm.group.id = :groupId AND gm.sender.id != :userId AND gm.id NOT IN (SELECT gmr.message.id FROM GroupMessageRead gmr WHERE gmr.user.id = :userId)")
 })
