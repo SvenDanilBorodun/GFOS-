@@ -39,7 +39,7 @@ public class ExportService {
                 .getResultList();
 
         StringBuilder csv = new StringBuilder();
-        csv.append("ID,Title,Description,Category,Status,Progress,Author,Likes,Comments,Created At\n");
+        csv.append("ID,Titel,Beschreibung,Kategorie,Status,Fortschritt,Autor,Likes,Kommentare,Erstellt am\n");
 
         for (Idea idea : ideas) {
             csv.append(idea.getId()).append(",");
@@ -59,39 +59,39 @@ public class ExportService {
 
     public byte[] exportStatisticsToCsv() {
         StringBuilder csv = new StringBuilder();
-        csv.append("Metric,Value\n");
+        csv.append("Metrik,Wert\n");
 
-        // Total ideas
+        // Gesamtzahl Ideen
         Long totalIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i", Long.class).getSingleResult();
-        csv.append("Total Ideas,").append(totalIdeas).append("\n");
+        csv.append("Gesamtzahl Ideen,").append(totalIdeas).append("\n");
 
-        // Ideas by status
+        // Ideen nach Status
         for (IdeaStatus status : IdeaStatus.values()) {
             Long count = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
                     .setParameter("status", status)
                     .getSingleResult();
-            csv.append("Ideas - ").append(status.name()).append(",").append(count).append("\n");
+            csv.append("Ideen - ").append(status.name()).append(",").append(count).append("\n");
         }
 
-        // Total users
+        // Gesamtzahl Benutzer
         Long totalUsers = em.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
-        csv.append("Total Users,").append(totalUsers).append("\n");
+        csv.append("Gesamtzahl Benutzer,").append(totalUsers).append("\n");
 
-        // Total likes
+        // Gesamtzahl Likes
         Long totalLikes = em.createQuery("SELECT COUNT(l) FROM Like l", Long.class).getSingleResult();
-        csv.append("Total Likes,").append(totalLikes).append("\n");
+        csv.append("Gesamtzahl Likes,").append(totalLikes).append("\n");
 
-        // Total comments
+        // Gesamtzahl Kommentare
         Long totalComments = em.createQuery("SELECT COUNT(c) FROM Comment c", Long.class).getSingleResult();
-        csv.append("Total Comments,").append(totalComments).append("\n");
+        csv.append("Gesamtzahl Kommentare,").append(totalComments).append("\n");
 
-        // Ideas by category
+        // Ideen nach Kategorie
         @SuppressWarnings("unchecked")
         List<Object[]> categoryStats = em.createQuery(
                 "SELECT i.category, COUNT(i) FROM Idea i GROUP BY i.category ORDER BY COUNT(i) DESC")
                 .getResultList();
         for (Object[] row : categoryStats) {
-            csv.append("Category - ").append(row[0]).append(",").append(row[1]).append("\n");
+            csv.append("Kategorie - ").append(row[0]).append(",").append(row[1]).append("\n");
         }
 
         return csv.toString().getBytes();
@@ -106,24 +106,24 @@ public class ExportService {
         PdfFont boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
         PdfFont regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
 
-        // Title
-        Paragraph title = new Paragraph("GFOS IdeaBoard - Statistics Report")
+        // Titel
+        Paragraph title = new Paragraph("GFOS IdeaBoard - Statistikbericht")
                 .setFont(boldFont)
                 .setFontSize(20)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setMarginBottom(20);
         document.add(title);
 
-        // Generation date
-        Paragraph date = new Paragraph("Generated: " + LocalDateTime.now().format(DATE_FORMAT))
+        // Generierungsdatum
+        Paragraph date = new Paragraph("Erstellt: " + LocalDateTime.now().format(DATE_FORMAT))
                 .setFont(regularFont)
                 .setFontSize(10)
                 .setTextAlignment(TextAlignment.RIGHT)
                 .setMarginBottom(20);
         document.add(date);
 
-        // Overview section
-        document.add(new Paragraph("Overview").setFont(boldFont).setFontSize(14).setMarginTop(10));
+        // Übersichtsbereich
+        document.add(new Paragraph("Übersicht").setFont(boldFont).setFontSize(14).setMarginTop(10));
 
         Long totalIdeas = em.createQuery("SELECT COUNT(i) FROM Idea i", Long.class).getSingleResult();
         Long totalUsers = em.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
@@ -132,18 +132,18 @@ public class ExportService {
 
         Table overviewTable = new Table(UnitValue.createPercentArray(new float[]{50, 50}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableRow(overviewTable, "Total Ideas", String.valueOf(totalIdeas));
-        addTableRow(overviewTable, "Total Users", String.valueOf(totalUsers));
-        addTableRow(overviewTable, "Total Likes", String.valueOf(totalLikes));
-        addTableRow(overviewTable, "Total Comments", String.valueOf(totalComments));
+        addTableRow(overviewTable, "Gesamtzahl Ideen", String.valueOf(totalIdeas));
+        addTableRow(overviewTable, "Gesamtzahl Benutzer", String.valueOf(totalUsers));
+        addTableRow(overviewTable, "Gesamtzahl Likes", String.valueOf(totalLikes));
+        addTableRow(overviewTable, "Gesamtzahl Kommentare", String.valueOf(totalComments));
         document.add(overviewTable);
 
-        // Ideas by Status
-        document.add(new Paragraph("Ideas by Status").setFont(boldFont).setFontSize(14).setMarginTop(20));
+        // Ideen nach Status
+        document.add(new Paragraph("Ideen nach Status").setFont(boldFont).setFontSize(14).setMarginTop(20));
 
         Table statusTable = new Table(UnitValue.createPercentArray(new float[]{60, 40}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableHeader(statusTable, "Status", "Count");
+        addTableHeader(statusTable, "Status", "Anzahl");
 
         for (IdeaStatus status : IdeaStatus.values()) {
             Long count = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.status = :status", Long.class)
@@ -153,8 +153,8 @@ public class ExportService {
         }
         document.add(statusTable);
 
-        // Ideas by Category
-        document.add(new Paragraph("Ideas by Category").setFont(boldFont).setFontSize(14).setMarginTop(20));
+        // Ideen nach Kategorie
+        document.add(new Paragraph("Ideen nach Kategorie").setFont(boldFont).setFontSize(14).setMarginTop(20));
 
         @SuppressWarnings("unchecked")
         List<Object[]> categoryStats = em.createQuery(
@@ -163,15 +163,15 @@ public class ExportService {
 
         Table categoryTable = new Table(UnitValue.createPercentArray(new float[]{60, 40}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableHeader(categoryTable, "Category", "Count");
+        addTableHeader(categoryTable, "Kategorie", "Anzahl");
 
         for (Object[] row : categoryStats) {
             addTableRow(categoryTable, String.valueOf(row[0]), String.valueOf(row[1]));
         }
         document.add(categoryTable);
 
-        // Top Ideas
-        document.add(new Paragraph("Top 5 Ideas by Likes").setFont(boldFont).setFontSize(14).setMarginTop(20));
+        // Top-Ideen
+        document.add(new Paragraph("Top 5 Ideen nach Likes").setFont(boldFont).setFontSize(14).setMarginTop(20));
 
         List<Idea> topIdeas = em.createQuery(
                 "SELECT i FROM Idea i ORDER BY i.likeCount DESC", Idea.class)
@@ -180,7 +180,7 @@ public class ExportService {
 
         Table topIdeasTable = new Table(UnitValue.createPercentArray(new float[]{50, 25, 25}))
                 .setWidth(UnitValue.createPercentValue(100));
-        addTableHeader(topIdeasTable, "Title", "Author", "Likes");
+        addTableHeader(topIdeasTable, "Titel", "Autor", "Likes");
 
         for (Idea idea : topIdeas) {
             addTableRow(topIdeasTable,
@@ -204,7 +204,7 @@ public class ExportService {
                 table.addHeaderCell(cell);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create font", e);
+            throw new RuntimeException("Fehler beim Erstellen der Schriftart", e);
         }
     }
 
@@ -215,7 +215,7 @@ public class ExportService {
                 table.addCell(new Cell().add(new Paragraph(value).setFont(regularFont)));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create font", e);
+            throw new RuntimeException("Fehler beim Erstellen der Schriftart", e);
         }
     }
 
@@ -237,7 +237,7 @@ public class ExportService {
                 .getResultList();
 
         StringBuilder csv = new StringBuilder();
-        csv.append("ID,Username,Email,First Name,Last Name,Role,XP Points,Level,Ideas Count,Likes Given,Comments,Active,Created At\n");
+        csv.append("ID,Benutzername,E-Mail,Vorname,Nachname,Rolle,XP-Punkte,Level,Anzahl Ideen,Vergebene Likes,Kommentare,Aktiv,Erstellt am\n");
 
         for (User user : users) {
             Long ideasCount = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.author.id = :userId", Long.class)

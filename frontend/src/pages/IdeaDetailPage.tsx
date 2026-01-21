@@ -95,9 +95,9 @@ export default function IdeaDetailPage() {
       const group = await groupService.joinGroupByIdea(Number(id));
       setIsGroupMember(true);
       setGroupId(group.id);
-      toast.success('Joined the idea group successfully!');
+      toast.success('Erfolgreich der Ideengruppe beigetreten!');
     } catch (error) {
-      toast.error('Failed to join group');
+      toast.error('Fehler beim Beitreten zur Gruppe');
     } finally {
       setJoiningGroup(false);
     }
@@ -139,7 +139,7 @@ export default function IdeaDetailPage() {
           : null
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update like';
+      const message = error instanceof Error ? error.message : 'Fehler beim Aktualisieren des Likes';
       toast.error(message);
     }
   };
@@ -195,12 +195,12 @@ export default function IdeaDetailPage() {
             fetchComments();
             return;
           } catch {
-            toast.error('Failed to remove reaction');
+            toast.error('Fehler beim Entfernen der Reaktion');
             return;
           }
         }
       }
-      toast.error('Failed to add reaction');
+      toast.error('Fehler beim Hinzufügen der Reaktion');
     }
   };
 
@@ -355,7 +355,7 @@ export default function IdeaDetailPage() {
                 <Link
                   to={`/ideas/${idea.id}/edit`}
                   className="btn-icon"
-                  title="Edit"
+                  title="Bearbeiten"
                 >
                   <PencilIcon className="w-5 h-5" />
                 </Link>
@@ -364,7 +364,7 @@ export default function IdeaDetailPage() {
                 <button
                   onClick={handleDelete}
                   className="btn-icon text-error-500 hover:bg-error-50 dark:hover:bg-error-900/20"
-                  title="Delete"
+                  title="Löschen"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -398,7 +398,7 @@ export default function IdeaDetailPage() {
                   className="btn-secondary flex items-center gap-2"
                 >
                   <EnvelopeIcon className="w-4 h-4" />
-                  Message Creator
+                  Nachricht an Ersteller
                 </Link>
               )}
               {isGroupMember ? (
@@ -407,7 +407,7 @@ export default function IdeaDetailPage() {
                   className="btn-primary flex items-center gap-2"
                 >
                   <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                  Group Chat
+                  Gruppenchat
                 </Link>
               ) : (
                 <button
@@ -416,7 +416,7 @@ export default function IdeaDetailPage() {
                   className="btn-primary flex items-center gap-2"
                 >
                   <UserGroupIcon className="w-4 h-4" />
-                  {joiningGroup ? 'Joining...' : 'Join Idea Group'}
+                  {joiningGroup ? 'Beitritt läuft...' : 'Ideengruppe beitreten'}
                 </button>
               )}
             </div>
@@ -439,12 +439,12 @@ export default function IdeaDetailPage() {
           </div>
         </div>
 
-        {/* Checklist Section */}
+        {/* Checklisten-Bereich */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
               <ClipboardDocumentListIcon className="w-5 h-5" />
-              Checklist
+              Checkliste
               {checklistItems.length > 0 && (
                 <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
                   ({checklistItems.filter((item) => item.isCompleted).length}/{checklistItems.length})
@@ -466,10 +466,10 @@ export default function IdeaDetailPage() {
             </div>
           )}
 
-          {/* Checklist items */}
+          {/* Checklisten-Elemente */}
           <div className="space-y-2">
             {checklistItems.length === 0 && !isAuthor && (
-              <p className="text-gray-500 dark:text-gray-400 text-sm">No checklist items yet.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">Noch keine Checklisten-Elemente.</p>
             )}
             {checklistItems.map((item) => (
               <div
@@ -484,7 +484,7 @@ export default function IdeaDetailPage() {
                   <button
                     onClick={() => handleToggleChecklistItem(item.id)}
                     className="flex-shrink-0 focus:outline-none"
-                    title="Toggle completion"
+                    title="Fertigstellung umschalten"
                   >
                     {item.isCompleted ? (
                       <CheckCircleSolidIcon className="w-6 h-6 text-success-500" />
@@ -514,7 +514,7 @@ export default function IdeaDetailPage() {
                   <button
                     onClick={() => handleDeleteChecklistItem(item.id)}
                     className="btn-icon text-gray-400 hover:text-error-500 flex-shrink-0"
-                    title="Delete item"
+                    title="Element löschen"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -523,7 +523,7 @@ export default function IdeaDetailPage() {
             ))}
           </div>
 
-          {/* Add new checklist item (only for author) */}
+          {/* Neues Checklisten-Element hinzufügen (nur für Autor) */}
           {isAuthor && (
             <form onSubmit={handleAddChecklistItem} className="mt-4">
               <div className="flex gap-2">
@@ -531,7 +531,7 @@ export default function IdeaDetailPage() {
                   type="text"
                   value={newChecklistItem}
                   onChange={(e) => setNewChecklistItem(e.target.value)}
-                  placeholder="Add a checklist item..."
+                  placeholder="Checklisten-Element hinzufügen..."
                   maxLength={200}
                   className="input flex-1"
                 />
@@ -541,21 +541,21 @@ export default function IdeaDetailPage() {
                   className="btn-primary flex items-center gap-2"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  {addingChecklistItem ? 'Adding...' : 'Add'}
+                  {addingChecklistItem ? 'Wird hinzugefügt...' : 'Hinzufügen'}
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Only you can check off items on this checklist.
+                Nur Sie können Elemente auf dieser Checkliste abhaken.
               </p>
             </form>
           )}
         </div>
 
-        {/* Progress (for in-progress ideas) */}
+        {/* Fortschritt (für Ideen in Bearbeitung) */}
         {idea.status === 'IN_PROGRESS' && (
           <div className="p-6 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-gray-900 dark:text-white">Progress</span>
+              <span className="font-medium text-gray-900 dark:text-white">Fortschritt</span>
               <span className="text-primary-600 font-bold">{idea.progressPercentage}%</span>
             </div>
             <div className="progress-bar h-3">
@@ -567,12 +567,12 @@ export default function IdeaDetailPage() {
           </div>
         )}
 
-        {/* File attachments */}
+        {/* Dateianhänge */}
         {idea.attachments.length > 0 && (
           <div className="p-6 border-b border-gray-100 dark:border-gray-700">
             <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <PaperClipIcon className="w-5 h-5" />
-              Attachments
+              Anhänge
             </h3>
             <div className="space-y-2">
               {idea.attachments.map((file) => (
@@ -594,7 +594,7 @@ export default function IdeaDetailPage() {
                   <button
                     onClick={() => handleDownloadFile(file.id, file.originalName)}
                     className="btn-icon"
-                    title="Download"
+                    title="Herunterladen"
                   >
                     <ArrowDownTrayIcon className="w-5 h-5" />
                   </button>
@@ -610,7 +610,7 @@ export default function IdeaDetailPage() {
             {isAuthor ? (
               <span
                 className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                title="You cannot like your own idea"
+                title="Sie können Ihre eigene Idee nicht liken"
               >
                 <HeartIcon className="w-5 h-5" />
                 {idea.likeCount} {idea.likeCount === 1 ? 'Like' : 'Likes'}
@@ -635,7 +635,7 @@ export default function IdeaDetailPage() {
 
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
               <ChatBubbleLeftIcon className="w-5 h-5" />
-              {idea.commentCount} {idea.commentCount === 1 ? 'Comment' : 'Comments'}
+              {idea.commentCount} {idea.commentCount === 1 ? 'Kommentar' : 'Kommentare'}
             </div>
           </div>
 
@@ -644,21 +644,21 @@ export default function IdeaDetailPage() {
               onClick={() => setShowStatusModal(true)}
               className="btn-secondary"
             >
-              Update Status
+              Status aktualisieren
             </button>
           )}
         </div>
       </article>
 
-      {/* Comments section */}
+      {/* Kommentarbereich */}
       <div className="card">
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Comments ({comments.length})
+            Kommentare ({comments.length})
           </h2>
         </div>
 
-        {/* New comment form */}
+        {/* Neues Kommentarformular */}
         <form onSubmit={handleCommentSubmit} className="p-6 border-b border-gray-100 dark:border-gray-700">
           <div className="flex gap-3">
             <div className="avatar-md flex-shrink-0">
@@ -668,7 +668,7 @@ export default function IdeaDetailPage() {
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment... (max 200 characters)"
+                placeholder="Kommentar hinzufügen... (max. 200 Zeichen)"
                 maxLength={200}
                 rows={3}
                 className="input resize-none"
@@ -682,18 +682,18 @@ export default function IdeaDetailPage() {
                   disabled={!newComment.trim() || submittingComment}
                   className="btn-primary"
                 >
-                  {submittingComment ? 'Posting...' : 'Post Comment'}
+                  {submittingComment ? 'Wird gepostet...' : 'Kommentar posten'}
                 </button>
               </div>
             </div>
           </div>
         </form>
 
-        {/* Comments list */}
+        {/* Kommentarliste */}
         <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {comments.length === 0 ? (
             <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              No comments yet. Be the first to comment!
+              Noch keine Kommentare. Seien Sie der Erste, der kommentiert!
             </div>
           ) : (
             comments.map((comment) => (
@@ -781,7 +781,7 @@ function StatusModal({ currentStatus, currentProgress, onSave, onClose }: Status
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content p-6" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-          Update Status
+          Status aktualisieren
         </h2>
 
         <div className="space-y-4">
@@ -797,15 +797,15 @@ function StatusModal({ currentStatus, currentProgress, onSave, onClose }: Status
               }}
               className="input"
             >
-              <option value="CONCEPT">Concept</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
+              <option value="CONCEPT">Konzept</option>
+              <option value="IN_PROGRESS">In Bearbeitung</option>
+              <option value="COMPLETED">Abgeschlossen</option>
             </select>
           </div>
 
           {status === 'IN_PROGRESS' && (
             <div>
-              <label className="label">Progress ({progress}%)</label>
+              <label className="label">Fortschritt ({progress}%)</label>
               <input
                 type="range"
                 min="0"
@@ -820,10 +820,10 @@ function StatusModal({ currentStatus, currentProgress, onSave, onClose }: Status
 
         <div className="flex justify-end gap-3 mt-6">
           <button onClick={onClose} className="btn-secondary">
-            Cancel
+            Abbrechen
           </button>
           <button onClick={() => onSave(status, progress)} className="btn-primary">
-            Save Changes
+            Änderungen speichern
           </button>
         </div>
       </div>

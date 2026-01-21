@@ -206,7 +206,7 @@ function SurveyCard({ survey, onVote, onDelete, onShowDetails, canDelete }: Surv
             <button
               onClick={onShowDetails}
               className="btn-icon text-gray-400 hover:text-primary-500"
-              title="View details"
+              title="Details anzeigen"
             >
               <InformationCircleIcon className="w-5 h-5" />
             </button>
@@ -214,7 +214,7 @@ function SurveyCard({ survey, onVote, onDelete, onShowDetails, canDelete }: Surv
               <button
                 onClick={() => onDelete(survey.id)}
                 className="btn-icon text-gray-400 hover:text-error-500"
-                title="Delete survey"
+                title="Umfrage löschen"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -279,7 +279,7 @@ function SurveyCard({ survey, onVote, onDelete, onShowDetails, canDelete }: Surv
 
       <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {survey.totalVotes} {survey.totalVotes === 1 ? 'vote' : 'votes'}
+          {survey.totalVotes} {survey.totalVotes === 1 ? 'Stimme' : 'Stimmen'}
         </span>
         {!hasVoted && (
           <button
@@ -287,7 +287,7 @@ function SurveyCard({ survey, onVote, onDelete, onShowDetails, canDelete }: Surv
             disabled={selectedOptions.length === 0}
             className="btn-primary text-sm py-1.5"
           >
-            Submit Vote
+            Abstimmen
           </button>
         )}
       </div>
@@ -327,12 +327,12 @@ function CreateSurveyModal({ onClose, onSubmit }: CreateSurveyModalProps) {
     const newErrors: Record<string, string> = {};
 
     if (!question.trim()) {
-      newErrors.question = 'Question is required';
+      newErrors.question = 'Frage ist erforderlich';
     }
 
     const validOptions = options.filter((o) => o.trim());
     if (validOptions.length < 2) {
-      newErrors.options = 'At least 2 options are required';
+      newErrors.options = 'Mindestens 2 Optionen sind erforderlich';
     }
 
     setErrors(newErrors);
@@ -354,7 +354,7 @@ function CreateSurveyModal({ onClose, onSubmit }: CreateSurveyModalProps) {
       <div className="modal-content p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create Survey
+            Umfrage erstellen
           </h2>
           <button onClick={onClose} className="btn-icon">
             <XMarkIcon className="w-5 h-5" />
@@ -364,7 +364,7 @@ function CreateSurveyModal({ onClose, onSubmit }: CreateSurveyModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-group">
             <label htmlFor="question" className="label">
-              Question
+              Frage
             </label>
             <input
               type="text"
@@ -372,13 +372,13 @@ function CreateSurveyModal({ onClose, onSubmit }: CreateSurveyModalProps) {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               className={errors.question ? 'input-error' : 'input'}
-              placeholder="What would you like to ask?"
+              placeholder="Was möchten Sie fragen?"
             />
             {errors.question && <p className="form-error">{errors.question}</p>}
           </div>
 
           <div className="form-group">
-            <label className="label">Options</label>
+            <label className="label">Optionen</label>
             <div className="space-y-2">
               {options.map((option, index) => (
                 <div key={index} className="flex gap-2">
@@ -408,17 +408,17 @@ function CreateSurveyModal({ onClose, onSubmit }: CreateSurveyModalProps) {
                 onClick={handleAddOption}
                 className="text-sm text-primary-600 dark:text-primary-400 hover:underline mt-2"
               >
-                + Add Option
+                + Option hinzufügen
               </button>
             )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
             <button type="button" onClick={onClose} className="btn-secondary">
-              Cancel
+              Abbrechen
             </button>
             <button type="submit" className="btn-primary">
-              Create Survey
+              Umfrage erstellen
             </button>
           </div>
         </form>
@@ -452,7 +452,7 @@ function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
       <div className="modal-content p-6 max-w-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Survey Details
+            Umfragedetails
           </h2>
           <button onClick={onClose} className="btn-icon">
             <XMarkIcon className="w-5 h-5" />
@@ -472,59 +472,59 @@ function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
             )}
           </div>
 
-          {/* Survey Info */}
+          {/* Umfrageinformationen */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Created by</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Erstellt von</p>
               <p className="font-medium text-gray-900 dark:text-white">
                 {survey.creator.firstName} {survey.creator.lastName}
               </p>
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Votes</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Gesamtstimmen</p>
               <p className="font-medium text-gray-900 dark:text-white">
                 {survey.totalVotes}
               </p>
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Created</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Erstellt</p>
               <p className="font-medium text-gray-900 dark:text-white">
-                {format(new Date(survey.createdAt), 'MMM d, yyyy')}
+                {format(new Date(survey.createdAt), 'd. MMM yyyy')}
               </p>
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
               <p className="font-medium text-gray-900 dark:text-white">
-                {survey.isActive ? 'Active' : 'Closed'}
+                {survey.isActive ? 'Aktiv' : 'Geschlossen'}
               </p>
             </div>
           </div>
 
-          {/* Survey Settings */}
+          {/* Umfrageeinstellungen */}
           <div className="flex flex-wrap gap-2">
             {survey.isAnonymous && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
                 <EyeSlashIcon className="w-4 h-4" />
-                Anonymous Voting
+                Anonyme Abstimmung
               </span>
             )}
             {survey.allowMultipleVotes && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
                 <CheckIcon className="w-4 h-4" />
-                Multiple Choices Allowed
+                Mehrfachauswahl erlaubt
               </span>
             )}
             {survey.expiresAt && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
-                Expires: {format(new Date(survey.expiresAt), 'MMM d, yyyy')}
+                Läuft ab: {format(new Date(survey.expiresAt), 'd. MMM yyyy')}
               </span>
             )}
           </div>
 
-          {/* Results Breakdown */}
+          {/* Ergebnisaufschlüsselung */}
           <div>
             <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-              Results Breakdown
+              Ergebnisaufschlüsselung
             </h4>
             <div className="space-y-3">
               {survey.options.map((option) => {
@@ -536,10 +536,10 @@ function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
                     <div className="flex items-center justify-between mb-1">
                       <span className={`text-sm ${isWinner ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300'}`}>
                         {option.optionText}
-                        {isWinner && ' (Leading)'}
+                        {isWinner && ' (Führend)'}
                       </span>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {option.voteCount} votes ({percentage}%)
+                        {option.voteCount} Stimmen ({percentage}%)
                       </span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -556,12 +556,12 @@ function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
             </div>
           </div>
 
-          {/* Your Vote Status */}
+          {/* Ihr Abstimmungsstatus */}
           {survey.hasVoted && (
             <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
               <p className="text-sm text-primary-700 dark:text-primary-300 flex items-center gap-2">
                 <CheckCircleIcon className="w-5 h-5" />
-                You have voted in this survey
+                Sie haben an dieser Umfrage teilgenommen
               </p>
             </div>
           )}
@@ -569,7 +569,7 @@ function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
 
         <div className="flex justify-end mt-6">
           <button onClick={onClose} className="btn-primary">
-            Close
+            Schließen
           </button>
         </div>
       </div>

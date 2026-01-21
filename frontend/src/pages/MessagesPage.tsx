@@ -242,23 +242,23 @@ export default function MessagesPage() {
         }
       }
     } catch (error) {
-      toast.error('Failed to send message');
+      toast.error('Fehler beim Senden der Nachricht');
     } finally {
       setSendingMessage(false);
     }
   };
 
   const handleLeaveGroup = async (groupId: number) => {
-    if (!confirm('Are you sure you want to leave this group?')) return;
+    if (!confirm('Sind Sie sicher, dass Sie diese Gruppe verlassen möchten?')) return;
 
     try {
       await groupService.leaveGroup(groupId);
       setGroups(prev => prev.filter(g => g.id !== groupId));
       setSelectedGroup(null);
       setSearchParams({});
-      toast.success('Left group successfully');
+      toast.success('Gruppe erfolgreich verlassen');
     } catch (error) {
-      toast.error('Failed to leave group');
+      toast.error('Fehler beim Verlassen der Gruppe');
     }
   };
 
@@ -272,21 +272,21 @@ export default function MessagesPage() {
   const formatMessageDate = (dateStr: string) => {
     const date = new Date(dateStr);
     if (isToday(date)) {
-      return format(date, 'h:mm a');
+      return format(date, 'HH:mm');
     } else if (isYesterday(date)) {
-      return 'Yesterday ' + format(date, 'h:mm a');
+      return 'Gestern ' + format(date, 'HH:mm');
     }
-    return format(date, 'MMM d, h:mm a');
+    return format(date, 'd. MMM, HH:mm');
   };
 
   const formatConversationDate = (dateStr: string) => {
     const date = new Date(dateStr);
     if (isToday(date)) {
-      return format(date, 'h:mm a');
+      return format(date, 'HH:mm');
     } else if (isYesterday(date)) {
-      return 'Yesterday';
+      return 'Gestern';
     }
-    return format(date, 'MMM d');
+    return format(date, 'd. MMM');
   };
 
   const filteredUsers = allUsers.filter(u =>
@@ -306,12 +306,12 @@ export default function MessagesPage() {
   return (
     <div className="h-[calc(100vh-180px)] flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nachrichten</h1>
         <button
           onClick={() => setShowNewConversation(true)}
           className="btn-primary"
         >
-          New Message
+          Neue Nachricht
         </button>
       </div>
 
@@ -331,7 +331,7 @@ export default function MessagesPage() {
               }`}
             >
               <UserIcon className="w-4 h-4" />
-              Direct
+              Direkt
             </button>
             <button
               onClick={() => setActiveTab('group')}
@@ -342,7 +342,7 @@ export default function MessagesPage() {
               }`}
             >
               <UserGroupIcon className="w-4 h-4" />
-              Groups
+              Gruppen
               {groups.reduce((sum, g) => sum + g.unreadCount, 0) > 0 && (
                 <span className="bg-primary-600 text-white text-xs rounded-full px-1.5 py-0.5">
                   {groups.reduce((sum, g) => sum + g.unreadCount, 0)}
@@ -357,8 +357,8 @@ export default function MessagesPage() {
               conversations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No conversations yet</p>
-                  <p className="text-sm mt-1">Start a new message to begin chatting</p>
+                  <p>Noch keine Konversationen</p>
+                  <p className="text-sm mt-1">Starten Sie eine neue Nachricht, um zu chatten</p>
                 </div>
               ) : (
                 conversations.map((conv) => (
@@ -404,10 +404,10 @@ export default function MessagesPage() {
               groups.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   <UserGroupIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No group chats yet</p>
-                  <p className="text-sm mt-1">Join an idea group to start chatting</p>
+                  <p>Noch keine Gruppenchats</p>
+                  <p className="text-sm mt-1">Treten Sie einer Ideengruppe bei, um zu chatten</p>
                   <Link to="/ideas" className="btn-primary mt-4 inline-block">
-                    Browse Ideas
+                    Ideen durchsuchen
                   </Link>
                 </div>
               ) : (
@@ -481,7 +481,7 @@ export default function MessagesPage() {
                           {selectedGroup.name}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {selectedGroup.memberCount} members
+                          {selectedGroup.memberCount} Mitglieder
                         </p>
                       </div>
                     </>
@@ -505,7 +505,7 @@ export default function MessagesPage() {
                   <button
                     onClick={() => handleLeaveGroup(selectedGroup.id)}
                     className="btn-icon text-gray-400 hover:text-error-500"
-                    title="Leave group"
+                    title="Gruppe verlassen"
                   >
                     <ArrowRightOnRectangleIcon className="w-5 h-5" />
                   </button>
@@ -520,8 +520,8 @@ export default function MessagesPage() {
                     <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                       <div className="text-center">
                         <UserGroupIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p>No messages yet</p>
-                        <p className="text-sm">Be the first to say something!</p>
+                        <p>Noch keine Nachrichten</p>
+                        <p className="text-sm">Seien Sie der Erste, der etwas sagt!</p>
                       </div>
                     </div>
                   ) : (
@@ -570,8 +570,8 @@ export default function MessagesPage() {
                     <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                       <div className="text-center">
                         <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p>No messages yet</p>
-                        <p className="text-sm">Send a message to start the conversation</p>
+                        <p>Noch keine Nachrichten</p>
+                        <p className="text-sm">Senden Sie eine Nachricht, um die Konversation zu starten</p>
                       </div>
                     </div>
                   ) : (
@@ -618,7 +618,7 @@ export default function MessagesPage() {
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder="Nachricht eingeben..."
                     maxLength={2000}
                     className="input flex-1"
                     autoFocus
@@ -638,9 +638,9 @@ export default function MessagesPage() {
               <div className="text-center">
                 <ChatBubbleLeftRightIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Select a conversation
+                  Wählen Sie eine Konversation
                 </h3>
-                <p>Choose a conversation from the list or start a new message</p>
+                <p>Wählen Sie eine Konversation aus der Liste oder starten Sie eine neue Nachricht</p>
               </div>
             </div>
           )}
@@ -652,14 +652,14 @@ export default function MessagesPage() {
         <div className="modal-overlay" onClick={() => setShowNewConversation(false)}>
           <div className="modal-content p-6 max-w-md" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              New Message
+              Neue Nachricht
             </h2>
 
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search users..."
+              placeholder="Benutzer suchen..."
               className="input mb-4"
               autoFocus
             />
@@ -667,7 +667,7 @@ export default function MessagesPage() {
             <div className="max-h-80 overflow-y-auto">
               {filteredUsers.length === 0 ? (
                 <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                  No users found
+                  Keine Benutzer gefunden
                 </p>
               ) : (
                 filteredUsers.map((targetUser) => (
@@ -697,7 +697,7 @@ export default function MessagesPage() {
                 onClick={() => setShowNewConversation(false)}
                 className="btn-secondary"
               >
-                Cancel
+                Abbrechen
               </button>
             </div>
           </div>

@@ -299,9 +299,9 @@ export default function CreateIdeaPage() {
     try {
       await ideaService.deleteFile(Number(id), fileId);
       setExistingFiles((prev) => prev.filter((f) => f.id !== fileId));
-      toast.success('File removed');
+      toast.success('Datei entfernt');
     } catch (error) {
-      toast.error('Failed to remove file');
+      toast.error('Fehler beim Entfernen der Datei');
     }
   };
 

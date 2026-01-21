@@ -19,7 +19,7 @@ const CATEGORIES = [
   'Technologie',
   'Nachhaltigkeit',
   'Personalwesen',
-  'Kundenerfahrung',
+  'Kundenerlebnis',
   'Betrieb',
   'Marketing',
   'Finanzen',
@@ -57,7 +57,7 @@ export default function IdeasPage() {
       const filter = {
         page,
         size: 12,
-        category: category !== 'All' ? category : undefined,
+        category: category !== 'Alle' ? category : undefined,
         status: status || undefined,
         search: search || undefined,
         sort: 'createdAt',
@@ -67,8 +67,8 @@ export default function IdeasPage() {
       setIdeas(response.content);
       setTotalPages(response.totalPages);
     } catch (error) {
-      console.error('Failed to fetch ideas:', error);
-      toast.error('Failed to load ideas');
+      console.error('Fehler beim Laden der Ideen:', error);
+      toast.error('Fehler beim Laden der Ideen');
     } finally {
       setLoading(false);
     }
@@ -95,14 +95,14 @@ export default function IdeasPage() {
   };
 
   const handleLike = async (ideaId: number, isLiked: boolean, authorId: number) => {
-    // Prevent users from liking their own ideas
+    // Benutzer daran hindern, ihre eigenen Ideen zu liken
     if (user && user.id === authorId) {
-      toast.error('You cannot like your own idea');
+      toast.error('Sie können Ihre eigene Idee nicht liken');
       return;
     }
 
     if (!isLiked && likeStatus && likeStatus.remainingLikes <= 0) {
-      toast.error('No likes remaining this week!');
+      toast.error('Diese Woche keine Likes mehr übrig!');
       return;
     }
 
@@ -125,8 +125,8 @@ export default function IdeasPage() {
       );
       fetchLikeStatus();
     } catch (error) {
-      console.error('Failed to like/unlike:', error);
-      toast.error('Failed to update like');
+      console.error('Fehler beim Liken/Unliken:', error);
+      toast.error('Fehler beim Aktualisieren des Likes');
     }
   };
 
@@ -143,31 +143,31 @@ export default function IdeasPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Kopfzeile */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ideas</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ideen</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Browse and contribute to innovation ideas
+            Stöbern Sie und tragen Sie zu Innovationsideen bei
           </p>
         </div>
         <Link to="/ideas/new" className="btn-primary inline-flex items-center gap-2">
           <PlusIcon className="w-5 h-5" />
-          New Idea
+          Neue Idee
         </Link>
       </div>
 
-      {/* Like status banner */}
+      {/* Like-Status-Banner */}
       {likeStatus && (
         <div className="card p-4 flex items-center justify-between bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20">
           <div className="flex items-center gap-3">
             <HeartIcon className="w-6 h-6 text-red-500" />
             <div>
               <p className="font-medium text-gray-900 dark:text-white">
-                {likeStatus.remainingLikes} likes remaining this week
+                {likeStatus.remainingLikes} Likes verbleibend diese Woche
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Resets every Sunday at midnight
+                Setzt sich jeden Sonntag um Mitternacht zurück
               </p>
             </div>
           </div>
@@ -184,10 +184,10 @@ export default function IdeasPage() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Filter */}
       <div className="card p-4">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
+          {/* Suche */}
           <form onSubmit={handleSearch} className="flex-1">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -195,7 +195,7 @@ export default function IdeasPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search ideas..."
+                placeholder="Ideen suchen..."
                 className="input pl-10"
               />
             </div>
@@ -267,15 +267,15 @@ export default function IdeasPage() {
         <div className="card p-12 text-center">
           <LightBulbIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No ideas found
+            Keine Ideen gefunden
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            {search || category !== 'All' || status
-              ? 'Try adjusting your filters'
-              : 'Be the first to submit an idea!'}
+            {search || category !== 'Alle' || status
+              ? 'Versuchen Sie, Ihre Filter anzupassen'
+              : 'Seien Sie der Erste, der eine Idee einreicht!'}
           </p>
           <Link to="/ideas/new" className="btn-primary">
-            Submit an Idea
+            Idee einreichen
           </Link>
         </div>
       ) : (
@@ -288,7 +288,7 @@ export default function IdeasPage() {
                     {idea.status.replace('_', ' ')}
                   </span>
                   {idea.isFeatured && (
-                    <span className="badge-primary">Featured</span>
+                    <span className="badge-primary">Hervorgehoben</span>
                   )}
                 </div>
 
@@ -313,11 +313,11 @@ export default function IdeasPage() {
                   )}
                 </div>
 
-                {/* Progress bar for in-progress ideas */}
+                {/* Fortschrittsbalken für Ideen in Bearbeitung */}
                 {idea.status === 'IN_PROGRESS' && (
                   <div className="mb-4">
                     <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      <span>Progress</span>
+                      <span>Fortschritt</span>
                       <span>{idea.progressPercentage}%</span>
                     </div>
                     <div className="progress-bar">
@@ -345,7 +345,7 @@ export default function IdeasPage() {
               {/* Actions footer */}
               <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 {user?.id === idea.author.id ? (
-                  <span className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 cursor-not-allowed" title="You cannot like your own idea">
+                  <span className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 cursor-not-allowed" title="Sie können Ihre eigene Idee nicht liken">
                     <HeartIcon className="w-5 h-5" />
                     {idea.likeCount}
                   </span>
@@ -380,7 +380,7 @@ export default function IdeasPage() {
         </div>
       )}
 
-      {/* Pagination */}
+      {/* Paginierung */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <button
@@ -388,17 +388,17 @@ export default function IdeasPage() {
             disabled={page === 0}
             className="btn-secondary disabled:opacity-50"
           >
-            Previous
+            Zurück
           </button>
           <span className="px-4 text-gray-600 dark:text-gray-400">
-            Page {page + 1} of {totalPages}
+            Seite {page + 1} von {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page === totalPages - 1}
             className="btn-secondary disabled:opacity-50"
           >
-            Next
+            Weiter
           </button>
         </div>
       )}

@@ -143,10 +143,10 @@ function UsersManagement() {
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                User
+                Benutzer
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Role
+                Rolle
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Level
@@ -155,10 +155,10 @@ function UsersManagement() {
                 Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Joined
+                Beigetreten
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Actions
+                Aktionen
               </th>
             </tr>
           </thead>
@@ -186,9 +186,9 @@ function UsersManagement() {
                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
                     className="input py-1 text-sm"
                   >
-                    <option value="EMPLOYEE">Employee</option>
-                    <option value="PROJECT_MANAGER">Project Manager</option>
-                    <option value="ADMIN">Admin</option>
+                    <option value="EMPLOYEE">Mitarbeiter</option>
+                    <option value="PROJECT_MANAGER">Projektmanager</option>
+                    <option value="ADMIN">Administrator</option>
                   </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -202,7 +202,7 @@ function UsersManagement() {
                       user.isActive ? 'badge-success' : 'badge-error'
                     }`}
                   >
-                    {user.isActive ? 'Active' : 'Inactive'}
+                    {user.isActive ? 'Aktiv' : 'Inaktiv'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -217,7 +217,7 @@ function UsersManagement() {
                         : 'text-success-600 hover:text-success-700'
                     }`}
                   >
-                    {user.isActive ? 'Deactivate' : 'Activate'}
+                    {user.isActive ? 'Deaktivieren' : 'Aktivieren'}
                   </button>
                 </td>
               </tr>
@@ -278,16 +278,16 @@ function AuditLogs() {
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Timestamp
+                Zeitstempel
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                User
+                Benutzer
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Action
+                Aktion
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Entity
+                Entität
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Details

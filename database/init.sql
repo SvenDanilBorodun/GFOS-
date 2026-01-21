@@ -486,16 +486,16 @@ CREATE TRIGGER trigger_update_vote_count
 
 -- Standardabzeichen einfügen (Name entspricht GamificationService-Abzeichen-Kriterien)
 INSERT INTO badges (name, display_name, description, icon, criteria, xp_reward) VALUES
-    ('first_idea', 'First Idea', 'Reichen Sie Ihre erste Innovationsidee ein', 'lightbulb', 'Submit first idea', 25),
-    ('idea_machine', 'Idea Machine', 'Zehn Innovationsideen eingereicht', 'rocket', 'Submit 10 ideas', 100),
-    ('popular', 'Popular', 'Zehn Likes auf einer einzelnen Idee erhalten', 'star', 'Get 10 likes on one idea', 50),
-    ('trendsetter', 'Trendsetter', 'Insgesamt 50 Likes erhalten', 'trending_up', 'Get 50 total likes', 150),
-    ('commentator', 'Commentator', '50 Kommentare zu Ideen hinterlassen', 'chat', 'Post 50 comments', 75),
-    ('supporter', 'Supporter', 'Alle Likes 4 Wochen hintereinander verwendet', 'favorite', 'Use all likes 4 consecutive weeks', 100),
-    ('contributor_month', 'Contributor of the Month', 'Die meisten Ideen in einem Monat eingereicht', 'emoji_events', 'Top contributor monthly', 200),
-    ('team_player', 'Team Player', 'Kommentierte 20 verschiedene Ideen', 'groups', 'Comment on 20 unique ideas', 50),
-    ('innovator', 'Innovator', 'Eine Idee in den Status Fertigstellung brachte', 'check_circle', 'Idea reaches Completed', 150),
-    ('early_bird', 'Early Bird', 'Einer der ersten 100 Benutzer', 'schedule', 'Register in first 100 users', 50);
+    ('first_idea', 'Erste Idee', 'Reichen Sie Ihre erste Innovationsidee ein', 'lightbulb', 'Erste Idee einreichen', 25),
+    ('idea_machine', 'Ideen-Maschine', 'Zehn Innovationsideen eingereicht', 'rocket', '10 Ideen einreichen', 100),
+    ('popular', 'Beliebt', 'Zehn Likes auf einer einzelnen Idee erhalten', 'star', '10 Likes für eine Idee erhalten', 50),
+    ('trendsetter', 'Trendsetter', 'Insgesamt 50 Likes erhalten', 'trending_up', 'Insgesamt 50 Likes erhalten', 150),
+    ('commentator', 'Kommentator', '50 Kommentare zu Ideen hinterlassen', 'chat', '50 Kommentare posten', 75),
+    ('supporter', 'Unterstützer', 'Alle Likes 4 Wochen hintereinander verwendet', 'favorite', 'Alle Likes 4 aufeinanderfolgende Wochen verwenden', 100),
+    ('contributor_month', 'Mitwirkender des Monats', 'Die meisten Ideen in einem Monat eingereicht', 'emoji_events', 'Top-Mitwirkender des Monats', 200),
+    ('team_player', 'Teamplayer', 'Kommentierte 20 verschiedene Ideen', 'groups', '20 verschiedene Ideen kommentieren', 50),
+    ('innovator', 'Innovator', 'Eine Idee in den Status Fertigstellung brachte', 'check_circle', 'Idee erreicht Abgeschlossen', 150),
+    ('early_bird', 'Frühaufsteher', 'Einer der ersten 100 Benutzer', 'schedule', 'Unter den ersten 100 Benutzern registrieren', 50);
 
 -- Admin-Benutzer einfügen (Passwort: admin123)
 -- Hash mit BCrypt-Kosten faktor 12 generiert, verifiziert, um mit PasswordUtil-Implementierung übereinzustimmen
@@ -511,19 +511,19 @@ INSERT INTO users (username, email, password_hash, first_name, last_name, role, 
 
 -- Beispiel-Ideen einfügen
 INSERT INTO ideas (title, description, category, status, progress_percentage, author_id) VALUES
-    ('AI-gestützte Kundenunterstützung', 'Implementieren Sie einen KI-Chatbot für 24/7-Kundenunterstützung, um Reaktionszeiten zu verkürzen und die Kundenzufriedenheit zu verbessern. Der Bot würde häufige Anfragen bearbeiten und komplexe Probleme an menschliche Agenten eskalieren.', 'Technology', 'IN_PROGRESS', 45, 2),
-    ('Grüne Büro-Initiative', 'Reduzieren Sie die Papiernutzung um 80% durch digitale Transformation. Implementieren Sie digitale Signaturen, Cloud-Speicher und papierlose Besprechungsräume.', 'Sustainability', 'CONCEPT', 0, 3),
-    ('Mitarbeiter-Wellnessprogram', 'Starten Sie ein umfassendes Wellness-Programm mit Fitnessstudio-Mitgliedschaften, psychischen Gesundheitsressourcen und flexiblen Arbeitszeiten.', 'HR', 'COMPLETED', 100, 4),
-    ('Mobile App für Außendienstmitarbeiter', 'Entwickeln Sie eine mobile Anwendung für Außendienstmitarbeiter zum Einreichen von Berichten, Zeitverfolgung und Echtzeitkommunikation mit dem Büro.', 'Technology', 'CONCEPT', 0, 2),
-    ('Kundenfeedback-Schleife', 'Erstellen Sie ein automatisiertes System zum Sammeln, Analysieren und Handeln auf Kundenfeedback über alle Touchpoints.', 'Customer Experience', 'IN_PROGRESS', 30, 3);
+    ('AI-gestützte Kundenunterstützung', 'Implementieren Sie einen KI-Chatbot für 24/7-Kundenunterstützung, um Reaktionszeiten zu verkürzen und die Kundenzufriedenheit zu verbessern. Der Bot würde häufige Anfragen bearbeiten und komplexe Probleme an menschliche Agenten eskalieren.', 'Technologie', 'IN_PROGRESS', 45, 2),
+    ('Grüne Büro-Initiative', 'Reduzieren Sie die Papiernutzung um 80% durch digitale Transformation. Implementieren Sie digitale Signaturen, Cloud-Speicher und papierlose Besprechungsräume.', 'Nachhaltigkeit', 'CONCEPT', 0, 3),
+    ('Mitarbeiter-Wellnessprogram', 'Starten Sie ein umfassendes Wellness-Programm mit Fitnessstudio-Mitgliedschaften, psychischen Gesundheitsressourcen und flexiblen Arbeitszeiten.', 'Personalwesen', 'COMPLETED', 100, 4),
+    ('Mobile App für Außendienstmitarbeiter', 'Entwickeln Sie eine mobile Anwendung für Außendienstmitarbeiter zum Einreichen von Berichten, Zeitverfolgung und Echtzeitkommunikation mit dem Büro.', 'Technologie', 'CONCEPT', 0, 2),
+    ('Kundenfeedback-Schleife', 'Erstellen Sie ein automatisiertes System zum Sammeln, Analysieren und Handeln auf Kundenfeedback über alle Touchpoints.', 'Kundenerlebnis', 'IN_PROGRESS', 30, 3);
 
 -- Beispiel-Tags einfügen
 INSERT INTO idea_tags (idea_id, tag_name) VALUES
-    (1, 'AI'), (1, 'automation'), (1, 'customer-service'),
-    (2, 'sustainability'), (2, 'digital'), (2, 'cost-saving'),
-    (3, 'wellness'), (3, 'employee-benefit'), (3, 'culture'),
-    (4, 'mobile'), (4, 'field-service'), (4, 'productivity'),
-    (5, 'feedback'), (5, 'analytics'), (5, 'customer-experience');
+    (1, 'KI'), (1, 'Automatisierung'), (1, 'Kundenservice'),
+    (2, 'Nachhaltigkeit'), (2, 'Digital'), (2, 'Kosteneinsparung'),
+    (3, 'Wellness'), (3, 'Mitarbeiter-Vorteil'), (3, 'Kultur'),
+    (4, 'Mobil'), (4, 'Außendienst'), (4, 'Produktivität'),
+    (5, 'Feedback'), (5, 'Analytik'), (5, 'Kundenerlebnis');
 
 -- Beispiel-Likes einfügen
 INSERT INTO likes (user_id, idea_id) VALUES

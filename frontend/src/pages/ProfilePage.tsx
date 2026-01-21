@@ -122,7 +122,7 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label">First Name</label>
+                    <label className="label">Vorname</label>
                     <input
                       type="text"
                       value={formData.firstName}
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="label">Last Name</label>
+                    <label className="label">Nachname</label>
                     <input
                       type="text"
                       value={formData.lastName}
@@ -145,7 +145,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="label">Email</label>
+                  <label className="label">E-Mail</label>
                   <input
                     type="email"
                     value={formData.email}
@@ -157,13 +157,13 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={handleSaveProfile} className="btn-primary">
-                    Save Changes
+                    Änderungen speichern
                   </button>
                   <button
                     onClick={() => setEditing(false)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    Abbrechen
                   </button>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function ProfilePage() {
                     onClick={() => setEditing(true)}
                     className="btn-secondary text-sm"
                   >
-                    Edit Profile
+                    Profil bearbeiten
                   </button>
                 </div>
               </>
@@ -223,7 +223,7 @@ export default function ProfilePage() {
         <div>
           <div className="flex justify-between text-sm mb-2">
             <span className="text-gray-600 dark:text-gray-400">
-              Progress to Level {(user?.level || 1) + 1}
+              Fortschritt zu Level {(user?.level || 1) + 1}
             </span>
             <span className="font-medium text-gray-900 dark:text-white">
               {user?.xpPoints} / {getNextLevelXp()} XP
@@ -237,32 +237,32 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* XP breakdown */}
+        {/* XP-Aufschlüsselung */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
             <p className="text-2xl font-bold text-primary-600">+50</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">per idea</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">pro Idee</p>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
             <p className="text-2xl font-bold text-red-500">+10</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">per like received</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">pro erhaltenen Like</p>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
             <p className="text-2xl font-bold text-blue-500">+5</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">per comment</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">pro Kommentar</p>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
             <p className="text-2xl font-bold text-green-500">+100</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">idea completed</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Idee abgeschlossen</p>
           </div>
         </div>
       </div>
 
-      {/* Badges */}
+      {/* Abzeichen */}
       <div className="card p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <TrophyIcon className="w-5 h-5 text-yellow-500" />
-          Badges ({earnedBadges.length}/{allBadges.length} Earned)
+          Abzeichen ({earnedBadges.length}/{allBadges.length} verdient)
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -283,25 +283,25 @@ export default function ProfilePage() {
             })
           ) : (
             <>
-              {/* Fallback badges when no badges exist in system */}
+              {/* Fallback-Abzeichen, wenn keine Abzeichen im System vorhanden sind */}
               <BadgeCard
-                name="First Idea"
-                description="Submit your first idea"
+                name="Erste Idee"
+                description="Reichen Sie Ihre erste Idee ein"
                 earned={earnedBadges.some((b) => b.badge.name === 'first_idea')}
               />
               <BadgeCard
-                name="Popular"
-                description="Get 10 likes on an idea"
+                name="Beliebt"
+                description="Erhalten Sie 10 Likes für eine Idee"
                 earned={earnedBadges.some((b) => b.badge.name === 'popular')}
               />
               <BadgeCard
-                name="Commentator"
-                description="Leave 50 comments"
+                name="Kommentator"
+                description="Hinterlassen Sie 50 Kommentare"
                 earned={earnedBadges.some((b) => b.badge.name === 'commentator')}
               />
               <BadgeCard
-                name="Supporter"
-                description="Use all likes 4 weeks in a row"
+                name="Unterstützer"
+                description="Verwenden Sie alle Likes 4 Wochen hintereinander"
                 earned={earnedBadges.some((b) => b.badge.name === 'supporter')}
               />
             </>
@@ -309,17 +309,17 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* My Ideas */}
+      {/* Meine Ideen */}
       <div className="card">
         <div className="p-5 border-b border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            My Ideas ({myIdeas.length})
+            Meine Ideen ({myIdeas.length})
           </h2>
         </div>
         <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {myIdeas.length === 0 ? (
             <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              You haven't submitted any ideas yet
+              Sie haben noch keine Ideen eingereicht
             </div>
           ) : (
             myIdeas.map((idea) => (
@@ -348,7 +348,7 @@ export default function ProfilePage() {
                       {idea.status.replace('_', ' ')}
                     </span>
                     <span className="text-sm text-gray-500">
-                      {idea.likeCount} likes
+                      {idea.likeCount} Likes
                     </span>
                   </div>
                 </div>
@@ -394,7 +394,7 @@ function BadgeCard({ name, description, earned, earnedAt }: BadgeCardProps) {
       </p>
       {earned && earnedAt && (
         <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-          Earned {format(new Date(earnedAt), 'MMM d, yyyy')}
+          Verdient am {format(new Date(earnedAt), 'd. MMM yyyy')}
         </p>
       )}
     </div>
