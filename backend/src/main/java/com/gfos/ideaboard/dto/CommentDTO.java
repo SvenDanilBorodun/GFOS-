@@ -30,7 +30,7 @@ public class CommentDTO {
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
 
-        // Group reactions by emoji
+        // Group reaktion mit Emoji 
         Map<String, Long> reactionCounts = comment.getReactions().stream()
                 .collect(Collectors.groupingBy(CommentReaction::getEmoji, Collectors.counting()));
 
@@ -41,7 +41,7 @@ public class CommentDTO {
         return dto;
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

@@ -32,7 +32,7 @@ public class AuditLogDTO {
         return dto;
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

@@ -18,7 +18,7 @@ public class ConversationDTO {
         this.lastMessageAt = lastMessage != null ? lastMessage.getCreatedAt() : null;
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public UserDTO getOtherUser() {
         return otherUser;
     }
