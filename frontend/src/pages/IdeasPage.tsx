@@ -39,7 +39,7 @@ export default function IdeasPage() {
   const [loading, setLoading] = useState(true);
   const [likeStatus, setLikeStatus] = useState<LikeStatus | null>(null);
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || 'All');
+  const [category, setCategory] = useState(searchParams.get('category') || 'Alle');
   const [status, setStatus] = useState<IdeaStatus | ''>(
     (searchParams.get('status') as IdeaStatus) || ''
   );
@@ -210,7 +210,7 @@ export default function IdeasPage() {
                 setCategory(e.target.value);
                 setPage(0);
                 setSearchParams((params) => {
-                  if (e.target.value !== 'All') params.set('category', e.target.value);
+                  if (e.target.value !== 'Alle') params.set('category', e.target.value);
                   else params.delete('category');
                   return params;
                 });

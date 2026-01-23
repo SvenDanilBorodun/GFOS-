@@ -481,6 +481,13 @@ CREATE TRIGGER trigger_update_vote_count
     FOR EACH ROW EXECUTE FUNCTION update_survey_vote_count();
 
 -- =====================================================
+-- BERECHTIGUNGEN FÜR SEQUENZEN
+-- =====================================================
+-- Erteile dem ideaboard_user Berechtigungen für alle Sequenzen
+-- Diese werden automatisch für BIGSERIAL-Spalten erstellt
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO ideaboard_user;
+
+-- =====================================================
 -- SEED-DATEN
 -- =====================================================
 
