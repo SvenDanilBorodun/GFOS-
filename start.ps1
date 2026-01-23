@@ -27,7 +27,10 @@ function Find-JavaHome {
     )
     foreach ($regPath in $adoptiumPaths) {
         if (Test-Path $regPath) {
-            $versions = Get-ChildItem $regPath -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "17" }
+            # Match Java 17 or higher (17, 18, 19, 20, 21, etc.)
+            $versions = Get-ChildItem $regPath -ErrorAction SilentlyContinue | Where-Object {
+                $_.Name -match "^(1[7-9]|[2-9]\d|\d{3,})(\.\d+)*"
+            } | Sort-Object Name -Descending
             foreach ($ver in $versions) {
                 $hotspotPath = Join-Path $ver.PSPath "hotspot\MSI"
                 if (Test-Path $hotspotPath) {
@@ -40,18 +43,19 @@ function Find-JavaHome {
         }
     }
 
-    # 3. Check common installation paths
+    # 3. Check common installation paths (Java 17+)
     $commonPaths = @(
-        "C:\Program Files\Eclipse Adoptium\jdk-17*",
-        "C:\Program Files\Java\jdk-17*",
-        "C:\Program Files\Microsoft\jdk-17*",
-        "C:\Program Files\Zulu\zulu-17*",
-        "C:\Program Files\Amazon Corretto\jdk17*",
-        "C:\Program Files\Eclipse Adoptium\jdk-21*",
-        "C:\Program Files\Java\jdk-21*"
+        "C:\Program Files\Eclipse Adoptium\jdk-*",
+        "C:\Program Files\Java\jdk-*",
+        "C:\Program Files\Microsoft\jdk-*",
+        "C:\Program Files\Zulu\zulu-*",
+        "C:\Program Files\Amazon Corretto\jdk*"
     )
     foreach ($pattern in $commonPaths) {
-        $found = Get-Item $pattern -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
+        $found = Get-Item $pattern -ErrorAction SilentlyContinue | Where-Object {
+            # Extract version number and ensure it's 17 or higher
+            $_.Name -match "jdk-?(\d+)" -and [int]$matches[1] -ge 17
+        } | Sort-Object Name -Descending | Select-Object -First 1
         if ($found -and (Test-Path "$($found.FullName)\bin\java.exe")) {
             return $found.FullName
         }
@@ -297,7 +301,7 @@ Optionen:
   -Help           Diese Hilfemeldung anzeigen
 
 Anforderungen:
-  - Java 17 (JDK)
+  - Java 17+ (JDK) - Java 17, 21 oder neuer
   - Apache Maven 3.8+
   - Node.js 18+ mit npm
   - PostgreSQL 15+
@@ -346,33 +350,41 @@ function Test-JavaInstallation {
 
     # Überprüfe konfigurierte JAVA_HOME
     if (Test-Path "$($CONFIG.JAVA_HOME)\bin\java.exe") {
-        $javaVersion = & "$($CONFIG.JAVA_HOME)\bin\java.exe" -version 2>&1 | Select-Object -First 1
-        if ($javaVersion -match "17") {
-            Write-Success "Java 17 gefunden unter: $($CONFIG.JAVA_HOME)"
-            $env:JAVA_HOME = $CONFIG.JAVA_HOME
-            return $true
+        $javaVersionOutput = & "$($CONFIG.JAVA_HOME)\bin\java.exe" -version 2>&1 | Select-Object -First 1
+        # Extract version number (handles both old format "1.8" and new format "17", "21", etc.)
+        if ($javaVersionOutput -match 'version "?(\d+)(\.\d+)*') {
+            $majorVersion = [int]$matches[1]
+            if ($majorVersion -ge 17) {
+                Write-Success "Java $majorVersion gefunden unter: $($CONFIG.JAVA_HOME)"
+                $env:JAVA_HOME = $CONFIG.JAVA_HOME
+                return $true
+            }
+            Write-Warning "Java $majorVersion gefunden, aber Version 17+ wird benötigt"
         }
     }
 
     # Versuche System Java
     if (Test-CommandExists "java") {
-        $javaVersion = & java -version 2>&1 | Select-Object -First 1
-        if ($javaVersion -match "17") {
-            Write-Success "Java 17 in PATH gefunden"
-            return $true
+        $javaVersionOutput = & java -version 2>&1 | Select-Object -First 1
+        if ($javaVersionOutput -match 'version "?(\d+)(\.\d+)*') {
+            $majorVersion = [int]$matches[1]
+            if ($majorVersion -ge 17) {
+                Write-Success "Java $majorVersion in PATH gefunden"
+                return $true
+            }
+            Write-Warning "Java $majorVersion gefunden, aber Version 17+ wird benötigt: $javaVersionOutput"
         }
-        Write-Warning "Java gefunden, aber nicht Version 17: $javaVersion"
     }
 
-    Write-Error "Java 17 NICHT GEFUNDEN!"
+    Write-Error "Java 17+ NICHT GEFUNDEN!"
     Write-Host @"
 
-    Bitte installieren Sie Java 17 (JDK):
-    1. Laden Sie Eclipse Temurin JDK 17 herunter: https://adoptium.net/
+    Bitte installieren Sie Java 17 oder höher (JDK):
+    1. Laden Sie Eclipse Temurin JDK 17 oder neuer herunter: https://adoptium.net/
     2. Fuehren Sie das Installationsprogramm aus
     3. Das Skript erkennt Java automatisch, oder setzen Sie JAVA_HOME Umgebungsvariable
 
-    Auto-Erkennung suchte: C:\Program Files\Eclipse Adoptium\jdk-17*, C:\Program Files\Java\jdk-17*
+    Auto-Erkennung suchte: C:\Program Files\Eclipse Adoptium\jdk-*, C:\Program Files\Java\jdk-*
 
 "@ -ForegroundColor Yellow
     return $false
