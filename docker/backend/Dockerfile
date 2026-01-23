@@ -46,16 +46,18 @@ RUN curl -L -o /tmp/glassfish.zip \
 RUN curl -L -o ${GLASSFISH_HOME}/glassfish/lib/postgresql-${POSTGRES_DRIVER_VERSION}.jar \
     "https://jdbc.postgresql.org/download/postgresql-${POSTGRES_DRIVER_VERSION}.jar"
 
-# Copy setup script
+# Copy setup script and fix line endings (Windows CRLF -> Unix LF)
 COPY docker/backend/setup-glassfish.sh /opt/setup-glassfish.sh
-RUN chmod +x /opt/setup-glassfish.sh
+RUN sed -i 's/\r$//' /opt/setup-glassfish.sh && chmod +x /opt/setup-glassfish.sh
 
-# Copy WAR from builder stage
-COPY --from=builder /build/target/ideaboard.war ${GLASSFISH_HOME}/glassfish/domains/${DOMAIN_NAME}/autodeploy/
+# Copy WAR to staging location (NOT autodeploy - we deploy manually after JDBC setup)
+COPY --from=builder /build/target/ideaboard.war /opt/ideaboard.war
 
-# Create non-root user
-RUN groupadd -r glassfish && useradd -r -g glassfish glassfish \
-    && chown -R glassfish:glassfish ${GLASSFISH_HOME}
+# Create non-root user with home directory
+RUN groupadd -r glassfish && useradd -r -g glassfish -m -d /home/glassfish glassfish \
+    && chown -R glassfish:glassfish ${GLASSFISH_HOME} \
+    && mkdir -p /home/glassfish/.gfclient \
+    && chown -R glassfish:glassfish /home/glassfish
 
 USER glassfish
 

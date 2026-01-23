@@ -51,24 +51,14 @@ else
   echo "WARNING: Database connection test failed. Check configuration."
 fi
 
-# Wait for WAR deployment
-echo "Waiting for application deployment..."
-DEPLOY_TIMEOUT=120
-DEPLOY_COUNT=0
-while [ ! -f "${GLASSFISH_HOME}/glassfish/domains/${DOMAIN_NAME:-domain1}/autodeploy/ideaboard.war_deployed" ]; do
-  if [ $DEPLOY_COUNT -ge $DEPLOY_TIMEOUT ]; then
-    echo "ERROR: Deployment timeout exceeded!"
-    # Check for deployment failure
-    if [ -f "${GLASSFISH_HOME}/glassfish/domains/${DOMAIN_NAME:-domain1}/autodeploy/ideaboard.war_deployFailed" ]; then
-      echo "Deployment failed! Check server.log for details."
-      cat ${GLASSFISH_HOME}/glassfish/domains/${DOMAIN_NAME:-domain1}/logs/server.log | tail -100
-    fi
-    exit 1
-  fi
-  echo "Waiting for deployment... ($DEPLOY_COUNT seconds)"
-  sleep 5
-  DEPLOY_COUNT=$((DEPLOY_COUNT + 5))
-done
+# Deploy the application manually (after JDBC is configured)
+echo "Deploying application..."
+if ! asadmin list-applications | grep -q "ideaboard"; then
+  asadmin deploy --contextroot ideaboard --name ideaboard /opt/ideaboard.war
+  echo "Application deployed successfully!"
+else
+  echo "Application already deployed."
+fi
 
 echo "=== Application deployed successfully! ==="
 echo "Backend API: http://localhost:8080/ideaboard/api"
