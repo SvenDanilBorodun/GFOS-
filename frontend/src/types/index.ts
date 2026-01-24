@@ -62,11 +62,18 @@ export interface ChecklistItem {
   updatedAt: string;
 }
 
+export interface ChecklistToggleResponse {
+  item: ChecklistItem;
+  transitionedToInProgress: boolean;
+  allTodosCompleted: boolean;
+}
+
 export interface IdeaCreateRequest {
   title: string;
   description: string;
   category: string;
   tags: string[];
+  checklistItems?: string[];
 }
 
 export interface IdeaUpdateRequest {

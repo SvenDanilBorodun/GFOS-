@@ -50,10 +50,17 @@ export default function IdeaDetailPage() {
   const [isGroupMember, setIsGroupMember] = useState(false);
   const [groupId, setGroupId] = useState<number | null>(null);
   const [joiningGroup, setJoiningGroup] = useState(false);
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
 
-  const canManageStatus = user?.role === 'PROJECT_MANAGER' || user?.role === 'ADMIN';
-  const canDelete = user?.role === 'ADMIN';
   const isAuthor = user?.id === idea?.author.id;
+  const isPMOrAdmin = user?.role === 'PROJECT_MANAGER' || user?.role === 'ADMIN';
+  // Autor kann eigene Idee ändern, PM/Admin alle Ideen
+  const canManageStatus = isAuthor || isPMOrAdmin;
+  const canDelete = user?.role === 'ADMIN';
+  // Autor, PM oder Admin können Checkliste bearbeiten
+  const canEditChecklist = isAuthor || isPMOrAdmin;
+  // Checkliste kann nicht bearbeitet werden, wenn Idee abgeschlossen ist
+  const checklistEditable = canEditChecklist && idea?.status !== 'COMPLETED';
 
   useEffect(() => {
     if (id) {
@@ -266,13 +273,26 @@ export default function IdeaDetailPage() {
 
   const handleToggleChecklistItem = async (itemId: number) => {
     try {
-      const updatedItem = await ideaService.toggleChecklistItem(Number(id), itemId);
+      const result = await ideaService.toggleChecklistItem(Number(id), itemId);
+
+      // Aktualisiere das Element im State
       setChecklistItems((prev) =>
-        prev.map((item) => (item.id === itemId ? updatedItem : item))
+        prev.map((item) => (item.id === itemId ? result.item : item))
       );
+
       // Fortschritt in der Idee aktualisieren
       const updatedIdea = await ideaService.getIdea(Number(id));
       setIdea(updatedIdea);
+
+      // Behandle automatischen Statusübergang zu IN_PROGRESS
+      if (result.transitionedToInProgress) {
+        toast.success('Status automatisch auf "In Bearbeitung" geändert');
+      }
+
+      // Zeige Bestätigungsdialog, wenn alle Todos erledigt sind
+      if (result.allTodosCompleted && updatedIdea.status !== 'COMPLETED') {
+        setShowCompletionDialog(true);
+      }
     } catch (error) {
       toast.error('Fehler beim Aktualisieren des Checklisten-Elements');
     }
@@ -468,7 +488,7 @@ export default function IdeaDetailPage() {
 
           {/* Checklisten-Elemente */}
           <div className="space-y-2">
-            {checklistItems.length === 0 && !isAuthor && (
+            {checklistItems.length === 0 && !canEditChecklist && (
               <p className="text-gray-500 dark:text-gray-400 text-sm">Noch keine Checklisten-Elemente.</p>
             )}
             {checklistItems.map((item) => (
@@ -480,7 +500,7 @@ export default function IdeaDetailPage() {
                     : 'bg-gray-50 dark:bg-gray-700/50'
                 }`}
               >
-                {isAuthor ? (
+                {checklistEditable ? (
                   <button
                     onClick={() => handleToggleChecklistItem(item.id)}
                     className="flex-shrink-0 focus:outline-none"
@@ -510,7 +530,7 @@ export default function IdeaDetailPage() {
                 >
                   {item.title}
                 </span>
-                {isAuthor && (
+                {checklistEditable && (
                   <button
                     onClick={() => handleDeleteChecklistItem(item.id)}
                     className="btn-icon text-gray-400 hover:text-error-500 flex-shrink-0"
@@ -523,8 +543,8 @@ export default function IdeaDetailPage() {
             ))}
           </div>
 
-          {/* Neues Checklisten-Element hinzufügen (nur für Autor) */}
-          {isAuthor && (
+          {/* Neues Checklisten-Element hinzufügen (für Autor, PM oder Admin, außer bei abgeschlossenen Ideen) */}
+          {checklistEditable && (
             <form onSubmit={handleAddChecklistItem} className="mt-4">
               <div className="flex gap-2">
                 <input
@@ -544,10 +564,17 @@ export default function IdeaDetailPage() {
                   {addingChecklistItem ? 'Wird hinzugefügt...' : 'Hinzufügen'}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Nur Sie können Elemente auf dieser Checkliste abhaken.
-              </p>
+              {isAuthor && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Nur Autor, Projektmanager oder Admin können Elemente abhaken.
+                </p>
+              )}
             </form>
+          )}
+          {idea?.status === 'COMPLETED' && canEditChecklist && (
+            <p className="text-xs text-gray-500 mt-4">
+              Die Checkliste kann bei abgeschlossenen Ideen nicht bearbeitet werden.
+            </p>
           )}
         </div>
 
@@ -762,6 +789,23 @@ export default function IdeaDetailPage() {
           onClose={() => setShowStatusModal(false)}
         />
       )}
+
+      {/* Completion Confirmation Dialog */}
+      {showCompletionDialog && (
+        <CompletionConfirmationDialog
+          onConfirm={async () => {
+            try {
+              const updated = await ideaService.updateStatus(Number(id), 'COMPLETED', 100);
+              setIdea(updated);
+              setShowCompletionDialog(false);
+              toast.success('Idee als abgeschlossen markiert!');
+            } catch (error) {
+              toast.error('Fehler beim Abschließen der Idee');
+            }
+          }}
+          onCancel={() => setShowCompletionDialog(false)}
+        />
+      )}
     </div>
   );
 }
@@ -824,6 +868,56 @@ function StatusModal({ currentStatus, currentProgress, onSave, onClose }: Status
           </button>
           <button onClick={() => onSave(status, progress)} className="btn-primary">
             Änderungen speichern
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface CompletionConfirmationDialogProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function CompletionConfirmationDialog({ onConfirm, onCancel }: CompletionConfirmationDialogProps) {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    await onConfirm();
+    setLoading(false);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-content p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-success-100 dark:bg-success-900/30 mb-4">
+            <CheckCircleIcon className="h-10 w-10 text-success-600 dark:text-success-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Alle To-dos erledigt!
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Möchten Sie diese Idee als abgeschlossen markieren?
+          </p>
+        </div>
+
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={onCancel}
+            className="btn-secondary"
+            disabled={loading}
+          >
+            Noch nicht
+          </button>
+          <button
+            onClick={handleConfirm}
+            className="btn-primary"
+            disabled={loading}
+          >
+            {loading ? 'Wird abgeschlossen...' : 'Als abgeschlossen markieren'}
           </button>
         </div>
       </div>

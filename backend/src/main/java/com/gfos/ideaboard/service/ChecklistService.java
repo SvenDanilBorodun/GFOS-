@@ -1,8 +1,10 @@
 package com.gfos.ideaboard.service;
 
 import com.gfos.ideaboard.dto.ChecklistItemDTO;
+import com.gfos.ideaboard.dto.ChecklistToggleResponse;
 import com.gfos.ideaboard.entity.ChecklistItem;
 import com.gfos.ideaboard.entity.Idea;
+import com.gfos.ideaboard.entity.IdeaStatus;
 import com.gfos.ideaboard.entity.User;
 import com.gfos.ideaboard.entity.UserRole;
 import com.gfos.ideaboard.exception.ApiException;
@@ -31,6 +33,31 @@ public class ChecklistService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Prüft, ob der Benutzer die Checkliste bearbeiten darf.
+     * Erlaubt für: Autor der Idee, PROJECT_MANAGER oder ADMIN
+     */
+    private boolean canEditChecklist(Idea idea, Long currentUserId) {
+        User currentUser = em.find(User.class, currentUserId);
+        if (currentUser == null) return false;
+
+        // Autor kann bearbeiten
+        if (idea.getAuthor().getId().equals(currentUserId)) return true;
+
+        // PM/Admin kann bearbeiten
+        return currentUser.getRole() == UserRole.PROJECT_MANAGER ||
+               currentUser.getRole() == UserRole.ADMIN;
+    }
+
+    /**
+     * Prüft, ob die Checkliste bearbeitet werden kann (nicht bei COMPLETED Status)
+     */
+    private void validateChecklistEditable(Idea idea) {
+        if (idea.getStatus() == IdeaStatus.COMPLETED) {
+            throw ApiException.badRequest("Checkliste kann bei abgeschlossenen Ideen nicht bearbeitet werden");
+        }
+    }
+
     @Transactional
     public ChecklistItemDTO createChecklistItem(Long ideaId, String title, Long currentUserId) {
         // Eingabe validieren
@@ -46,10 +73,13 @@ public class ChecklistService {
             throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Nur der Ideenschöpfer kann Checklistenelemente hinzufügen
-        if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente hinzufügen");
+        // Prüfe Bearbeitungsberechtigung (Autor, PM oder Admin)
+        if (!canEditChecklist(idea, currentUserId)) {
+            throw ApiException.forbidden("Nicht berechtigt, Checklistenelemente hinzuzufügen");
         }
+
+        // Prüfe, ob die Idee nicht abgeschlossen ist
+        validateChecklistEditable(idea);
 
         // Nächste Ordinalposition abrufen
         Integer maxPosition = em.createQuery(
@@ -72,16 +102,19 @@ public class ChecklistService {
     }
 
     @Transactional
-    public ChecklistItemDTO toggleChecklistItem(Long ideaId, Long itemId, Long currentUserId) {
+    public ChecklistToggleResponse toggleChecklistItem(Long ideaId, Long itemId, Long currentUserId) {
         Idea idea = em.find(Idea.class, ideaId);
         if (idea == null) {
             throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // WICHTIG: Nur der Ideenschöpfer kann Elemente abhaken
-        if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente aktualisieren");
+        // Prüfe Bearbeitungsberechtigung (Autor, PM oder Admin)
+        if (!canEditChecklist(idea, currentUserId)) {
+            throw ApiException.forbidden("Nicht berechtigt, Checklistenelemente zu aktualisieren");
         }
+
+        // Prüfe, ob die Idee nicht abgeschlossen ist
+        validateChecklistEditable(idea);
 
         ChecklistItem item = em.find(ChecklistItem.class, itemId);
         if (item == null) {
@@ -98,9 +131,14 @@ public class ChecklistService {
         em.merge(item);
 
         // Ideenfortschritt basierend auf Checklistenfertigstellung aktualisieren
-        updateIdeaProgress(idea);
+        // und Statusübergänge prüfen
+        StatusTransitionResult result = updateIdeaProgressWithTransitions(idea);
 
-        return ChecklistItemDTO.fromEntity(item);
+        return new ChecklistToggleResponse(
+            ChecklistItemDTO.fromEntity(item),
+            result.transitionedToInProgress,
+            result.allTodosCompleted
+        );
     }
 
     @Transactional
@@ -110,10 +148,13 @@ public class ChecklistService {
             throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Nur der Autor kann Checklistenelemente löschen
-        if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente löschen");
+        // Prüfe Bearbeitungsberechtigung (Autor, PM oder Admin)
+        if (!canEditChecklist(idea, currentUserId)) {
+            throw ApiException.forbidden("Nicht berechtigt, Checklistenelemente zu löschen");
         }
+
+        // Prüfe, ob die Idee nicht abgeschlossen ist
+        validateChecklistEditable(idea);
 
         ChecklistItem item = em.find(ChecklistItem.class, itemId);
         if (item == null) {
@@ -138,10 +179,13 @@ public class ChecklistService {
             throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Nur der Autor kann Checklistenelemente aktualisieren
-        if (!idea.getAuthor().getId().equals(currentUserId)) {
-            throw ApiException.forbidden("Nur der Ideenschöpfer kann Checklistenelemente aktualisieren");
+        // Prüfe Bearbeitungsberechtigung (Autor, PM oder Admin)
+        if (!canEditChecklist(idea, currentUserId)) {
+            throw ApiException.forbidden("Nicht berechtigt, Checklistenelemente zu aktualisieren");
         }
+
+        // Prüfe, ob die Idee nicht abgeschlossen ist
+        validateChecklistEditable(idea);
 
         if (title == null || title.trim().isEmpty()) {
             throw ApiException.badRequest("Checklistenelement-Titel ist erforderlich");
@@ -187,5 +231,57 @@ public class ChecklistService {
         int progressPercentage = (int) Math.round((double) completedCount / items.size() * 100);
         idea.setProgressPercentage(progressPercentage);
         em.merge(idea);
+    }
+
+    /**
+     * Aktualisiert den Fortschritt und behandelt automatische Statusübergänge.
+     * @return StatusTransitionResult mit Informationen über Statusänderungen
+     */
+    private StatusTransitionResult updateIdeaProgressWithTransitions(Idea idea) {
+        List<ChecklistItem> items = em.createNamedQuery("ChecklistItem.findByIdea", ChecklistItem.class)
+                .setParameter("ideaId", idea.getId())
+                .getResultList();
+
+        if (items.isEmpty()) {
+            return new StatusTransitionResult(false, false);
+        }
+
+        long completedCount = items.stream()
+                .filter(ChecklistItem::getIsCompleted)
+                .count();
+
+        int progressPercentage = (int) Math.round((double) completedCount / items.size() * 100);
+        idea.setProgressPercentage(progressPercentage);
+
+        boolean transitionedToInProgress = false;
+        boolean allTodosCompleted = false;
+
+        // Automatischer Übergang: CONCEPT -> IN_PROGRESS wenn erstes Todo erledigt
+        if (idea.getStatus() == IdeaStatus.CONCEPT && completedCount > 0) {
+            idea.setStatus(IdeaStatus.IN_PROGRESS);
+            transitionedToInProgress = true;
+        }
+
+        // Prüfen, ob alle Todos erledigt sind (für Frontend-Bestätigungsdialog)
+        if (completedCount == items.size() && !items.isEmpty()) {
+            allTodosCompleted = true;
+        }
+
+        em.merge(idea);
+
+        return new StatusTransitionResult(transitionedToInProgress, allTodosCompleted);
+    }
+
+    /**
+     * Ergebnis der Statusübergangsprüfung
+     */
+    private static class StatusTransitionResult {
+        final boolean transitionedToInProgress;
+        final boolean allTodosCompleted;
+
+        StatusTransitionResult(boolean transitionedToInProgress, boolean allTodosCompleted) {
+            this.transitionedToInProgress = transitionedToInProgress;
+            this.allTodosCompleted = allTodosCompleted;
+        }
     }
 }

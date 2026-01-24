@@ -1,6 +1,7 @@
 package com.gfos.ideaboard.resource;
 
 import com.gfos.ideaboard.dto.ChecklistItemDTO;
+import com.gfos.ideaboard.dto.ChecklistToggleResponse;
 import com.gfos.ideaboard.dto.CommentDTO;
 import com.gfos.ideaboard.dto.FileAttachmentDTO;
 import com.gfos.ideaboard.dto.IdeaDTO;
@@ -92,6 +93,8 @@ public class IdeaResource {
         String category = (String) body.get("category");
         @SuppressWarnings("unchecked")
         List<String> tags = (List<String>) body.get("tags");
+        @SuppressWarnings("unchecked")
+        List<String> checklistItems = (List<String>) body.get("checklistItems");
 
         if (title == null || title.trim().isEmpty()) {
             throw ApiException.badRequest("Titel ist erforderlich");
@@ -102,8 +105,11 @@ public class IdeaResource {
         if (category == null || category.trim().isEmpty()) {
             throw ApiException.badRequest("Kategorie ist erforderlich");
         }
+        if (checklistItems == null || checklistItems.isEmpty()) {
+            throw ApiException.badRequest("Mindestens ein To-do ist erforderlich");
+        }
 
-        IdeaDTO idea = ideaService.createIdea(title, description, category, tags, userId);
+        IdeaDTO idea = ideaService.createIdea(title, description, category, tags, checklistItems, userId);
         return Response.status(Response.Status.CREATED).entity(idea).build();
     }
 
@@ -278,8 +284,8 @@ public class IdeaResource {
     public Response toggleChecklistItem(@PathParam("id") Long id, @PathParam("itemId") Long itemId,
                                         @Context ContainerRequestContext requestContext) {
         Long userId = (Long) requestContext.getProperty("userId");
-        ChecklistItemDTO item = checklistService.toggleChecklistItem(id, itemId, userId);
-        return Response.ok(item).build();
+        ChecklistToggleResponse result = checklistService.toggleChecklistItem(id, itemId, userId);
+        return Response.ok(result).build();
     }
 
     @PUT

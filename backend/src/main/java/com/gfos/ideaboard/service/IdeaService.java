@@ -167,6 +167,63 @@ public class IdeaService {
     }
 
     @Transactional
+    public IdeaDTO createIdea(String title, String description, String category,
+                              List<String> tags, List<String> checklistItemTitles, Long authorId) {
+        User author = em.find(User.class, authorId);
+        if (author == null) {
+            throw ApiException.notFound("Autor nicht gefunden");
+        }
+
+        // Validiere, dass mindestens ein Checklistenelement vorhanden ist
+        if (checklistItemTitles == null || checklistItemTitles.isEmpty()) {
+            throw ApiException.badRequest("Mindestens ein To-do ist erforderlich");
+        }
+
+        // Filtere leere Einträge
+        List<String> validChecklistItems = checklistItemTitles.stream()
+                .filter(item -> item != null && !item.trim().isEmpty())
+                .map(String::trim)
+                .toList();
+
+        if (validChecklistItems.isEmpty()) {
+            throw ApiException.badRequest("Mindestens ein gültiges To-do ist erforderlich");
+        }
+
+        Idea idea = new Idea();
+        idea.setTitle(title);
+        idea.setDescription(description);
+        idea.setCategory(category);
+        idea.setTags(tags != null ? tags : List.of());
+        idea.setAuthor(author);
+        idea.setStatus(IdeaStatus.CONCEPT);
+        idea.setProgressPercentage(0);
+
+        em.persist(idea);
+
+        // Erstelle Checklistenelemente
+        int position = 0;
+        for (String itemTitle : validChecklistItems) {
+            ChecklistItem item = new ChecklistItem();
+            item.setIdea(idea);
+            item.setTitle(itemTitle);
+            item.setIsCompleted(false);
+            item.setOrdinalPosition(position++);
+            em.persist(item);
+        }
+
+        // Erstelle automatisch eine Gruppe für diese Idee
+        groupService.createGroupForIdea(idea, author);
+
+        // Vergebe XP und prüfe Abzeichen
+        gamificationService.awardXpForIdea(authorId);
+
+        // Audit-Protokoll
+        auditService.log(authorId, AuditAction.CREATE, "Idea", idea.getId(), null, null);
+
+        return IdeaDTO.fromEntity(idea);
+    }
+
+    @Transactional
     public IdeaDTO updateIdea(Long id, String title, String description, String category,
                               List<String> tags, Long currentUserId) {
         Idea idea = findById(id);
@@ -201,11 +258,25 @@ public class IdeaService {
             throw ApiException.notFound("Idee nicht gefunden");
         }
 
-        // Prüfe Berechtigung (nur PM oder Admin können Status ändern)
         User currentUser = em.find(User.class, currentUserId);
-        if (currentUser == null ||
-            (currentUser.getRole() != UserRole.PROJECT_MANAGER && currentUser.getRole() != UserRole.ADMIN)) {
+        if (currentUser == null) {
+            throw ApiException.forbidden("Benutzer nicht gefunden");
+        }
+
+        boolean isAuthor = idea.getAuthor().getId().equals(currentUserId);
+        boolean isPMOrAdmin = currentUser.getRole() == UserRole.PROJECT_MANAGER ||
+                              currentUser.getRole() == UserRole.ADMIN;
+
+        // Prüfe Berechtigung (Autor kann eigene Idee ändern, PM/Admin alle)
+        if (!isAuthor && !isPMOrAdmin) {
             throw ApiException.forbidden("Nicht berechtigt, Status zu ändern");
+        }
+
+        // Nur PM/Admin können abgeschlossene Ideen wieder öffnen
+        if (idea.getStatus() == IdeaStatus.COMPLETED && status != IdeaStatus.COMPLETED) {
+            if (!isPMOrAdmin) {
+                throw ApiException.forbidden("Abgeschlossene Ideen können nur von PM/Admin erneut geöffnet werden");
+            }
         }
 
         IdeaStatus oldStatus = idea.getStatus();

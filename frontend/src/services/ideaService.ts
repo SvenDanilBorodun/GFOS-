@@ -8,7 +8,8 @@ import {
   Comment,
   CommentCreateRequest,
   LikeStatus,
-  ChecklistItem
+  ChecklistItem,
+  ChecklistToggleResponse
 } from '../types';
 
 export const ideaService = {
@@ -140,8 +141,8 @@ export const ideaService = {
     return response.data;
   },
 
-  async toggleChecklistItem(ideaId: number, itemId: number): Promise<ChecklistItem> {
-    const response = await api.patch<ChecklistItem>(`/ideas/${ideaId}/checklist/${itemId}/toggle`);
+  async toggleChecklistItem(ideaId: number, itemId: number): Promise<ChecklistToggleResponse> {
+    const response = await api.patch<ChecklistToggleResponse>(`/ideas/${ideaId}/checklist/${itemId}/toggle`);
     return response.data;
   },
 

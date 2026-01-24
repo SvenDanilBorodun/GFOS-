@@ -11,7 +11,9 @@ import {
   TableCellsIcon,
   CloudArrowUpIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  PlusIcon,
+  ListBulletIcon
 } from '@heroicons/react/24/outline';
 import { ideaService } from '../services/ideaService';
 import { Idea } from '../types';
@@ -68,6 +70,7 @@ export default function CreateIdeaPage() {
     tags: [] as string[],
   });
   const [tagInput, setTagInput] = useState('');
+  const [checklistItems, setChecklistItems] = useState<string[]>(['']);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [uploadStatuses, setUploadStatuses] = useState<Map<string, UploadStatus>>(new Map());
   const [existingFiles, setExistingFiles] = useState<{ id: number; name: string; mimeType?: string }[]>([]);
@@ -165,6 +168,14 @@ export default function CreateIdeaPage() {
       newErrors.category = 'Bitte wählen Sie eine Kategorie';
     }
 
+    // Validiere Checklistenelemente (nur bei neuen Ideen)
+    if (!isEditing) {
+      const validItems = checklistItems.filter(item => item.trim() !== '');
+      if (validItems.length === 0) {
+        newErrors.checklist = 'Mindestens ein To-do ist erforderlich';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -180,7 +191,11 @@ export default function CreateIdeaPage() {
       if (isEditing) {
         idea = await ideaService.updateIdea(Number(id), formData);
       } else {
-        idea = await ideaService.createIdea(formData);
+        const validChecklistItems = checklistItems.filter(item => item.trim() !== '');
+        idea = await ideaService.createIdea({
+          ...formData,
+          checklistItems: validChecklistItems,
+        });
       }
 
       // Neue Dateien mit Fortschrittsanzeige hochladen
@@ -427,6 +442,62 @@ export default function CreateIdeaPage() {
             Enter oder Komma drücken, um ein Tag hinzuzufügen
           </p>
         </div>
+
+        {/* To-dos / Checkliste (nur bei neuen Ideen) */}
+        {!isEditing && (
+          <div className="form-group">
+            <label className="label flex items-center gap-2">
+              <ListBulletIcon className="w-4 h-4" />
+              To-dos <span className="text-error-500">*</span>
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Definieren Sie die Schritte zur Umsetzung Ihrer Idee (mindestens 1)
+            </p>
+
+            <div className="space-y-2 mb-3">
+              {checklistItems.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => {
+                      const newItems = [...checklistItems];
+                      newItems[index] = e.target.value;
+                      setChecklistItems(newItems);
+                    }}
+                    placeholder={`To-do ${index + 1}`}
+                    maxLength={200}
+                    className={`input flex-1 ${errors.checklist && index === 0 && !item.trim() ? 'border-error-500' : ''}`}
+                  />
+                  {checklistItems.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setChecklistItems(checklistItems.filter((_, i) => i !== index));
+                      }}
+                      className="p-2 text-gray-400 hover:text-error-500 hover:bg-error-50 dark:hover:bg-error-900/20 rounded-lg transition-colors"
+                      title="To-do entfernen"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setChecklistItems([...checklistItems, ''])}
+              className="btn-secondary flex items-center gap-2 text-sm"
+              disabled={checklistItems.length >= 20}
+            >
+              <PlusIcon className="w-4 h-4" />
+              To-do hinzufügen
+            </button>
+
+            {errors.checklist && <p className="form-error mt-2">{errors.checklist}</p>}
+          </div>
+        )}
 
         {/* Datei-Upload */}
         <div className="form-group">
