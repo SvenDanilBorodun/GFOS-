@@ -177,8 +177,10 @@ public class IdeaResource {
     // Kommentare (Comments)
     @GET
     @Path("/{id}/comments")
-    public Response getComments(@PathParam("id") Long id) {
-        List<CommentDTO> comments = commentService.getCommentsByIdea(id);
+    public Response getComments(@PathParam("id") Long id,
+                                @Context ContainerRequestContext requestContext) {
+        Long userId = (Long) requestContext.getProperty("userId");
+        List<CommentDTO> comments = commentService.getCommentsByIdea(id, userId);
         return Response.ok(comments).build();
     }
 

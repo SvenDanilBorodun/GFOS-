@@ -6,7 +6,6 @@ import {
   HomeIcon,
   LightBulbIcon,
   ChartBarIcon,
-  UserCircleIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   SunIcon,
@@ -23,7 +22,6 @@ const navigation = [
   { name: 'Ideen', href: '/ideas', icon: LightBulbIcon },
   { name: 'Nachrichten', href: '/messages', icon: ChatBubbleLeftRightIcon },
   { name: 'Umfragen', href: '/surveys', icon: ChartBarIcon },
-  { name: 'Profil', href: '/profile', icon: UserCircleIcon },
 ];
 
 const adminNavigation = [
@@ -130,7 +128,17 @@ export default function Layout() {
 
           {/* Benutzer-Bereich */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-3 mb-3">
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `flex items-center gap-3 mb-3 px-3 py-2 -mx-3 rounded-lg transition-colors ${
+                  isActive
+                    ? 'bg-primary-50 dark:bg-primary-900/20'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`
+              }
+              onClick={() => setSidebarOpen(false)}
+            >
               <div className="avatar-md">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}
               </div>
@@ -142,7 +150,7 @@ export default function Layout() {
                   Stufe {user?.level} • {user?.xpPoints} XP
                 </p>
               </div>
-            </div>
+            </NavLink>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400

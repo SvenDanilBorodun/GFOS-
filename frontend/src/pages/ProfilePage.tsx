@@ -200,6 +200,55 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Meine Ideen */}
+      <div className="card">
+        <div className="p-5 border-b border-gray-100 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Meine Ideen ({myIdeas.length})
+          </h2>
+        </div>
+        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+          {myIdeas.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              Sie haben noch keine Ideen eingereicht
+            </div>
+          ) : (
+            myIdeas.map((idea) => (
+              <a
+                key={idea.id}
+                href={`/ideas/${idea.id}`}
+                className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                      {idea.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {format(new Date(idea.createdAt), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className={`badge ${
+                      idea.status === 'COMPLETED'
+                        ? 'badge-success'
+                        : idea.status === 'IN_PROGRESS'
+                        ? 'badge-warning'
+                        : 'badge-gray'
+                    }`}>
+                      {idea.status.replace('_', ' ')}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {idea.likeCount} Likes
+                    </span>
+                  </div>
+                </div>
+              </a>
+            ))
+          )}
+        </div>
+      </div>
+
       {/* Level and XP */}
       <div className="card p-6">
         <div className="flex items-center gap-4 mb-4">
@@ -305,55 +354,6 @@ export default function ProfilePage() {
                 earned={earnedBadges.some((b) => b.badge.name === 'supporter')}
               />
             </>
-          )}
-        </div>
-      </div>
-
-      {/* Meine Ideen */}
-      <div className="card">
-        <div className="p-5 border-b border-gray-100 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Meine Ideen ({myIdeas.length})
-          </h2>
-        </div>
-        <div className="divide-y divide-gray-100 dark:divide-gray-700">
-          {myIdeas.length === 0 ? (
-            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              Sie haben noch keine Ideen eingereicht
-            </div>
-          ) : (
-            myIdeas.map((idea) => (
-              <a
-                key={idea.id}
-                href={`/ideas/${idea.id}`}
-                className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 dark:text-white truncate">
-                      {idea.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {format(new Date(idea.createdAt), 'MMM d, yyyy')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`badge ${
-                      idea.status === 'COMPLETED'
-                        ? 'badge-success'
-                        : idea.status === 'IN_PROGRESS'
-                        ? 'badge-warning'
-                        : 'badge-gray'
-                    }`}>
-                      {idea.status.replace('_', ' ')}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {idea.likeCount} Likes
-                    </span>
-                  </div>
-                </div>
-              </a>
-            ))
           )}
         </div>
       </div>

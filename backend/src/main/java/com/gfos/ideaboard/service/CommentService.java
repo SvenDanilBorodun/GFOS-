@@ -30,12 +30,12 @@ public class CommentService {
     @Inject
     private GamificationService gamificationService;
 
-    public List<CommentDTO> getCommentsByIdea(Long ideaId) {
+    public List<CommentDTO> getCommentsByIdea(Long ideaId, Long currentUserId) {
         List<Comment> comments = em.createNamedQuery("Comment.findByIdea", Comment.class)
                 .setParameter("ideaId", ideaId)
                 .getResultList();
         return comments.stream()
-                .map(CommentDTO::fromEntity)
+                .map(comment -> CommentDTO.fromEntity(comment, currentUserId))
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +75,7 @@ public class CommentService {
             notificationService.notifyComment(idea, author, content);
         }
 
-        return CommentDTO.fromEntity(comment);
+        return CommentDTO.fromEntity(comment, authorId);
     }
 
     @Transactional

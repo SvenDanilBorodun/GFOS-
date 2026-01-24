@@ -3,6 +3,7 @@ package com.gfos.ideaboard.dto;
 import com.gfos.ideaboard.entity.Comment;
 import com.gfos.ideaboard.entity.CommentReaction;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,12 +16,13 @@ public class CommentDTO {
     private String content;
     private Integer reactionCount;
     private List<ReactionDTO> reactions;
+    private List<String> currentUserReactionEmojis;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public CommentDTO() {}
 
-    public static CommentDTO fromEntity(Comment comment) {
+    public static CommentDTO fromEntity(Comment comment, Long currentUserId) {
         CommentDTO dto = new CommentDTO();
         dto.setId(comment.getId());
         dto.setIdeaId(comment.getIdea().getId());
@@ -30,13 +32,24 @@ public class CommentDTO {
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
 
-        // Group reaktion mit Emoji 
+        // Group reaktion mit Emoji
         Map<String, Long> reactionCounts = comment.getReactions().stream()
                 .collect(Collectors.groupingBy(CommentReaction::getEmoji, Collectors.counting()));
 
         dto.setReactions(reactionCounts.entrySet().stream()
                 .map(entry -> new ReactionDTO(entry.getKey(), entry.getValue().intValue()))
                 .collect(Collectors.toList()));
+
+        // Collect current user's reaction emojis
+        if (currentUserId != null) {
+            List<String> userEmojis = comment.getReactions().stream()
+                    .filter(reaction -> reaction.getUser().getId().equals(currentUserId))
+                    .map(CommentReaction::getEmoji)
+                    .collect(Collectors.toList());
+            dto.setCurrentUserReactionEmojis(userEmojis);
+        } else {
+            dto.setCurrentUserReactionEmojis(new ArrayList<>());
+        }
 
         return dto;
     }
@@ -88,6 +101,14 @@ public class CommentDTO {
 
     public void setReactions(List<ReactionDTO> reactions) {
         this.reactions = reactions;
+    }
+
+    public List<String> getCurrentUserReactionEmojis() {
+        return currentUserReactionEmojis;
+    }
+
+    public void setCurrentUserReactionEmojis(List<String> currentUserReactionEmojis) {
+        this.currentUserReactionEmojis = currentUserReactionEmojis;
     }
 
     public LocalDateTime getCreatedAt() {

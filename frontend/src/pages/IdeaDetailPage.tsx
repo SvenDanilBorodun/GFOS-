@@ -190,24 +190,23 @@ export default function IdeaDetailPage() {
 
   const handleReaction = async (commentId: number, emoji: string) => {
     try {
-      await ideaService.addReaction(commentId, emoji);
-      fetchComments();
-    } catch (error: unknown) {
-      // If 409 conflict, user already reacted - try to remove instead
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { status?: number } };
-        if (axiosError.response?.status === 409) {
-          try {
-            await ideaService.removeReaction(commentId, emoji);
-            fetchComments();
-            return;
-          } catch {
-            toast.error('Fehler beim Entfernen der Reaktion');
-            return;
-          }
-        }
+      // Find the comment to check if user has already reacted
+      const comment = comments.find((c) => c.id === commentId);
+      if (!comment) return;
+
+      const hasReacted = comment.currentUserReactionEmojis?.includes(emoji);
+
+      if (hasReacted) {
+        // User already reacted, so remove it
+        await ideaService.removeReaction(commentId, emoji);
+      } else {
+        // User hasn't reacted, so add it
+        await ideaService.addReaction(commentId, emoji);
       }
-      toast.error('Fehler beim Hinzufügen der Reaktion');
+
+      fetchComments();
+    } catch (error) {
+      toast.error('Fehler beim Aktualisieren der Reaktion');
     }
   };
 
@@ -754,12 +753,15 @@ export default function IdeaDetailPage() {
                     <div className="flex items-center gap-2 mt-3">
                       {EMOJI_LIST.map((emoji) => {
                         const reaction = comment.reactions.find((r) => r.emoji === emoji);
+                        const userHasReacted = comment.currentUserReactionEmojis?.includes(emoji);
                         return (
                           <button
                             key={emoji}
                             onClick={() => handleReaction(comment.id, emoji)}
                             className={`px-2 py-1 rounded-full text-sm flex items-center gap-1 transition-colors ${
-                              reaction && reaction.count > 0
+                              userHasReacted
+                                ? 'bg-primary-100 dark:bg-primary-900/30 border border-primary-300 dark:border-primary-700'
+                                : reaction && reaction.count > 0
                                 ? 'bg-primary-50 dark:bg-primary-900/20'
                                 : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
                             }`}

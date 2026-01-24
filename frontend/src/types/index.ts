@@ -117,6 +117,7 @@ export interface Comment {
   content: string;
   reactionCount: number;
   reactions: CommentReaction[];
+  currentUserReactionEmojis: string[];
   createdAt: string;
   updatedAt: string;
 }
