@@ -16,7 +16,7 @@ frontend/node_modules
 *.log
 logs/
 
-# Environment files (security)
+# Environment files 
 .env
 .env.local
 .env.*.local
@@ -25,7 +25,7 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Documentation (not needed in image)
+# Documentation 
 *.md
 !DOCKER_README.md
 
@@ -39,5 +39,5 @@ Thumbs.db
 *.tmp
 *.temp
 
-# PowerShell scripts (not needed in Docker)
+# PowerShell scripts 
 *.ps1

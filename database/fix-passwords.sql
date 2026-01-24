@@ -1,5 +1,3 @@
--- Fix password hashes to work with BCrypt verification
-
 -- Update admin password (admin123)
 UPDATE users
 SET password_hash = '$2a$12$MMbkxZQfQePt3aApd8bCsuSv0U7pT54rR708XyXXNq9gcnfjrsTBy'

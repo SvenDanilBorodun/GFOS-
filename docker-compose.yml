@@ -1,9 +1,7 @@
 version: '3.9'
 
 services:
-  # ===========================================
   # PostgreSQL Database
-  # ===========================================
   db:
     build:
       context: .
@@ -27,9 +25,7 @@ services:
     networks:
       - ideaboard-network
 
-  # ===========================================
   # GlassFish Backend
-  # ===========================================
   backend:
     build:
       context: .
@@ -57,9 +53,8 @@ services:
     networks:
       - ideaboard-network
 
-  # ===========================================
-  # React Frontend (nginx)
-  # ===========================================
+  
+  # React Frontend 
   frontend:
     build:
       context: .

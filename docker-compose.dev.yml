@@ -1,10 +1,10 @@
 version: '3.9'
 
-# Development overrides - use with:
+# Development überschreiben
 # docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 services:
-  # Development frontend with hot-reload
+  # Development frontend 
   frontend:
     build:
       context: .
@@ -18,7 +18,7 @@ services:
       - NODE_ENV=development
     command: npm run dev -- --host 0.0.0.0
 
-  # Backend - expose admin console in dev
+  # Backend 
   backend:
     environment:
       - GLASSFISH_LOG_LEVEL=FINE

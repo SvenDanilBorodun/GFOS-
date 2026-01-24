@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Material Design inspired color palette
+        // Design Farben 
         primary: {
           50: '#e3f2fd',
           100: '#bbdefb',
