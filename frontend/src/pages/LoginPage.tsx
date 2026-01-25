@@ -163,11 +163,11 @@ export default function LoginPage() {
           {/* Demo-Anmeldedaten */}
           <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Demo-Konten:
+              Test-Konten:
             </p>
             <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
               <p><span className="font-medium">Admin:</span> admin / admin123</p>
-              <p><span className="font-medium">Mitarbeiter:</span> jsmith / password123</p>
+              <p><span className="font-medium">Mitarbeiter:</span> jsmith, tjohnson / password123</p>
               <p><span className="font-medium">PM:</span> mwilson / password123</p>
             </div>
           </div>

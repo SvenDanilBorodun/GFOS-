@@ -492,6 +492,14 @@ INSERT INTO users (username, email, password_hash, first_name, last_name, role, 
 -- Test-Benutzer einfügen (Passwort: password123)
 -- Hash mit BCrypt-Kosten faktor 12 generiert, verifiziert, um mit PasswordUtil-Implementierung übereinzustimmen
 INSERT INTO users (username, email, password_hash, first_name, last_name, role, xp_points, level) VALUES
-    ('jsmith', 'john.smith@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'John', 'Smith', 'EMPLOYEE', 150, 2),
-    ('mwilson', 'mary.wilson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Mary', 'Wilson', 'PROJECT_MANAGER', 350, 3),
-    ('tjohnson', 'tom.johnson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Tom', 'Johnson', 'EMPLOYEE', 75, 1);
+    ('jsmith', 'john.smith@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'John', 'Smith', 'EMPLOYEE', 0, 1),
+    ('mwilson', 'mary.wilson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Mary', 'Wilson', 'PROJECT_MANAGER', 0, 1),
+    ('tjohnson', 'tom.johnson@gfos.com', '$2a$12$9qf4aU3aQ.iXkYJYAea3deFQODQxKIwpV63Vz7p6CuCya.s696RXG', 'Tom', 'Johnson', 'EMPLOYEE', 0, 1);
+
+-- =====================================================
+-- ABZEICHEN (Badges) - System-Konfiguration
+-- =====================================================
+INSERT INTO badges (name, display_name, description, icon, criteria, xp_reward, is_active) VALUES
+    ('first_idea', 'Ideenstarter', 'Erste Idee eingereicht', 'lightbulb', 'Reiche deine erste Idee ein', 25, true),
+    ('popular', 'Beliebt', '10 Likes erhalten', 'heart', 'Erhalte insgesamt 10 Likes auf deine Ideen', 50, true),
+    ('commentator', 'Kommentator', '50 Kommentare geschrieben', 'chat-bubble', 'Schreibe 50 Kommentare', 75, true);

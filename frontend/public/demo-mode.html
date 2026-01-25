@@ -72,15 +72,15 @@
     <h3>Wählen Sie einen Demo-Benutzer:</h3>
 
     <button onclick="enableDemo('EMPLOYEE')">
-      👤 Mitarbeiter-Demo (John Doe)
+      👤 Mitarbeiter-Demo (John Smith)
     </button>
 
     <button onclick="enableDemo('PROJECT_MANAGER')">
-      📊 Projektmanager-Demo (Jane Smith)
+      📊 Projektmanager-Demo (Mary Wilson)
     </button>
 
     <button onclick="enableDemo('ADMIN')">
-      👑 Administrator-Demo (Admin User)
+      👑 Administrator-Demo (System Administrator)
     </button>
 
     <button onclick="clearDemo()" style="background: #dc2626; margin-top: 20px;">
@@ -94,45 +94,45 @@
     function enableDemo(role) {
       const demoUsers = {
         EMPLOYEE: {
-          id: 1,
-          username: 'john.doe',
-          email: 'john.doe@gfos.com',
+          id: 2,
+          username: 'jsmith',
+          email: 'john.smith@gfos.com',
           firstName: 'John',
-          lastName: 'Doe',
+          lastName: 'Smith',
           role: 'EMPLOYEE',
           avatarUrl: null,
-          xpPoints: 250,
-          level: 3,
+          xpPoints: 150,
+          level: 2,
           isActive: true,
           lastLogin: new Date().toISOString(),
           createdAt: '2024-01-01T00:00:00',
           updatedAt: new Date().toISOString()
         },
         PROJECT_MANAGER: {
-          id: 2,
-          username: 'jane.smith',
-          email: 'jane.smith@gfos.com',
-          firstName: 'Jane',
-          lastName: 'Smith',
+          id: 3,
+          username: 'mwilson',
+          email: 'mary.wilson@gfos.com',
+          firstName: 'Mary',
+          lastName: 'Wilson',
           role: 'PROJECT_MANAGER',
           avatarUrl: null,
-          xpPoints: 850,
-          level: 5,
+          xpPoints: 350,
+          level: 3,
           isActive: true,
           lastLogin: new Date().toISOString(),
           createdAt: '2024-01-01T00:00:00',
           updatedAt: new Date().toISOString()
         },
         ADMIN: {
-          id: 3,
+          id: 1,
           username: 'admin',
           email: 'admin@gfos.com',
-          firstName: 'Admin',
-          lastName: 'User',
+          firstName: 'System',
+          lastName: 'Administrator',
           role: 'ADMIN',
           avatarUrl: null,
-          xpPoints: 1500,
-          level: 6,
+          xpPoints: 0,
+          level: 1,
           isActive: true,
           lastLogin: new Date().toISOString(),
           createdAt: '2024-01-01T00:00:00',
