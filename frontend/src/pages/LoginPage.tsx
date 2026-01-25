@@ -67,22 +67,8 @@ export default function LoginPage() {
             Verwandeln Sie Ideen in Innovation
           </h1>
           <p className="text-lg text-primary-100">
-            Treten Sie Ihrem Team bei, teilen Sie, entwickeln Sie und implementieren Sie die Ideen, die unsere Zukunft prägen werden.
+            Treten Sie Ihrem Team bei, teilen Sie, entwickeln Sie und implementieren Sie die Ideen.
           </p>
-          <div className="flex gap-8">
-            <div>
-              <p className="text-3xl font-bold text-white">500+</p>
-              <p className="text-sm text-primary-200">Eingereichte Ideen</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white">120</p>
-              <p className="text-sm text-primary-200">Abgeschlossene Projekte</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-white">50+</p>
-              <p className="text-sm text-primary-200">Aktive Mitwirkende</p>
-            </div>
-          </div>
         </div>
 
         <p className="text-sm text-primary-200">
