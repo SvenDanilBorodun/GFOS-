@@ -410,7 +410,7 @@ Die Service-Schicht (14 Klassen) kapselt die gesamte Geschäftslogik und trennt 
 
 ### 4.5 REST-API-Schicht (Resources)
 
-Die Resource-Klassen (12 Klassen mit 83 Endpunkten) definieren die REST-API-Endpunkte der Anwendung.
+Die Resource-Klassen (12 Klassen mit 79 Endpunkten) definieren die REST-API-Endpunkte der Anwendung.
 
 #### API-Struktur
 
@@ -428,9 +428,9 @@ Die Resource-Klassen (12 Klassen mit 83 Endpunkten) definieren die REST-API-Endp
 | AuditResource | `/api/audit-logs` | 2 | Audit-Logs abrufen (Admin) |
 | ExportResource | `/api/export` | 4 | CSV/PDF-Export von Daten |
 | HealthResource | `/api/health` | 1 | Docker Health-Check |
-| | **Gesamt** | **83** | |
+| | **Gesamt** | **79** | |
 
-#### Vollständige Endpunkt-Übersicht (83 Endpunkte)
+#### Vollständige Endpunkt-Übersicht (79 Endpunkte)
 
 **IdeaResource** (`/api/ideas`) - 20 Endpunkte:
 ```
@@ -798,9 +798,9 @@ Level 10: 10000 XP (Maximum)
 
 | Badge | Kriterium | XP-Bonus |
 |-------|-----------|----------|
-| First Idea | Erste Idee eingereicht | +20 XP |
+| First Idea | Erste Idee eingereicht | +25 XP |
 | Popular | 10+ Likes auf eine Idee | +50 XP |
-| Commentator | 50+ Kommentare verfasst | +30 XP |
+| Commentator | 50+ Kommentare verfasst | +75 XP |
 
 **Warum Gamification?**
 
@@ -929,7 +929,7 @@ Die Wartbarkeit wird durch folgende Maßnahmen sichergestellt:
 | Service-Klassen | 14 |
 | REST-Resources | 12 |
 | DTO-Klassen | 20 |
-| API-Endpunkte | 83 |
+| API-Endpunkte | 79 |
 | **Frontend** | |
 | TypeScript-Dateien | 26 |
 | React-Seiten | 10 |

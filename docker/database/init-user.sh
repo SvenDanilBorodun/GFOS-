@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 # This script runs after init.sql to create the application user
