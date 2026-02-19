@@ -1,4 +1,4 @@
-// User types
+// Benutzer-Typen
 export type UserRole = 'EMPLOYEE' | 'PROJECT_MANAGER' | 'ADMIN';
 
 export interface User {
@@ -28,7 +28,7 @@ export interface BadgeWithStatus extends Badge {
   earnedAt?: string;
 }
 
-// Idea types
+// Ideen-Typen
 export type IdeaStatus = 'CONCEPT' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface Idea {
@@ -51,7 +51,7 @@ export interface Idea {
   updatedAt: string;
 }
 
-// Checklist types
+// Checklisten-Typen
 export interface ChecklistItem {
   id: number;
   ideaId: number;
@@ -85,7 +85,7 @@ export interface IdeaUpdateRequest {
   progressPercentage?: number;
 }
 
-// File attachment types
+// Dateianhang-Typen
 export interface FileAttachment {
   id: number;
   filename: string;
@@ -95,7 +95,7 @@ export interface FileAttachment {
   uploadedAt: string;
 }
 
-// Like types
+// Like-Typen
 export interface Like {
   id: number;
   userId: number;
@@ -109,7 +109,7 @@ export interface LikeStatus {
   maxWeeklyLikes: number;
 }
 
-// Comment types
+// Kommentar-Typen
 export interface Comment {
   id: number;
   ideaId: number;
@@ -133,7 +133,7 @@ export interface CommentReaction {
   count: number;
 }
 
-// Survey types
+// Umfrage-Typen
 export interface Survey {
   id: number;
   creator: User;
@@ -166,7 +166,7 @@ export interface SurveyCreateRequest {
   expiresAt?: string;
 }
 
-// Badge types
+// Abzeichen-Typen
 export interface Badge {
   id: number;
   name: string;
@@ -177,7 +177,7 @@ export interface Badge {
   xpReward: number;
 }
 
-// Notification types
+// Benachrichtigungs-Typen
 export type NotificationType =
   | 'LIKE'
   | 'COMMENT'
@@ -199,7 +199,7 @@ export interface Notification {
   createdAt: string;
 }
 
-// Message types
+// Nachrichten-Typen
 export interface Message {
   id: number;
   sender: User;
@@ -224,7 +224,7 @@ export interface SendMessageRequest {
   ideaId?: number;
 }
 
-// Group types
+// Gruppen-Typen
 export type GroupMemberRole = 'CREATOR' | 'MEMBER';
 
 export interface GroupMember {
@@ -262,7 +262,7 @@ export interface SendGroupMessageRequest {
   content: string;
 }
 
-// Audit log types
+// Audit-Log-Typen
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'STATUS_CHANGE' | 'LOGIN' | 'LOGOUT';
 
 export interface AuditLog {
@@ -277,7 +277,7 @@ export interface AuditLog {
   createdAt: string;
 }
 
-// Dashboard types
+// Dashboard-Typen
 export interface CategoryBreakdown {
   category: string;
   count: number;
@@ -309,7 +309,7 @@ export interface TopIdea {
   rank: number;
 }
 
-// Auth types
+// Authentifizierungs-Typen
 export interface LoginRequest {
   username: string;
   password: string;
@@ -330,7 +330,7 @@ export interface AuthResponse {
   expiresIn: number;
 }
 
-// Pagination types
+// Paginierungs-Typen
 export interface Page<T> {
   content: T[];
   totalElements: number;
@@ -348,7 +348,7 @@ export interface PageRequest {
   direction?: 'ASC' | 'DESC';
 }
 
-// Filter types
+// Filter-Typen
 export interface IdeaFilter extends PageRequest {
   category?: string;
   status?: IdeaStatus;
@@ -357,7 +357,7 @@ export interface IdeaFilter extends PageRequest {
   tags?: string[];
 }
 
-// API Response types
+// API-Antwort-Typen
 export interface ApiError {
   status: number;
   message: string;

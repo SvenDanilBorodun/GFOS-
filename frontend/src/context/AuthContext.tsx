@@ -34,12 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
 
-          // Verify token is still valid
+          // Token-Gültigkeit überprüfen
           const currentUser = await authService.getCurrentUser();
           setUser(currentUser);
           localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
         } catch {
-          // Token expired or invalid
+          // Token abgelaufen oder ungültig
           handleLogout();
         }
       }

@@ -22,20 +22,20 @@ export default function MessagesPage() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Mode state
+  // Modus-Status
   const [activeTab, setActiveTab] = useState<ChatMode>('direct');
 
-  // Direct message state
+  // Direktnachrichten-Status
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // Group chat state
+  // Gruppenchat-Status
   const [groups, setGroups] = useState<IdeaGroup[]>([]);
   const [groupMessages, setGroupMessages] = useState<GroupMessage[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<IdeaGroup | null>(null);
 
-  // Common state
+  // Gemeinsamer Status
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -45,7 +45,7 @@ export default function MessagesPage() {
   const [showNewConversation, setShowNewConversation] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Check URL params for user or group
+  // URL-Parameter für Benutzer oder Gruppe prüfen
   useEffect(() => {
     const userId = searchParams.get('user');
     const groupId = searchParams.get('group');
@@ -76,7 +76,7 @@ export default function MessagesPage() {
   const loadConversationFromUrl = async (userId: number) => {
     try {
       const users = await userService.getAllUsers();
-      // Use Number() conversion to ensure type consistency
+      // Number()-Konvertierung verwenden, um Typkonsistenz sicherzustellen
       const targetUser = users.find(u => Number(u.id) === Number(userId));
       if (targetUser) {
         setSelectedUser(targetUser);
@@ -194,12 +194,12 @@ export default function MessagesPage() {
     setSendingMessage(true);
     try {
       if (selectedGroup) {
-        // Send group message
+        // Gruppennachricht senden
         const message = await groupService.sendGroupMessage(selectedGroup.id, newMessage.trim());
         setGroupMessages(prev => [...prev, message]);
         setNewMessage('');
 
-        // Update group's last message
+        // Letzte Nachricht der Gruppe aktualisieren
         setGroups(prev => {
           const updated = prev.map(g =>
             g.id === selectedGroup.id
@@ -211,7 +211,7 @@ export default function MessagesPage() {
           );
         });
       } else if (selectedUser) {
-        // Send direct message
+        // Direktnachricht senden
         const message = await messageService.sendMessage({
           recipientId: selectedUser.id,
           content: newMessage.trim(),
@@ -316,11 +316,11 @@ export default function MessagesPage() {
       </div>
 
       <div className="flex-1 flex card overflow-hidden">
-        {/* Conversations/Groups List */}
+        {/* Konversations-/Gruppenliste */}
         <div className={`w-full md:w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col ${
           !showMobileList ? 'hidden md:flex' : 'flex'
         }`}>
-          {/* Tabs */}
+          {/* Reiter */}
           <div className="flex border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setActiveTab('direct')}
@@ -353,7 +353,7 @@ export default function MessagesPage() {
 
           <div className="flex-1 overflow-y-auto">
             {activeTab === 'direct' ? (
-              // Direct Conversations
+              // Direktkonversationen
               conversations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   <ChatBubbleLeftRightIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -400,7 +400,7 @@ export default function MessagesPage() {
                 ))
               )
             ) : (
-              // Group Chats
+              // Gruppenchats
               groups.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   <UserGroupIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -456,13 +456,13 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Chat Window */}
+        {/* Chat-Fenster */}
         <div className={`flex-1 flex flex-col ${
           showMobileList ? 'hidden md:flex' : 'flex'
         }`}>
           {selectedUser || selectedGroup ? (
             <>
-              {/* Chat Header */}
+              {/* Chat-Kopfzeile */}
               <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button
@@ -512,10 +512,10 @@ export default function MessagesPage() {
                 )}
               </div>
 
-              {/* Messages */}
+              {/* Nachrichten */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {selectedGroup ? (
-                  // Group messages
+                  // Gruppennachrichten
                   groupMessages.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                       <div className="text-center">
@@ -565,7 +565,7 @@ export default function MessagesPage() {
                     })
                   )
                 ) : (
-                  // Direct messages
+                  // Direktnachrichten
                   messages.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                       <div className="text-center">
@@ -611,7 +611,7 @@ export default function MessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Message Input */}
+              {/* Nachrichteneingabe */}
               <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex gap-3">
                   <input
@@ -647,7 +647,7 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* New Conversation Modal */}
+      {/* Neue Konversation Modal */}
       {showNewConversation && (
         <div className="modal-overlay" onClick={() => setShowNewConversation(false)}>
           <div className="modal-content p-6 max-w-md" onClick={(e) => e.stopPropagation()}>

@@ -4,7 +4,7 @@ import { useAuth } from './context/AuthContext';
 // Layout
 import Layout from './components/Layout';
 
-// Pages
+// Seiten
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -16,7 +16,7 @@ import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import MessagesPage from './pages/MessagesPage';
 
-// Protected Route Component
+// Geschützte Routen-Komponente
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -39,7 +39,7 @@ function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?
   return <>{children}</>;
 }
 
-// Public Route - redirects to dashboard if already logged in
+// Öffentliche Route - leitet zum Dashboard weiter, wenn bereits angemeldet
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -61,7 +61,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Öffentliche Routen */}
       <Route
         path="/login"
         element={
@@ -79,7 +79,7 @@ export default function App() {
         }
       />
 
-      {/* Protected routes */}
+      {/* Geschützte Routen */}
       <Route
         path="/"
         element={

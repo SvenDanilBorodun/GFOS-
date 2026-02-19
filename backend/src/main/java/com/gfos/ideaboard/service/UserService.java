@@ -56,7 +56,7 @@ public class UserService {
             user.setLastName(lastName);
         }
         if (email != null && !email.equals(user.getEmail())) {
-            // Check if email is already taken
+            // Prüfen, ob E-Mail bereits vergeben ist
             if (isEmailTaken(email, id)) {
                 throw ApiException.conflict("Email already in use");
             }

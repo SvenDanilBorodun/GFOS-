@@ -43,7 +43,7 @@ public class GroupMember {
         joinedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

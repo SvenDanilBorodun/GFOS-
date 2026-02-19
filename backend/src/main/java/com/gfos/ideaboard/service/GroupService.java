@@ -25,7 +25,7 @@ public class GroupService {
     private NotificationService notificationService;
 
     /**
-     * Creates a group for an idea. Called automatically when an idea is created.
+     * Erstellt eine Gruppe für eine Idee. Wird automatisch aufgerufen, wenn eine Idee erstellt wird.
      */
     @Transactional
     public IdeaGroup createGroupForIdea(Idea idea, User creator) {
@@ -37,7 +37,7 @@ public class GroupService {
 
         em.persist(group);
 
-        // Add the creator as a member with CREATOR role
+        // Den Ersteller als Mitglied mit der Rolle ERSTELLER hinzufügen
         GroupMember creatorMember = new GroupMember();
         creatorMember.setGroup(group);
         creatorMember.setUser(creator);
@@ -49,7 +49,7 @@ public class GroupService {
     }
 
     /**
-     * Gets all groups that a user is a member of.
+     * Ruft alle Gruppen ab, in denen ein Benutzer Mitglied ist.
      */
     public List<IdeaGroupDTO> getUserGroups(Long userId) {
         List<IdeaGroup> groups = em.createNamedQuery("IdeaGroup.findByUser", IdeaGroup.class)
@@ -58,7 +58,7 @@ public class GroupService {
 
         return groups.stream()
                 .map(group -> {
-                    // Fetch members eagerly for DTO conversion
+                    // Mitglieder eifrig für DTO-Konvertierung abrufen
                     List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
                             .setParameter("groupId", group.getId())
                             .getResultList();
@@ -70,10 +70,10 @@ public class GroupService {
     }
 
     /**
-     * Gets a group by its ID.
+     * Ruft eine Gruppe anhand ihrer ID ab.
      */
     public IdeaGroupDTO getGroup(Long groupId, Long userId) {
-        // Use JPQL with JOIN FETCH to eagerly load related entities
+        // JPQL mit JOIN FETCH verwenden, um verwandte Entitäten eifrig zu laden
         List<IdeaGroup> groups = em.createQuery(
                 "SELECT g FROM IdeaGroup g LEFT JOIN FETCH g.idea LEFT JOIN FETCH g.createdBy WHERE g.id = :groupId",
                 IdeaGroup.class)
@@ -85,12 +85,12 @@ public class GroupService {
         }
         IdeaGroup group = groups.get(0);
 
-        // Check if user is a member
+        // Prüfen, ob Benutzer Mitglied ist
         if (!isMember(groupId, userId)) {
             throw ApiException.forbidden("You are not a member of this group");
         }
 
-        // Fetch members eagerly for DTO conversion
+        // Mitglieder eifrig für DTO-Konvertierung abrufen
         List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
                 .setParameter("groupId", groupId)
                 .getResultList();
@@ -101,7 +101,7 @@ public class GroupService {
     }
 
     /**
-     * Gets a group by idea ID.
+     * Ruft eine Gruppe anhand der Ideen-ID ab.
      */
     public IdeaGroupDTO getGroupByIdea(Long ideaId, Long userId) {
         List<IdeaGroup> groups = em.createNamedQuery("IdeaGroup.findByIdea", IdeaGroup.class)
@@ -115,7 +115,7 @@ public class GroupService {
         IdeaGroup group = groups.get(0);
         boolean userIsMember = isMember(group.getId(), userId);
 
-        // Fetch members eagerly for DTO conversion
+        // Mitglieder eifrig für DTO-Konvertierung abrufen
         List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
                 .setParameter("groupId", group.getId())
                 .getResultList();
@@ -127,11 +127,11 @@ public class GroupService {
     }
 
     /**
-     * Allows a user to join a group.
+     * Ermöglicht einem Benutzer, einer Gruppe beizutreten.
      */
     @Transactional
     public IdeaGroupDTO joinGroup(Long groupId, Long userId) {
-        // Use JPQL with JOIN FETCH to eagerly load related entities
+        // JPQL mit JOIN FETCH verwenden, um verwandte Entitäten eifrig zu laden
         List<IdeaGroup> groups = em.createQuery(
                 "SELECT g FROM IdeaGroup g LEFT JOIN FETCH g.idea LEFT JOIN FETCH g.createdBy WHERE g.id = :groupId",
                 IdeaGroup.class)
@@ -143,7 +143,7 @@ public class GroupService {
         }
         IdeaGroup group = groups.get(0);
 
-        // Check if already a member
+        // Prüfen, ob bereits Mitglied
         if (isMember(groupId, userId)) {
             throw ApiException.badRequest("You are already a member of this group");
         }
@@ -159,12 +159,12 @@ public class GroupService {
         member.setRole(GroupMemberRole.MEMBER);
 
         em.persist(member);
-        em.flush(); // Ensure the member is persisted before fetching
+        em.flush(); // Sicherstellen, dass das Mitglied vor dem Abrufen persistiert wird
 
-        // Notify group creator that someone joined
+        // Gruppenersteller benachrichtigen, dass jemand beigetreten ist
         notificationService.notifyGroupJoin(group, user);
 
-        // Fetch all members including the new one for DTO conversion
+        // Alle Mitglieder einschließlich des neuen für DTO-Konvertierung abrufen
         List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
                 .setParameter("groupId", groupId)
                 .getResultList();
@@ -173,7 +173,7 @@ public class GroupService {
     }
 
     /**
-     * Allows a user to join a group by idea ID.
+     * Ermöglicht einem Benutzer, einer Gruppe anhand der Ideen-ID beizutreten.
      */
     @Transactional
     public IdeaGroupDTO joinGroupByIdea(Long ideaId, Long userId) {
@@ -189,7 +189,7 @@ public class GroupService {
     }
 
     /**
-     * Allows a user to leave a group.
+     * Ermöglicht einem Benutzer, eine Gruppe zu verlassen.
      */
     @Transactional
     public void leaveGroup(Long groupId, Long userId) {
@@ -198,7 +198,7 @@ public class GroupService {
             throw ApiException.notFound("Group not found");
         }
 
-        // Check if the user is the creator
+        // Prüfen, ob der Benutzer der Ersteller ist
         if (group.getCreatedBy().getId().equals(userId)) {
             throw ApiException.badRequest("Group creator cannot leave the group");
         }
@@ -216,10 +216,10 @@ public class GroupService {
     }
 
     /**
-     * Gets all messages in a group.
+     * Ruft alle Nachrichten in einer Gruppe ab.
      */
     public List<GroupMessageDTO> getGroupMessages(Long groupId, Long userId) {
-        // Verify user is a member
+        // Verifizieren, dass Benutzer Mitglied ist
         if (!isMember(groupId, userId)) {
             throw ApiException.forbidden("You are not a member of this group");
         }
@@ -234,11 +234,11 @@ public class GroupService {
     }
 
     /**
-     * Sends a message to a group.
+     * Sendet eine Nachricht an eine Gruppe.
      */
     @Transactional
     public GroupMessageDTO sendMessage(Long groupId, String content, Long senderId) {
-        // Validate content
+        // Inhalt validieren
         if (content == null || content.trim().isEmpty()) {
             throw ApiException.badRequest("Message content is required");
         }
@@ -251,7 +251,7 @@ public class GroupService {
             throw ApiException.notFound("Group not found");
         }
 
-        // Verify sender is a member
+        // Verifizieren, dass Absender Mitglied ist
         if (!isMember(groupId, senderId)) {
             throw ApiException.forbidden("You are not a member of this group");
         }
@@ -267,41 +267,41 @@ public class GroupService {
         message.setContent(content.trim());
 
         em.persist(message);
-        em.flush(); // Flush to ensure ID is generated and @PrePersist has run
+        em.flush(); // Flushen, um sicherzustellen, dass ID generiert wird und @PrePersist ausgeführt wurde
 
-        // Update group's updatedAt - use current time if createdAt is somehow null
+        // updatedAt der Gruppe aktualisieren - aktuelle Zeit verwenden, wenn createdAt irgendwie null ist
         LocalDateTime updateTime = message.getCreatedAt() != null ? message.getCreatedAt() : LocalDateTime.now();
         group.setUpdatedAt(updateTime);
         em.merge(group);
 
-        // Mark as read by sender (only if message has an ID)
+        // Als gelesen vom Absender markieren (nur wenn Nachricht eine ID hat)
         if (message.getId() != null) {
             markMessageAsRead(message.getId(), senderId);
         }
 
-        // Notify other group members
+        // Andere Gruppenmitglieder benachrichtigen
         notificationService.notifyGroupMessage(group, sender, content);
 
         return GroupMessageDTO.fromEntity(message);
     }
 
     /**
-     * Marks all messages in a group as read for a user.
+     * Markiert alle Nachrichten in einer Gruppe für einen Benutzer als gelesen.
      */
     @Transactional
     public void markAllMessagesAsRead(Long groupId, Long userId) {
-        // Get all unread messages
+        // Alle ungelesenen Nachrichten abrufen
         List<GroupMessage> messages = em.createNamedQuery("GroupMessage.findByGroup", GroupMessage.class)
                 .setParameter("groupId", groupId)
                 .getResultList();
 
         for (GroupMessage message : messages) {
-            // Skip messages sent by the user
+            // Vom Benutzer gesendete Nachrichten überspringen
             if (message.getSender().getId().equals(userId)) {
                 continue;
             }
 
-            // Check if already read
+            // Prüfen, ob bereits gelesen
             List<GroupMessageRead> reads = em.createNamedQuery("GroupMessageRead.findByMessageAndUser", GroupMessageRead.class)
                     .setParameter("messageId", message.getId())
                     .setParameter("userId", userId)
@@ -314,7 +314,7 @@ public class GroupService {
     }
 
     /**
-     * Marks a single message as read.
+     * Markiert eine einzelne Nachricht als gelesen.
      */
     @Transactional
     public void markMessageAsRead(Long messageId, Long userId) {
@@ -328,7 +328,7 @@ public class GroupService {
             return;
         }
 
-        // Check if already marked as read
+        // Prüfen, ob bereits als gelesen markiert
         List<GroupMessageRead> existing = em.createNamedQuery("GroupMessageRead.findByMessageAndUser", GroupMessageRead.class)
                 .setParameter("messageId", messageId)
                 .setParameter("userId", userId)
@@ -343,7 +343,7 @@ public class GroupService {
     }
 
     /**
-     * Checks if a user is a member of a group.
+     * Prüft, ob ein Benutzer Mitglied einer Gruppe ist.
      */
     public boolean isMember(Long groupId, Long userId) {
         Long count = em.createQuery(
@@ -355,7 +355,7 @@ public class GroupService {
     }
 
     /**
-     * Gets the count of unread messages for a user in a group.
+     * Ruft die Anzahl ungelesener Nachrichten für einen Benutzer in einer Gruppe ab.
      */
     public int getUnreadMessageCount(Long groupId, Long userId) {
         Long count = em.createNamedQuery("GroupMessage.countUnreadByUser", Long.class)
@@ -366,7 +366,7 @@ public class GroupService {
     }
 
     /**
-     * Gets the last message in a group.
+     * Ruft die letzte Nachricht in einer Gruppe ab.
      */
     public GroupMessageDTO getLastMessage(Long groupId) {
         List<GroupMessage> messages = em.createNamedQuery("GroupMessage.findRecentByGroup", GroupMessage.class)
@@ -382,7 +382,7 @@ public class GroupService {
     }
 
     /**
-     * Gets total unread group messages for a user across all groups.
+     * Ruft die Gesamtzahl ungelesener Gruppennachrichten für einen Benutzer über alle Gruppen hinweg ab.
      */
     public int getTotalUnreadCount(Long userId) {
         List<IdeaGroup> groups = em.createNamedQuery("IdeaGroup.findByUser", IdeaGroup.class)

@@ -156,7 +156,7 @@ public class NotificationService {
 
     @Transactional
     public void notifyGroupJoin(IdeaGroup group, User joiner) {
-        // Notify the group creator
+        // Den Gruppenersteller benachrichtigen
         Notification notification = new Notification();
         notification.setUser(group.getCreatedBy());
         notification.setType(NotificationType.MESSAGE);
@@ -171,16 +171,16 @@ public class NotificationService {
 
     @Transactional
     public void notifyGroupMessage(IdeaGroup group, User sender, String content) {
-        // Query members with users eagerly fetched to avoid lazy loading issues
+        // Mitglieder mit eifrig geladenen Benutzern abfragen, um Lazy-Loading-Probleme zu vermeiden
         List<GroupMember> members = em.createNamedQuery("GroupMember.findByGroupWithUser", GroupMember.class)
                 .setParameter("groupId", group.getId())
                 .getResultList();
 
-        // Get sender name safely
+        // Absendernamen sicher abrufen
         String senderName = sender.getFirstName() != null ? sender.getFirstName() : sender.getUsername();
         String groupName = group.getName() != null ? group.getName() : "Group";
 
-        // Notify all group members except the sender
+        // Alle Gruppenmitglieder außer dem Absender benachrichtigen
         for (GroupMember member : members) {
             User memberUser = member.getUser();
             if (memberUser != null && !memberUser.getId().equals(sender.getId())) {

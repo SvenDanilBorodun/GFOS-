@@ -190,17 +190,17 @@ export default function IdeaDetailPage() {
 
   const handleReaction = async (commentId: number, emoji: string) => {
     try {
-      // Find the comment to check if user has already reacted
+      // Kommentar finden, um zu prüfen, ob der Benutzer bereits reagiert hat
       const comment = comments.find((c) => c.id === commentId);
       if (!comment) return;
 
       const hasReacted = comment.currentUserReactionEmojis?.includes(emoji);
 
       if (hasReacted) {
-        // User already reacted, so remove it
+        // Benutzer hat bereits reagiert, also entfernen
         await ideaService.removeReaction(commentId, emoji);
       } else {
-        // User hasn't reacted, so add it
+        // Benutzer hat noch nicht reagiert, also hinzufügen
         await ideaService.addReaction(commentId, emoji);
       }
 
@@ -312,7 +312,7 @@ export default function IdeaDetailPage() {
     }
   };
 
-  // Calculate checklist progress
+  // Checklisten-Fortschritt berechnen
   const checklistProgress = checklistItems.length > 0
     ? Math.round((checklistItems.filter((item) => item.isCompleted).length / checklistItems.length) * 100)
     : 0;
@@ -358,9 +358,9 @@ export default function IdeaDetailPage() {
         Zurück zu Ideen
       </Link>
 
-      {/* Main content card */}
+      {/* Hauptinhalt-Karte */}
       <article className="card">
-        {/* Header */}
+        {/* Kopfzeile */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -395,7 +395,7 @@ export default function IdeaDetailPage() {
             {idea.title}
           </h1>
 
-          {/* Author info */}
+          {/* Autoren-Info */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="avatar-md">
@@ -442,7 +442,7 @@ export default function IdeaDetailPage() {
           </div>
         </div>
 
-        {/* Description */}
+        {/* Beschreibung */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
           <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
             {idea.description}
@@ -475,7 +475,7 @@ export default function IdeaDetailPage() {
             )}
           </div>
 
-          {/* Progress bar for checklist */}
+          {/* Fortschrittsbalken für Checkliste */}
           {checklistItems.length > 0 && (
             <div className="progress-bar h-2 mb-4">
               <div
@@ -630,7 +630,7 @@ export default function IdeaDetailPage() {
           </div>
         )}
 
-        {/* Actions */}
+        {/* Aktionen */}
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {isAuthor ? (
@@ -749,7 +749,7 @@ export default function IdeaDetailPage() {
                     </div>
                     <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
 
-                    {/* Reactions */}
+                    {/* Reaktionen */}
                     <div className="flex items-center gap-2 mt-3">
                       {EMOJI_LIST.map((emoji) => {
                         const reaction = comment.reactions.find((r) => r.emoji === emoji);
@@ -782,7 +782,7 @@ export default function IdeaDetailPage() {
         </div>
       </div>
 
-      {/* Status Modal */}
+      {/* Status-Modal */}
       {showStatusModal && (
         <StatusModal
           currentStatus={idea.status}
@@ -792,7 +792,7 @@ export default function IdeaDetailPage() {
         />
       )}
 
-      {/* Completion Confirmation Dialog */}
+      {/* Abschluss-Bestätigungsdialog */}
       {showCompletionDialog && (
         <CompletionConfirmationDialog
           onConfirm={async () => {

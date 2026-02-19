@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Health check endpoint for Docker container health checks.
+ * Health Check Endpunkt für Docker Container Health Checks.
  */
 @Path("/health")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,7 +26,7 @@ public class HealthResource {
         health.put("timestamp", System.currentTimeMillis());
 
         try {
-            // Test database connectivity
+            // Datenbankverbindung testen
             em.createNativeQuery("SELECT 1").getSingleResult();
             health.put("status", "UP");
             health.put("database", "connected");

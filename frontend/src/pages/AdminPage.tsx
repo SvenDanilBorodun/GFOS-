@@ -70,7 +70,7 @@ export default function AdminPage() {
         </NavLink>
       </div>
 
-      {/* Content */}
+      {/* Inhalt */}
       <Routes>
         <Route path="/" element={<Navigate to="/admin/users" replace />} />
         <Route path="/users" element={<UsersManagement />} />

@@ -201,7 +201,7 @@ export default function IdeasPage() {
             </div>
           </form>
 
-          {/* Category filter */}
+          {/* Kategorie-Filter */}
           <div className="flex items-center gap-2">
             <FunnelIcon className="w-5 h-5 text-gray-400" />
             <select
@@ -225,7 +225,7 @@ export default function IdeasPage() {
             </select>
           </div>
 
-          {/* Status filter */}
+          {/* Status-Filter */}
           <select
             value={status}
             onChange={(e) => {
@@ -248,7 +248,7 @@ export default function IdeasPage() {
         </div>
       </div>
 
-      {/* Ideas grid */}
+      {/* Ideen-Raster */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
@@ -329,7 +329,7 @@ export default function IdeasPage() {
                   </div>
                 )}
 
-                {/* Author and date */}
+                {/* Autor und Datum */}
                 <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                   <div className="avatar-sm">
                     {idea.author.firstName?.[0]}{idea.author.lastName?.[0]}
@@ -342,7 +342,7 @@ export default function IdeasPage() {
                 </div>
               </Link>
 
-              {/* Actions footer */}
+              {/* Aktionen-Fußzeile */}
               <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 {user?.id === idea.author.id ? (
                   <span className="flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 cursor-not-allowed" title="Sie können Ihre eigene Idee nicht liken">

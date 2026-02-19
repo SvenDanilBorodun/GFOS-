@@ -130,7 +130,7 @@ export default function SurveysPage() {
         </div>
       )}
 
-      {/* Create Modal */}
+      {/* Erstellen-Modal */}
       {showCreateModal && (
         <CreateSurveyModal
           onClose={() => setShowCreateModal(false)}
@@ -138,7 +138,7 @@ export default function SurveysPage() {
         />
       )}
 
-      {/* Survey Details Modal */}
+      {/* Umfragedetails-Modal */}
       {selectedSurvey && (
         <SurveyDetailsModal
           survey={selectedSurvey}
@@ -249,7 +249,7 @@ function SurveyCard({ survey, onVote, onDelete, onShowDetails, canDelete }: Surv
                 }
               `}
             >
-              {/* Background progress bar */}
+              {/* Hintergrund-Fortschrittsbalken */}
               {hasVoted && (
                 <div
                   className="absolute inset-y-0 left-0 bg-primary-100 dark:bg-primary-900/30 transition-all duration-500"
@@ -460,7 +460,7 @@ function SurveyDetailsModal({ survey, onClose }: SurveyDetailsModalProps) {
         </div>
 
         <div className="space-y-6">
-          {/* Question */}
+          {/* Frage */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {survey.question}

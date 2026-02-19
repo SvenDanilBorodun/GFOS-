@@ -32,7 +32,7 @@ public class CommentDTO {
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
 
-        // Group reaktion mit Emoji
+        // Reaktionen nach Emoji gruppieren
         Map<String, Long> reactionCounts = comment.getReactions().stream()
                 .collect(Collectors.groupingBy(CommentReaction::getEmoji, Collectors.counting()));
 
@@ -40,7 +40,7 @@ public class CommentDTO {
                 .map(entry -> new ReactionDTO(entry.getKey(), entry.getValue().intValue()))
                 .collect(Collectors.toList()));
 
-        // Collect current user's reaction emojis
+        // Reaktions-Emojis des aktuellen Benutzers sammeln
         if (currentUserId != null) {
             List<String> userEmojis = comment.getReactions().stream()
                     .filter(reaction -> reaction.getUser().getId().equals(currentUserId))

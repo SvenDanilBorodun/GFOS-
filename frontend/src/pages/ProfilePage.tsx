@@ -106,7 +106,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Profile header */}
+      {/* Profil-Kopfzeile */}
       <div className="card p-6">
         <div className="flex flex-col sm:flex-row gap-6">
           {/* Avatar */}
@@ -249,7 +249,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Level and XP */}
+      {/* Level und XP */}
       <div className="card p-6">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
@@ -268,7 +268,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Progress to next level */}
+        {/* Fortschritt zum nächsten Level */}
         <div>
           <div className="flex justify-between text-sm mb-2">
             <span className="text-gray-600 dark:text-gray-400">

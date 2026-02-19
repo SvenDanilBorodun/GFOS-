@@ -13,7 +13,7 @@ import {
 } from '../types';
 
 export const ideaService = {
-  // Ideas CRUD
+  // Ideen CRUD
   async getIdeas(filter: IdeaFilter = {}): Promise<Page<Idea>> {
     const params = new URLSearchParams();
     if (filter.page !== undefined) params.append('page', filter.page.toString());
@@ -49,7 +49,7 @@ export const ideaService = {
     await api.delete(`/ideas/${id}`);
   },
 
-  // File attachments
+  // Dateianhänge
   async uploadFile(ideaId: number, file: File): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
@@ -85,7 +85,7 @@ export const ideaService = {
     return response.data;
   },
 
-  // Comments
+  // Kommentare
   async getComments(ideaId: number): Promise<Comment[]> {
     const response = await api.get<Comment[]>(`/ideas/${ideaId}/comments`);
     return response.data;
@@ -100,7 +100,7 @@ export const ideaService = {
     await api.delete(`/comments/${commentId}`);
   },
 
-  // Reactions
+  // Reaktionen
   async addReaction(commentId: number, emoji: string): Promise<void> {
     await api.post(`/comments/${commentId}/reactions`, { emoji });
   },
@@ -109,7 +109,7 @@ export const ideaService = {
     await api.delete(`/comments/${commentId}/reactions/${emoji}`);
   },
 
-  // Status (PM/Admin only)
+  // Status (Nur PM/Admin)
   async updateStatus(ideaId: number, status: string, progressPercentage?: number): Promise<Idea> {
     const response = await api.put<Idea>(`/ideas/${ideaId}/status`, {
       status,
@@ -118,7 +118,7 @@ export const ideaService = {
     return response.data;
   },
 
-  // Categories
+  // Kategorien
   async getCategories(): Promise<string[]> {
     const response = await api.get<string[]>('/ideas/categories');
     return response.data;
@@ -130,7 +130,7 @@ export const ideaService = {
     return response.data;
   },
 
-  // Checklist
+  // Checkliste
   async getChecklist(ideaId: number): Promise<ChecklistItem[]> {
     const response = await api.get<ChecklistItem[]>(`/ideas/${ideaId}/checklist`);
     return response.data;

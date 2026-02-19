@@ -31,7 +31,7 @@ public class MessageDTO {
         return dto;
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

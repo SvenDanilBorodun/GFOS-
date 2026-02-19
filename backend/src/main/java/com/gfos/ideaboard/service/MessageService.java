@@ -53,7 +53,7 @@ public class MessageService {
 
         em.persist(message);
 
-        // Create notification for recipient
+        // Benachrichtigung für Empfänger erstellen
         notifyNewMessage(recipient, sender, content, ideaId);
 
         return MessageDTO.fromEntity(message);
@@ -73,12 +73,12 @@ public class MessageService {
     }
 
     public List<ConversationDTO> getUserConversations(Long userId) {
-        // Get all messages for this user
+        // Alle Nachrichten für diesen Benutzer abrufen
         List<Message> allMessages = em.createNamedQuery("Message.findUserMessages", Message.class)
                 .setParameter("userId", userId)
                 .getResultList();
 
-        // Group messages by conversation partner
+        // Nachrichten nach Gesprächspartner gruppieren
         Map<Long, List<Message>> messagesByUser = new LinkedHashMap<>();
 
         for (Message msg : allMessages) {
@@ -89,21 +89,21 @@ public class MessageService {
             messagesByUser.computeIfAbsent(otherUserId, k -> new ArrayList<>()).add(msg);
         }
 
-        // Build conversation DTOs
+        // Konversations-DTOs erstellen
         List<ConversationDTO> conversations = new ArrayList<>();
 
         for (Map.Entry<Long, List<Message>> entry : messagesByUser.entrySet()) {
             Long otherUserId = entry.getKey();
             List<Message> convMessages = entry.getValue();
 
-            // Get the other user
+            // Den anderen Benutzer abrufen
             User otherUser = em.find(User.class, otherUserId);
             if (otherUser == null) continue;
 
-            // Get the most recent message
+            // Die aktuellste Nachricht abrufen
             Message lastMessage = convMessages.get(0);
 
-            // Count unread messages from this user
+            // Ungelesene Nachrichten von diesem Benutzer zählen
             Long unreadCount = em.createNamedQuery("Message.countUnreadFromUser", Long.class)
                     .setParameter("recipientId", userId)
                     .setParameter("senderId", otherUserId)
@@ -117,7 +117,7 @@ public class MessageService {
             conversations.add(conv);
         }
 
-        // Sort by last message date (most recent first)
+        // Nach Datum der letzten Nachricht sortieren (aktuellste zuerst)
         conversations.sort((a, b) -> {
             if (a.getLastMessageAt() == null) return 1;
             if (b.getLastMessageAt() == null) return -1;

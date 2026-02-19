@@ -42,7 +42,7 @@ public class SurveyDTO {
         dto.setExpiresAt(survey.getExpiresAt());
         dto.setCreatedAt(survey.getCreatedAt());
 
-        // Calculate percentages
+        // Prozentsätze berechnen
         if (dto.getTotalVotes() > 0) {
             dto.getOptions().forEach(opt ->
                     opt.setPercentage((double) opt.getVoteCount() / dto.getTotalVotes() * 100));
@@ -51,7 +51,7 @@ public class SurveyDTO {
         return dto;
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

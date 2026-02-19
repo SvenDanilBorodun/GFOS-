@@ -26,7 +26,7 @@ public class RegisterRequest {
     @Size(max = 50)
     private String lastName;
 
-    // Getters and Setters
+    // Getters und Setters
     public String getUsername() {
         return username;
     }

@@ -50,7 +50,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile sidebar backdrop */}
+      {/* Mobiler Seitenleisten-Hintergrund */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -58,7 +58,7 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Seitenleiste */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-material-2
                     transform transition-transform duration-300 ease-in-out lg:translate-x-0
@@ -216,7 +216,7 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Page content */}
+        {/* Seiteninhalt */}
         <main className="p-4 lg:p-6">
           <Outlet />
         </main>

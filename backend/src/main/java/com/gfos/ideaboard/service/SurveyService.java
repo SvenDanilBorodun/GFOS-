@@ -66,7 +66,7 @@ public class SurveyService {
 
         em.persist(survey);
 
-        // Add options
+        // Optionen hinzufügen
         for (int i = 0; i < options.size(); i++) {
             SurveyOption option = new SurveyOption();
             option.setOptionText(options.get(i));
@@ -94,13 +94,13 @@ public class SurveyService {
             throw ApiException.notFound("User not found");
         }
 
-        // Check if already voted
+        // Prüfen, ob bereits abgestimmt
         List<Long> existingVotes = getUserVotedOptionIds(surveyId, userId);
         if (!existingVotes.isEmpty() && !survey.getAllowMultipleVotes()) {
             throw ApiException.conflict("Already voted on this survey");
         }
 
-        // Validate options belong to this survey
+        // Validieren, dass Optionen zu dieser Umfrage gehören
         List<Long> validOptionIds = survey.getOptions().stream()
                 .map(SurveyOption::getId)
                 .collect(Collectors.toList());
@@ -110,7 +110,7 @@ public class SurveyService {
                 throw ApiException.badRequest("Invalid option ID: " + optionId);
             }
 
-            // Check if already voted for this option
+            // Prüfen, ob für diese Option bereits abgestimmt wurde
             if (existingVotes.contains(optionId)) {
                 continue;
             }
@@ -123,14 +123,14 @@ public class SurveyService {
             vote.setUser(user);
             em.persist(vote);
 
-            // Note: vote_count and total_votes are automatically updated by database trigger
-            // Do NOT manually increment here to avoid double counting
+            // Hinweis: vote_count und total_votes werden automatisch durch Datenbank-Trigger aktualisiert
+            // Hier NICHT manuell inkrementieren, um Doppelzählung zu vermeiden
         }
 
-        // Flush to ensure triggers have run before returning
+        // Flushen, um sicherzustellen, dass Trigger vor der Rückgabe ausgeführt wurden
         em.flush();
 
-        // Refresh entities to get updated counts from database triggers
+        // Entitäten aktualisieren, um aktualisierte Zählungen von Datenbank-Triggern zu erhalten
         em.refresh(survey);
         for (SurveyOption opt : survey.getOptions()) {
             em.refresh(opt);
@@ -146,7 +146,7 @@ public class SurveyService {
             throw ApiException.notFound("Survey not found");
         }
 
-        // Only creator or admin can delete
+        // Nur Ersteller oder Admin können löschen
         User user = em.find(User.class, userId);
         if (!survey.getCreator().getId().equals(userId) && user.getRole() != UserRole.ADMIN) {
             throw ApiException.forbidden("Not authorized to delete this survey");

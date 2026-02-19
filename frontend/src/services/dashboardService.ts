@@ -22,7 +22,7 @@ export const dashboardService = {
     return response.data;
   },
 
-  // Notifications
+  // Benachrichtigungen
   async getNotifications(): Promise<Notification[]> {
     const response = await api.get<Notification[]>('/notifications');
     return response.data;

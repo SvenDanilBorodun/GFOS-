@@ -66,7 +66,7 @@ public class Idea {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Relationships
+    // Beziehungen
     @ElementCollection
     @CollectionTable(name = "idea_tags", joinColumns = @JoinColumn(name = "idea_id"))
     @Column(name = "tag_name")
@@ -96,7 +96,7 @@ public class Idea {
         updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

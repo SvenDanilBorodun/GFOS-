@@ -126,7 +126,7 @@ public class DashboardResource {
         Long userId = (Long) requestContext.getProperty("userId");
         List<IdeaDTO> topIdeas = ideaService.getTopIdeasThisWeek(3, userId);
 
-        // Add rank information
+        // Ranginformationen hinzufügen
         List<Map<String, Object>> result = topIdeas.stream()
                 .map(idea -> {
                     Map<String, Object> item = new HashMap<>();

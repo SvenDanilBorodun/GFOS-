@@ -27,7 +27,7 @@ public class SurveyOption {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder = 0;
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }

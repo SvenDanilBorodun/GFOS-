@@ -47,7 +47,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     updateEffectiveTheme();
 
-    // Listen for system theme changes
+    // Auf Änderungen des System-Designs hören
     if (theme === 'system' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handler = () => updateEffectiveTheme();
@@ -57,7 +57,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   useEffect(() => {
-    // Apply theme to document
+    // Design auf Dokument anwenden
     const root = document.documentElement;
     if (effectiveTheme === 'dark') {
       root.classList.add('dark');

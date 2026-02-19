@@ -18,13 +18,13 @@ public class GamificationService {
     @Inject
     private NotificationService notificationService;
 
-    // XP rewards
+    // XP-Belohnungen
     public static final int XP_SUBMIT_IDEA = 50;
     public static final int XP_RECEIVE_LIKE = 10;
     public static final int XP_POST_COMMENT = 5;
     public static final int XP_IDEA_COMPLETED = 100;
 
-    // Level thresholds
+    // Level-Schwellenwerte
     private static final int[] LEVEL_THRESHOLDS = {0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000};
 
     @Transactional
@@ -101,7 +101,7 @@ public class GamificationService {
 
     @Transactional
     public void checkAndAwardBadge(Long userId, String badgeName, BadgeChecker checker) {
-        // Check if user already has this badge
+        // Prüfen, ob der Benutzer dieses Abzeichen bereits hat
         List<UserBadge> existing = em.createQuery(
                 "SELECT ub FROM UserBadge ub WHERE ub.user.id = :userId AND ub.badge.name = :badgeName",
                 UserBadge.class)
@@ -111,10 +111,10 @@ public class GamificationService {
 
         if (!existing.isEmpty()) return;
 
-        // Check if criteria met
+        // Prüfen, ob Kriterien erfüllt sind
         if (!checker.check(userId)) return;
 
-        // Find badge
+        // Abzeichen finden
         List<Badge> badges = em.createQuery("SELECT b FROM Badge b WHERE b.name = :name", Badge.class)
                 .setParameter("name", badgeName)
                 .getResultList();
@@ -123,14 +123,14 @@ public class GamificationService {
 
         Badge badge = badges.get(0);
 
-        // Award badge
+        // Abzeichen verleihen
         User user = em.find(User.class, userId);
         UserBadge userBadge = new UserBadge();
         userBadge.setUser(user);
         userBadge.setBadge(badge);
         em.persist(userBadge);
 
-        // Notify user
+        // Benutzer benachrichtigen
         notificationService.createNotification(
                 userId,
                 NotificationType.BADGE_EARNED,
@@ -139,7 +139,7 @@ public class GamificationService {
         );
     }
 
-    // Badge criteria checkers
+    // Prüfer für Abzeichenkriterien
     private boolean hasSubmittedFirstIdea(Long userId) {
         Long count = em.createQuery("SELECT COUNT(i) FROM Idea i WHERE i.author.id = :userId", Long.class)
                 .setParameter("userId", userId)

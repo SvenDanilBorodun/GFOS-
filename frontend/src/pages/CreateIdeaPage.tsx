@@ -565,7 +565,7 @@ export default function CreateIdeaPage() {
                         }`}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {/* Image preview or file icon */}
+                        {/* Bildvorschau oder Datei-Symbol */}
                         {isImage && file.preview ? (
                           <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800">
                             <img
@@ -594,7 +594,7 @@ export default function CreateIdeaPage() {
                         </div>
                       </div>
 
-                      {/* Status indicators */}
+                      {/* Statusanzeigen */}
                       <div className="flex items-center gap-2 ml-2">
                         {uploadStatus?.status === 'uploading' && (
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-500 border-t-transparent" />

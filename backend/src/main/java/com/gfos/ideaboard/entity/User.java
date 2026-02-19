@@ -69,7 +69,7 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Relationships
+    // Beziehungen
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Idea> ideas = new ArrayList<>();
 
@@ -93,7 +93,7 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }
@@ -220,7 +220,7 @@ public class User {
     }
 
     private void updateLevel() {
-        // Synced with GamificationService.LEVEL_THRESHOLDS
+        // Synchronisiert mit GamificationService.LEVEL_THRESHOLDS
         int[] thresholds = {0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000};
         for (int i = thresholds.length - 1; i >= 0; i--) {
             if (xpPoints >= thresholds[i]) {

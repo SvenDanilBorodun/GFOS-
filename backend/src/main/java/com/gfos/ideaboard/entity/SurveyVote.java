@@ -39,7 +39,7 @@ public class SurveyVote {
         createdAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // Getters und Setters
     public Long getId() {
         return id;
     }
