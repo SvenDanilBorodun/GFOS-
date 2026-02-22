@@ -1,11 +1,5 @@
 # Docker Quick Start
 
-## Vorgaben
-- Docker Desktop installed and running
-
-## Start Project
-
-```bash
 copy .env.example .env
 
 # Starten aller services

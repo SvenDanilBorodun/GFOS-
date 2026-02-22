@@ -60,8 +60,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(idea.getAuthor());
         notification.setType(NotificationType.LIKE);
-        notification.setTitle("New Like");
-        notification.setMessage(liker.getFirstName() + " liked your idea \"" + truncate(idea.getTitle(), 50) + "\"");
+        notification.setTitle("Neues Like");
+        notification.setMessage(liker.getFirstName() + " hat deine Idee \"" + truncate(idea.getTitle(), 50) + "\" geliked");
         notification.setLink("/ideas/" + idea.getId());
         notification.setSender(liker);
         notification.setRelatedEntityType("Idea");
@@ -74,8 +74,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(idea.getAuthor());
         notification.setType(NotificationType.COMMENT);
-        notification.setTitle("New Comment");
-        notification.setMessage(commenter.getFirstName() + " commented on \"" + truncate(idea.getTitle(), 30) + "\": " + truncate(commentContent, 50));
+        notification.setTitle("Neuer Kommentar");
+        notification.setMessage(commenter.getFirstName() + " hat \"" + truncate(idea.getTitle(), 30) + "\" kommentiert: " + truncate(commentContent, 50));
         notification.setLink("/ideas/" + idea.getId());
         notification.setSender(commenter);
         notification.setRelatedEntityType("Idea");
@@ -88,8 +88,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(comment.getAuthor());
         notification.setType(NotificationType.REACTION);
-        notification.setTitle("New Reaction");
-        notification.setMessage(reactor.getFirstName() + " reacted to your comment");
+        notification.setTitle("Neue Reaktion");
+        notification.setMessage(reactor.getFirstName() + " hat auf deinen Kommentar reagiert");
         notification.setLink("/ideas/" + comment.getIdea().getId());
         notification.setSender(reactor);
         notification.setRelatedEntityType("Comment");
@@ -102,8 +102,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(idea.getAuthor());
         notification.setType(NotificationType.STATUS_CHANGE);
-        notification.setTitle("Status Updated");
-        notification.setMessage("Your idea \"" + truncate(idea.getTitle(), 30) + "\" status changed to " + formatStatus(newStatus));
+        notification.setTitle("Status aktualisiert");
+        notification.setMessage("Der Status deiner Idee \"" + truncate(idea.getTitle(), 30) + "\" hat sich geändert auf " + formatStatus(newStatus));
         notification.setLink("/ideas/" + idea.getId());
         notification.setSender(changedBy);
         notification.setRelatedEntityType("Idea");
@@ -116,8 +116,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setType(NotificationType.BADGE_EARNED);
-        notification.setTitle("Badge Earned!");
-        notification.setMessage("Congratulations! You earned the \"" + badge.getName() + "\" badge");
+        notification.setTitle("Abzeichen erhalten!");
+        notification.setMessage("Herzlichen Glückwunsch! Du hast das Abzeichen \"" + badge.getName() + "\" erhalten");
         notification.setLink("/profile");
         notification.setRelatedEntityType("Badge");
         notification.setRelatedEntityId(badge.getId());
@@ -130,7 +130,7 @@ public class NotificationService {
         notification.setUser(user);
         notification.setType(NotificationType.LEVEL_UP);
         notification.setTitle("Level Up!");
-        notification.setMessage("Congratulations! You reached Level " + newLevel);
+        notification.setMessage("Herzlichen Glückwunsch! Du hast Level " + newLevel + " erreicht");
         notification.setLink("/profile");
         em.persist(notification);
     }
@@ -144,7 +144,17 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setType(type);
-        notification.setTitle(type.name().replace("_", " "));
+        String gerTitle = switch (type) {
+            case LIKE -> "Neues Like";
+            case COMMENT -> "Neuer Kommentar";
+            case REACTION -> "Neue Reaktion";
+            case STATUS_CHANGE -> "Status aktualisiert";
+            case BADGE_EARNED -> "Abzeichen erhalten!";
+            case LEVEL_UP -> "Level Up!";
+            case MENTION -> "Erwähnung";
+            case MESSAGE -> "Neue Nachricht";
+        };
+        notification.setTitle(gerTitle);
         notification.setMessage(message);
         notification.setRelatedEntityType(relatedEntityType);
         notification.setRelatedEntityId(relatedEntityId);
@@ -160,8 +170,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUser(group.getCreatedBy());
         notification.setType(NotificationType.MESSAGE);
-        notification.setTitle("New Group Member");
-        notification.setMessage(joiner.getFirstName() + " " + joiner.getLastName() + " joined the group \"" + truncate(group.getName(), 30) + "\"");
+        notification.setTitle("Neues Gruppenmitglied");
+        notification.setMessage(joiner.getFirstName() + " " + joiner.getLastName() + " ist der Gruppe \"" + truncate(group.getName(), 30) + "\" beigetreten");
         notification.setLink("/messages?group=" + group.getId());
         notification.setSender(joiner);
         notification.setRelatedEntityType("IdeaGroup");
@@ -187,7 +197,7 @@ public class NotificationService {
                 Notification notification = new Notification();
                 notification.setUser(memberUser);
                 notification.setType(NotificationType.MESSAGE);
-                notification.setTitle("New Group Message");
+                notification.setTitle("Neue Gruppennachricht");
                 notification.setMessage(senderName + " in \"" + truncate(groupName, 20) + "\": " + truncate(content, 50));
                 notification.setLink("/messages?group=" + group.getId());
                 notification.setSender(sender);
@@ -206,9 +216,9 @@ public class NotificationService {
 
     private String formatStatus(IdeaStatus status) {
         return switch (status) {
-            case CONCEPT -> "Concept";
-            case IN_PROGRESS -> "In Progress";
-            case COMPLETED -> "Completed";
+            case CONCEPT -> "Konzept";
+            case IN_PROGRESS -> "In Bearbeitung";
+            case COMPLETED -> "Abgeschlossen";
         };
     }
 }

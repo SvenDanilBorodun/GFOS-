@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 import {
   HeartIcon,
   ChatBubbleLeftIcon,
@@ -138,9 +139,8 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
               return (
                 <li
                   key={notification.id}
-                  className={`relative hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                    !notification.isRead ? 'bg-primary-50/50 dark:bg-primary-900/10' : ''
-                  }`}
+                  className={`relative hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${!notification.isRead ? 'bg-primary-50/50 dark:bg-primary-900/10' : ''
+                    }`}
                 >
                   <Link
                     to={notification.link || '#'}
@@ -161,7 +161,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {format(new Date(notification.createdAt), 'MMM d, h:mm a')}
+                        {format(new Date(notification.createdAt), 'd. MMM, HH:mm', { locale: de })}
                       </p>
                     </div>
                     {!notification.isRead && (

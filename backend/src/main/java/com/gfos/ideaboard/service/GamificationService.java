@@ -65,7 +65,7 @@ public class GamificationService {
             notificationService.createNotification(
                     userId,
                     NotificationType.BADGE_EARNED,
-                    "Congratulations! You've reached Level " + newLevel + "!",
+                    "Herzlichen Glückwunsch! Du hast Level " + newLevel + " erreicht!",
                     null, null
             );
         }
@@ -134,7 +134,7 @@ public class GamificationService {
         notificationService.createNotification(
                 userId,
                 NotificationType.BADGE_EARNED,
-                "You've earned the \"" + badge.getDisplayName() + "\" badge!",
+                "Du hast das Abzeichen \"" + badge.getDisplayName() + "\" erhalten!",
                 null, null
         );
     }
